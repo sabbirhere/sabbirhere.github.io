@@ -1,0 +1,115 @@
+/* =================================================
+   NICEPAGE DARK THEME OVERRIDE
+   Loaded AFTER all other CSS files
+================================================= */
+
+/* -------- Global background & text -------- */
+html, body {
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+}
+
+/* -------- Headings -------- */
+h1, h2, h3, h4, h5, h6,
+.u-title,
+.u-text-heading {
+  color: #f0f6fc !important;
+}
+
+/* -------- Paragraphs & lists -------- */
+p,
+li,
+span,
+.u-text {
+  color: #c9d1d9 !important;
+  line-height: 1.7;
+}
+
+/* -------- Sections -------- */
+.u-section {
+  background-color: transparent !important;
+}
+
+/* -------- Content blocks -------- */
+.u-sheet,
+.u-group,
+.u-container-layout,
+.u-layout-cell {
+  background-color: #161b22 !important;
+  border-radius: 10px;
+  border: 1px solid #21262d;
+}
+
+/* -------- Projects / lists -------- */
+.u-list,
+.u-repeater,
+.u-gallery,
+.u-layout-wrap {
+  background-color: transparent !important;
+}
+
+.u-list-item,
+.u-repeater-item,
+.u-gallery-item {
+  background-color: #161b22 !important;
+  border-radius: 10px;
+  border: 1px solid #21262d;
+}
+
+/* -------- Header & menu -------- */
+.u-header,
+.u-menu,
+.u-nav-container {
+  background-color: #010409 !important;
+  border-bottom: 1px solid #21262d;
+}
+
+.u-nav-link {
+  color: #c9d1d9 !important;
+}
+
+.u-nav-link:hover {
+  color: #58a6ff !important;
+}
+
+/* -------- Buttons -------- */
+.u-btn {
+  background-color: #238636 !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+  border: none !important;
+}
+
+.u-btn:hover {
+  background-color: #2ea043 !important;
+}
+
+/* -------- Icons -------- */
+.u-icon {
+  color: #58a6ff !important;
+}
+
+/* -------- Images -------- */
+img {
+  filter: brightness(0.95) contrast(1.05);
+}
+
+/* -------- Forms -------- */
+input,
+textarea {
+  background-color: #0d1117 !important;
+  color: #e6edf3 !important;
+  border: 1px solid #30363d !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8b949e !important;
+}
+
+/* -------- Footer -------- */
+.u-footer {
+  background-color: #010409 !important;
+  color: #8b949e !important;
+  border-top: 1px solid #21262d;
+}
