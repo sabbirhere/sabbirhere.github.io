@@ -703,7 +703,6 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
         <p>Calculate voltage, current, resistance and power.</p>
         <span class="badge">OPEN TOOL →</span>
     </button>
-
     <button type="button" class="tool-card" onclick="openAppPanel('power')">
         <div class="tool-icon">⚡</div>
         <h3>Power Calculator</h3>
@@ -786,6 +785,12 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
         <p>Draft large-scale single-line diagrams with practical symbols, grid-snapped equipment and flexible wiring.</p>
         <span class="badge">OPEN EDITOR →</span>
     </button>
+    <button type="button" class="tool-card" onclick="openAppPanel('contact')">
+        <div class="tool-icon">✉</div>
+        <h3>Contact</h3>
+        <p>Get in touch with the ElectraLab creator.</p>
+        <span class="badge">OPEN CONTACT →</span>
+    </button>
 
 </div>
 </section>
@@ -831,7 +836,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
     <div class="ai-badge">◉ Electra AI</div>
     <h2>Electra AI</h2>
     <p>Ask anything about electrical engineering,<br>get instant help and guidance.</p>
-    <a class="start-button" href="#electraai" onclick="openAppPanel('electraai'); return false;">Open AI Assistant →</a>
+    <a class="start-button" href="#panel-electraai" onclick="openAppPanel('electraai'); return false;">Open AI Assistant →</a>
   </div>
 </section>
 
@@ -856,6 +861,21 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
     </div>
     <button class="calc-action" onclick="calculatePFI()">CALCULATE PFI φ</button><button class="clear-inputs" onclick="clearCalculator(this)">CLEAR INPUTS</button>
     <div class="live-result" id="pfiResult">Enter load power, voltage and existing/target power factor.</div>
+  </div>
+</section>
+
+<section class="app-panel" id="panel-contact">
+  <div class="panel-inner">
+    <a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
+    <h2>✉ Contact</h2>
+    <p class="panel-subtitle">Connect with the creator of ElectraLab.</p>
+    <div class="live-result contact-card">
+      <div class="ai-badge">ELECTRALAB CONTACT</div>
+      <h3><a href="https://www.facebook.com/ACSabbir" target="_blank" rel="noopener noreferrer">SABBIR AHAMED</a></h3>
+      <p>For questions, feedback, collaboration or technical suggestions:</p>
+      <p><a href="mailto:sabbirac@atomicmail.io">sabbirac@atomicmail.io</a></p>
+      <a class="start-button" href="mailto:sabbirac@atomicmail.io?subject=ElectraLab%20enquiry">SEND AN EMAIL →</a>
+    </div>
   </div>
 </section>
 
@@ -1182,7 +1202,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 <h2>⚡ Electra AI</h2>
 <p class="panel-subtitle">Ask electrical engineering questions using the Electra AI chat assistant.</p>
 <div class="elfsight-chat-host" aria-label="Electra AI chat assistant">
-  <div class="elfsight-app-9e04b6e3-701d-424a-b21a-f3ea87821623" data-elfsight-app-lazy></div>
+  <div class="embeddable-HODZ405jUt"></div>
 </div>
 </div>
 </section>
@@ -1196,7 +1216,7 @@ Electrical Engineering Toolbox
 <small>Preliminary design aid only — verify against nameplate data, applicable standards, and a qualified engineer before construction.</small>
 
 </footer> 
-<script src="https://elfsightcdn.com/platform.js" async></script>
+<script src="https://widgets.embeddable.co/sdk/latest/embeddable.js" defer></script>
 <script>
 function n(id) {
     const v = parseFloat(document.getElementById(id).value);
@@ -1381,7 +1401,7 @@ function calcBreaker(){
 </script>
 
 <script>
-const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi","diagram"];
+const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi","contact","diagram"];
 
 function openAppPanel(name) {
     document.querySelectorAll(".app-panel").forEach(p => p.classList.remove("active"));
@@ -1392,46 +1412,13 @@ function openAppPanel(name) {
     if (name === "resistor") initResistor();
     if (name === "electraai") {
         window.requestAnimationFrame(() => {
-            ensureElfsightChat();
-            window.setTimeout(ensureElfsightChat, 350);
+            window.dispatchEvent(new Event("resize"));
         });
     }
 }
 
 if (window.location.search.indexOf("electraai=1") !== -1) {
     window.addEventListener("DOMContentLoaded", () => openAppPanel("electraai"));
-}
-
-function ensureElfsightChat() {
-    const host = document.querySelector(".elfsight-chat-host");
-    if (!host) return;
-    if (window.location.protocol === "file:") {
-        host.innerHTML = '<div class="elfsight-local-notice"><div><strong>Open Electra AI online</strong><br>This local HTML file cannot load an online widget. Open the published HTTPS version instead.<br><a class="start-button" href="https://sabbirhere.github.io/?electraai=1" target="_blank" rel="noopener">Open online AI chat →</a></div></div>';
-        host.dataset.elfsightActivated = "local";
-        return;
-    }
-    const widgetSelector = '[class*="elfsight-app-9e04b6e3-701d-424a-b21a-f3ea87821623"]';
-    let mount = host.querySelector(widgetSelector);
-    if (!host.dataset.elfsightActivated) {
-        host.innerHTML = "";
-        mount = document.createElement("div");
-        mount.className = "elfsight-app-9e04b6e3-701d-424a-b21a-f3ea87821623";
-        mount.setAttribute("data-elfsight-app-lazy", "");
-        host.appendChild(mount);
-    }
-    host.dataset.elfsightActivated = "true";
-    let script = document.querySelector('script[src="https://elfsightcdn.com/platform.js"]');
-    if (!script) {
-        script = document.createElement("script");
-        script.src = "https://elfsightcdn.com/platform.js";
-        script.async = true;
-        document.body.appendChild(script);
-    }
-    if (window.eapps && typeof window.eapps.init === "function") window.eapps.init();
-    window.setTimeout(() => {
-        if (window.eapps && typeof window.eapps.init === "function") window.eapps.init();
-    }, 500);
-    window.dispatchEvent(new Event("resize"));
 }
 
 function closeAppPanel() {
@@ -2094,19 +2081,34 @@ function calculateBusbar(){
       `<small>Preliminary estimate only. Verify temperature rise, enclosure ventilation, spacing, joints, supports, electrodynamic forces and short-circuit withstand under IEC 61439 or the applicable standard.</small>`;
 }
 let pfiConnection="delta";
-function pfiSuggestedSteps(total){
-    const count=total<=25?4:total<=60?6:total<=120?8:10;
-    let steps=[5], remaining=total-5;
-    if(remaining<=0) return [total];
-    for(let i=1;i<count;i++){
-        const slots=count-i;
+function pfiSuggestedSteps(total,loadKW){
+    if(total<=5) return [total];
+    if(total<15) return [5,total-5];
+    const count=loadKW<=15?3:loadKW<=50?4:loadKW<=100?6:loadKW<=250?8:loadKW<=500?10:12;
+    const first=Math.max(5,Math.round((total/(count+1))/5)*5);
+    let steps=[Math.min(first,total)], remaining=total-steps[0];
+    while(steps.length<count&&remaining>0){
+        const slots=count-steps.length;
         const step=Math.max(5,Math.round((remaining/slots)/5)*5);
         steps.push(Math.min(step,remaining));
         remaining-=steps[steps.length-1];
-        if(remaining<=0) break;
     }
     if(remaining>0) steps[steps.length-1]+=remaining;
     return steps.filter(step=>step>0);
+}
+function pfiStandardBreaker(current){
+    const standard=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000];
+    const rating=standard.find(size=>size>=current)||standard[standard.length-1];
+    return `${rating} A ${rating>63?"MCCB":"MCB"}`;
+}
+function pfiStepPlan(steps,V,phases){
+    const phaseFactor=phases===3?Math.sqrt(3):1;
+    return steps.map((step,index)=>{
+        const nominalCurrent=step*1000/(phaseFactor*V);
+        const conductorAmpacity=nominalCurrent*1.35;
+        const breakerDesign=nominalCurrent*1.5;
+        return `<tr><td>Step ${index+1}</td><td>${fmt(step)} kVAr</td><td>${fmt(nominalCurrent)} A</td><td>${fmt(conductorAmpacity)} A min.</td><td>${pfiStandardBreaker(breakerDesign)}</td></tr>`;
+    }).join("");
 }
 function setPFIConnection(mode,button){
     pfiConnection=mode;
@@ -2131,11 +2133,12 @@ function calculatePFI(){
     const capacitance=phases===1 ? qVar/(omega*V*V) :
       (pfiConnection==="delta" ? qVar/(3*omega*V*V) : qVar/(omega*V*V));
     const standardBank=Math.ceil(q/5)*5;
-    const suggestedSteps=pfiSuggestedSteps(standardBank);
+    const suggestedSteps=pfiSuggestedSteps(standardBank,P);
+    const stepPlan=pfiStepPlan(suggestedSteps,V,phases);
     out.innerHTML=`Required capacitor bank: <span class="result-value">${fmt(q)} kVAr</span><br>`+
       `Suggested standard bank step: <span class="result-value">${fmt(standardBank)} kVAr</span><br>`+
       `Suggested APFC arrangement: <span class="result-value">${suggestedSteps.map(step=>fmt(step)).join(" + ")} kVAr</span><br>`+
-      `Control stages: <span class="result-value">${suggestedSteps.length}</span> (small first step for light-load control)<br>`+
+      `Suggested control stages: <span class="result-value">${suggestedSteps.length}</span> (selected for ${fmt(P)} kW connected load)<br>`+
       `Line current before correction: <span class="result-value">${fmt(currentBefore)} A</span><br>`+
       `Line current after correction: <span class="result-value">${fmt(currentAfter)} A</span><br>`+
       `Estimated current reduction: <span class="result-value">${fmt(currentBefore-currentAfter)} A (${fmt((1-currentAfter/currentBefore)*100)}%)</span><br>`+
@@ -2143,6 +2146,9 @@ function calculatePFI(){
       `Apparent power after correction: <span class="result-value">${fmt(apparentAfter)} kVA</span><br>`+
       `Capacitor connection: <span class="result-value">${phases===1?"Single-phase":pfiConnection.toUpperCase()}</span><br>`+
       `Capacitance per phase: <span class="result-value">${fmt(capacitance*1000000)} μF</span><br><br>`+
+      `<b>Suggested step ampacity and breaker selection</b>`+
+      `<div class="result-box"><table class="result-table"><thead><tr><th>Stage</th><th>Step</th><th>Capacitor current</th><th>Minimum conductor ampacity*</th><th>Suggested breaker**</th></tr></thead><tbody>${stepPlan}</tbody></table></div>`+
+      `<small>* Conductor ampacity uses a preliminary 1.35 × capacitor-current allowance. ** Breaker selection uses the next standard rating at or above 1.50 × capacitor current; verify manufacturer instructions, coordination, fault level, harmonics and local code before construction.</small><br><br>`+
       `<small>Preliminary PFI panel estimate. Select capacitor voltage rating, detuning reactors, discharge resistors, switching steps, harmonics protection and protection devices using the project design and applicable standards.</small>`;
 }
 </script>
