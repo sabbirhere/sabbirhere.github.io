@@ -1,8 +1,8 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>ElectraLab | Electrical Calculator</title> <style> * { margin: 0; padding: 0; box-sizing: border-box; } html { scroll-behavior: smooth; } body { font-family: Arial, Helvetica, sans-serif; background: #020617; color: white; min-height: 100vh; overflow-x: hidden; } /* ========================= ANIMATED BACKGROUND ========================= */ body::before { content: ""; position: fixed; inset: 0; z-index: -5; background: radial-gradient(circle at 20% 20%, rgba(0,255,255,.18), transparent 25%), radial-gradient(circle at 80% 30%, rgba(139,92,246,.18), transparent 25%), radial-gradient(circle at 50% 90%, rgba(0,128,255,.15), transparent 30%), #020617; } /* Grid */ body::after { content: ""; position: fixed; inset: 0; z-index: -4; background-image: linear-gradient(rgba(0,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,.06) 1px, transparent 1px); background-size: 45px 45px; animation: gridMove 15s linear infinite; } @keyframes gridMove { from { transform: translateY(0); } to { transform: translateY(45px); } } /* Floating glow particles */ .particle { position: fixed; width: 5px; height: 5px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff, 0 0 25px #00ffff; opacity: .6; z-index: -2; animation: floatParticle linear infinite; } @keyframes floatParticle { 0% { transform: translateY(110vh); opacity: 0; } 10% { opacity: .7; } 90% { opacity: .7; } 100% { transform: translateY(-10vh); opacity: 0; } } /* ========================= HEADER ========================= */ header { position: sticky; top: 0; z-index: 100; height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; background: rgba(2,6,23,.72); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,255,255,.18); } .logo { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: bold; letter-spacing: 1px; } .logo-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient( 135deg, #00ffff, #6366f1 ); color: #020617; box-shadow: 0 0 15px rgba(0,255,255,.5); } .logo span { color: #00ffff; } .menu-button { background: none; border: none; color: white; font-size: 27px; cursor: pointer; display: none; } /* ========================= HERO ========================= */ .hero { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; text-align: center; padding: 70px 20px; position: relative; } .hero-content { max-width: 900px; animation: heroEnter 1.2s ease forwards; }
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>ElectraLab | Electrical Calculator</title> <style> * { margin: 0; padding: 0; box-sizing: border-box; } html { scroll-behavior: smooth; } body { font-family: Arial, Helvetica, sans-serif; background: #020617; color: white; min-height: 100vh; overflow-x: hidden; } button, input, select { font: inherit; } button { border: none; } a { color: inherit; } .start-button, .tool-card, .back-tools, .theme-toggle, .mode-tabs button, .calc-action, .clear-inputs, .ai-suggestion { transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; } /* ========================= ANIMATED BACKGROUND ========================= */ body::before { content: ""; position: fixed; inset: 0; z-index: -5; background: radial-gradient(circle at 20% 20%, rgba(0,255,255,.18), transparent 25%), radial-gradient(circle at 80% 30%, rgba(139,92,246,.18), transparent 25%), radial-gradient(circle at 50% 90%, rgba(0,128,255,.15), transparent 30%), #020617; } /* Grid */ body::after { content: ""; position: fixed; inset: 0; z-index: -4; background-image: linear-gradient(rgba(0,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,.06) 1px, transparent 1px); background-size: 45px 45px; animation: gridMove 15s linear infinite; } @keyframes gridMove { from { transform: translateY(0); } to { transform: translateY(45px); } } /* Floating glow particles */ .particle { position: fixed; width: 5px; height: 5px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff, 0 0 25px #00ffff; opacity: .6; z-index: -2; animation: floatParticle linear infinite; } @keyframes floatParticle { 0% { transform: translateY(110vh); opacity: 0; } 10% { opacity: .7; } 90% { opacity: .7; } 100% { transform: translateY(-10vh); opacity: 0; } } /* ========================= HEADER ========================= */ header { position: sticky; top: 0; z-index: 100; height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; background: rgba(2,6,23,.72); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,255,255,.18); } .logo { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: bold; letter-spacing: 1px; } .logo-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient( 135deg, #00ffff, #6366f1 ); color: #020617; box-shadow: 0 0 15px rgba(0,255,255,.5); } .logo span { color: #00ffff; } .menu-button { background: none; border: none; color: white; font-size: 27px; cursor: pointer; display: none; } /* ========================= HERO ========================= */ .hero { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; text-align: center; padding: 70px 20px; position: relative; } .hero-content { max-width: 900px; animation: heroEnter 1.2s ease forwards; }
  .creator-credit { margin: 0 auto 24px; display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border: 1px solid rgba(0,255,255,.25); border-radius: 999px; background: rgba(2,6,23,.5); box-shadow: 0 0 18px rgba(0,255,255,.12); animation: creatorGlow 3s ease-in-out infinite; }
  .creator-label { font-size: 10px; letter-spacing: 2px; color: #64748b; }
  .creator-name { font-size: 15px; font-weight: 700; letter-spacing: .5px; color: #00ffff; text-shadow: 0 0 10px rgba(0,255,255,.55); }
- @keyframes creatorGlow { 0%,100% { box-shadow: 0 0 14px rgba(0,255,255,.10); } 50% { box-shadow: 0 0 26px rgba(0,255,255,.28); } } @keyframes heroEnter { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } } .energy-ring { width: 130px; height: 130px; margin: 0 auto 30px; border-radius: 50%; border: 2px solid #00ffff; display: grid; place-items: center; position: relative; animation: pulseRing 3s infinite ease-in-out; } .energy-ring::before, .energy-ring::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(0,255,255,.4); } .energy-ring::before { inset: 10px; } .energy-ring::after { inset: 22px; } @keyframes pulseRing { 0%,100% { transform: scale(1); box-shadow: 0 0 15px #00ffff, 0 0 40px rgba(0,255,255,.3); } 50% { transform: scale(1.06); box-shadow: 0 0 30px #00ffff, 0 0 80px rgba(0,255,255,.45); } } .bolt { font-size: 50px; color: #ffe600; text-shadow: 0 0 10px #ffe600, 0 0 30px #ff9900; } .hero h1 { font-size: clamp(42px, 8vw, 82px); line-height: 1; margin-bottom: 20px; background: linear-gradient( 90deg, #00ffff, #7c3aed, #ff00cc, #00ffff ); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 6s linear infinite; } @keyframes gradientMove { 0% { background-position: 0%; } 100% { background-position: 300%; } } .hero p { max-width: 650px; margin: auto; color: #94a3b8; font-size: 18px; line-height: 1.7; } .start-button { display: inline-block; margin-top: 35px; padding: 15px 30px; border-radius: 12px; text-decoration: none; color: #020617; font-weight: bold; background: linear-gradient( 90deg, #00ffff, #6366f1 ); box-shadow: 0 0 20px rgba(0,255,255,.35); transition: .3s; } .start-button:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 30px rgba(0,255,255,.7); } /* ========================= MENU SECTION ========================= */ .tools { max-width: 1150px; margin: auto; padding: 80px 20px; } .section-title { text-align: center; margin-bottom: 45px; } .section-title h2 { font-size: 34px; margin-bottom: 10px; } .section-title p { color: #64748b; } /* Cards */ .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; } .tool-card { position: relative; min-height: 190px; padding: 25px; border-radius: 18px; background: linear-gradient( 145deg, rgba(15,23,42,.9), rgba(15,23,42,.55) ); border: 1px solid rgba(0,255,255,.13); overflow: hidden; transition: .35s; } .tool-card::before { content: ""; position: absolute; width: 120px; height: 120px; right: -50px; top: -50px; border-radius: 50%; background: #00ffff; filter: blur(55px); opacity: .15; } .tool-card:hover { transform: translateY(-8px); border-color: #00ffff; box-shadow: 0 10px 40px rgba(0,255,255,.12); } .tool-icon { width: 55px; height: 55px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; margin-bottom: 20px; background: linear-gradient( 135deg, rgba(0,255,255,.18), rgba(124,58,237,.25) ); border: 1px solid rgba(0,255,255,.25); } .tool-card h3 { margin-bottom: 9px; } .tool-card p { color: #94a3b8; font-size: 14px; line-height: 1.5; } .tool-card.coming { opacity: .6; } .badge { display: inline-block; margin-top: 14px; padding: 5px 9px; border-radius: 20px; font-size: 11px; color: #00ffff; background: rgba(0,255,255,.08); border: 1px solid rgba(0,255,255,.15); } /* ========================= FOOTER ========================= */ footer { text-align: center; padding: 40px 20px; color: #475569; border-top: 1px solid rgba(255,255,255,.05); } /* ========================= MOBILE ========================= */ @media(max-width:650px) { header { padding: 0 20px; } .hero { min-height: 90vh; } .hero h1 { font-size: 48px; } .hero p { font-size: 15px; } .tool-grid { grid-template-columns: 1fr 1fr; } } @media(max-width:430px) { .tool-grid { grid-template-columns: 1fr; } .energy-ring { width: 105px; height: 105px; } .bolt { font-size: 40px; } } 
+ @keyframes creatorGlow { 0%,100% { box-shadow: 0 0 14px rgba(0,255,255,.10); } 50% { box-shadow: 0 0 26px rgba(0,255,255,.28); } } @keyframes heroEnter { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } } .energy-ring { width: 130px; height: 130px; margin: 0 auto 30px; border-radius: 50%; border: 2px solid #00ffff; display: grid; place-items: center; position: relative; animation: pulseRing 3s infinite ease-in-out; } .energy-ring::before, .energy-ring::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(0,255,255,.4); } .energy-ring::before { inset: 10px; } .energy-ring::after { inset: 22px; } @keyframes pulseRing { 0%,100% { transform: scale(1); box-shadow: 0 0 15px #00ffff, 0 0 40px rgba(0,255,255,.3); } 50% { transform: scale(1.06); box-shadow: 0 0 30px #00ffff, 0 0 80px rgba(0,255,255,.45); } } .bolt { font-size: 50px; color: #ffe600; text-shadow: 0 0 10px #ffe600, 0 0 30px #ff9900; } .hero h1 { font-size: clamp(42px, 8vw, 82px); line-height: 1; margin-bottom: 20px; background: linear-gradient( 90deg, #00ffff, #7c3aed, #ff00cc, #00ffff ); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 6s linear infinite; } @keyframes gradientMove { 0% { background-position: 0%; } 100% { background-position: 300%; } } .hero p { max-width: 650px; margin: auto; color: #94a3b8; font-size: 18px; line-height: 1.7; } .start-button { display: inline-block; margin-top: 35px; padding: 15px 30px; border-radius: 12px; text-decoration: none; color: #020617; font-weight: bold; background: linear-gradient( 90deg, #00ffff, #6366f1 ); box-shadow: 0 0 20px rgba(0,255,255,.35); transition: .3s; } .start-button:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 30px rgba(0,255,255,.7); } /* ========================= MENU SECTION ========================= */ .tools { max-width: 1150px; margin: auto; padding: 80px 20px; } .section-title { text-align: center; margin-bottom: 45px; } .section-title h2 { font-size: 34px; margin-bottom: 10px; } .section-title p { color: #64748b; } /* Cards */ .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; } .tool-card { position: relative; min-height: 190px; padding: 25px; border-radius: 18px; background: linear-gradient( 145deg, rgba(15,23,42,.9), rgba(15,23,42,.55) ); border: 1px solid rgba(0,255,255,.13); overflow: hidden; transition: .35s; text-align: left; width: 100%; display: block; color: white; text-decoration: none; cursor: pointer; appearance: none; -webkit-appearance: none; } .tool-card::before { content: ""; position: absolute; width: 120px; height: 120px; right: -50px; top: -50px; border-radius: 50%; background: #00ffff; filter: blur(55px); opacity: .15; } .tool-card:hover { transform: translateY(-8px); border-color: #00ffff; box-shadow: 0 10px 40px rgba(0,255,255,.12); } .tool-card:focus-visible, .start-button:focus-visible, .back-tools:focus-visible, .ai-suggestion:focus-visible, .calc-action:focus-visible, .clear-inputs:focus-visible { outline: 2px solid #00ffff; outline-offset: 3px; } .tool-icon { width: 55px; height: 55px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; margin-bottom: 20px; background: linear-gradient( 135deg, rgba(0,255,255,.18), rgba(124,58,237,.25) ); border: 1px solid rgba(0,255,255,.25); } .tool-card h3 { margin-bottom: 9px; } .tool-card p { color: #94a3b8; font-size: 14px; line-height: 1.5; } .tool-card.coming { opacity: .6; } .badge { display: inline-block; margin-top: 14px; padding: 5px 9px; border-radius: 20px; font-size: 11px; color: #00ffff; background: rgba(0,255,255,.08); border: 1px solid rgba(0,255,255,.15); } /* ========================= FOOTER ========================= */ footer { text-align: center; padding: 40px 20px; color: #475569; border-top: 1px solid rgba(255,255,255,.05); } /* ========================= MOBILE ========================= */ @media(max-width:650px) { header { padding: 0 20px; } .hero { min-height: 90vh; } .hero h1 { font-size: 48px; } .hero p { font-size: 15px; } .tool-grid { grid-template-columns: 1fr 1fr; } } @media(max-width:430px) { .tool-grid { grid-template-columns: 1fr; } .energy-ring { width: 105px; height: 105px; } .bolt { font-size: 40px; } } 
 .creator-credit {
     margin: 0 auto 28px;
     font-size: 15px;
@@ -131,6 +131,9 @@
     text-decoration: none;
     background: rgba(0,255,255,.05);
     cursor: pointer;
+}
+.back-tools:hover, .clear-inputs:hover, .calc-action:hover, .mode-tabs button:hover, .theme-toggle:hover {
+    transform: translateY(-1px);
 }
 
 
@@ -410,6 +413,8 @@ body.light-theme .mode-tabs button {
 <style>
 /* ================= ELECTRA AI ================= */
 .ai-panel{max-width:1150px;margin:0 auto;padding:10px 20px 80px;display:none}.ai-panel.active{display:block}.ai-box{max-width:820px;margin:auto;padding:28px;border-radius:22px;background:linear-gradient(145deg,rgba(15,23,42,.97),rgba(15,23,42,.72));border:1px solid rgba(0,255,255,.18)}.ai-chat{height:380px;overflow:auto;padding:15px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid rgba(0,255,255,.12);line-height:1.6}.ai-msg{margin:10px 0;padding:12px 14px;border-radius:12px}.ai-user{background:rgba(99,102,241,.18)}.ai-bot{background:rgba(0,255,255,.06)}.ai-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}.ai-suggestion{opacity:.45;padding:8px 12px;border-radius:20px;border:1px solid rgba(0,255,255,.18);background:rgba(0,255,255,.05);color:#cbd5e1;cursor:pointer}.ai-suggestion:hover{opacity:1}.ai-input{display:flex;gap:10px}.ai-input input{flex:1;padding:13px;border-radius:12px;background:#020617;color:white;border:1px solid rgba(0,255,255,.18)}
+.elfsight-chat-host{min-height:520px;padding:8px;border-radius:16px;background:rgba(0,0,0,.12);border:1px solid rgba(0,255,255,.12)}
+.elfsight-chat-host>div{min-height:500px}
 </style>
 <style>
 /* Dashboard layout */
@@ -526,6 +531,60 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
+/* ========================= SINGLE-LINE DIAGRAM BUILDER ========================= */
+.sld-panel{max-width:1400px!important}
+.sld-shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;min-height:650px}
+.sld-sidebar,.sld-stage-wrap{background:#07111f;border:1px solid rgba(34,211,238,.2);border-radius:14px}
+.sld-sidebar{height:580px;padding:14px;overflow-y:auto;overflow-x:hidden}
+.sld-sidebar h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#67e8f9;margin:4px 0 12px}
+.sld-hint{font-size:11px;line-height:1.5;color:#64748b;margin:-4px 0 14px}
+.sld-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sld-palette button{min-height:74px;padding:7px;border:1px solid rgba(148,163,184,.16);border-radius:10px;background:#0b1b2d;color:#cbd5e1;cursor:grab;font-size:11px}
+.sld-palette button:hover,.sld-palette button:focus-visible{border-color:#22d3ee;background:#102942;color:#fff;outline:none}
+.sld-palette svg{width:100%;height:34px;display:block;margin-bottom:4px}
+.sld-toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border-bottom:1px solid rgba(34,211,238,.16);background:#091827}
+.sld-toolbar button{padding:8px 10px;border:1px solid rgba(148,163,184,.2);border-radius:8px;background:#10243a;color:#cbd5e1;cursor:pointer;font-size:12px}
+.sld-toolbar button:hover,.sld-toolbar button:focus-visible{border-color:#22d3ee;color:#fff;outline:none}
+.sld-toolbar .sld-spacer{flex:1}
+.sld-status{padding:8px 12px;color:#64748b;font-size:11px;border-top:1px solid rgba(34,211,238,.12)}
+.sld-stage{height:580px;overflow:hidden;position:relative;cursor:crosshair;background:#06101d}
+.sld-stage svg{width:100%;height:100%;display:block}
+.sld-stage .sld-grid{stroke:#1e3a50;stroke-width:.7}
+.sld-stage .sld-major{stroke:#28506a;stroke-width:1}
+.sld-stage .sld-wire{fill:none;stroke:#67e8f9;stroke-width:3;stroke-linejoin:miter;pointer-events:stroke;cursor:pointer}
+.sld-stage .sld-wire-hit{fill:none;stroke:transparent;stroke-width:18;pointer-events:stroke;cursor:pointer}
+.sld-stage .sld-wire-draft{stroke:#fbbf24;stroke-dasharray:7 5;pointer-events:none}
+.sld-palette button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.sld-palette button span{display:block;color:#cbd5e1;font-size:10px;line-height:1.1;white-space:normal}
+@media print{
+  body>*{display:none!important}
+  #panel-diagram{display:block!important;position:static!important;padding:0!important}
+  #panel-diagram .panel-inner{display:block!important;max-width:none!important;border:0!important;box-shadow:none!important;background:#fff!important;color:#000!important}
+  #panel-diagram .back-tools,#panel-diagram .sld-sidebar,#panel-diagram .sld-toolbar,#panel-diagram .sld-status,#panel-diagram .panel-subtitle{display:none!important}
+  #panel-diagram .sld-shell{display:block!important}
+  #panel-diagram .sld-stage-wrap{border:0!important;background:#fff!important}
+  #panel-diagram .sld-stage{height:auto!important;overflow:visible!important;background:#fff!important}
+  #panel-diagram .sld-stage svg{width:100%!important;height:auto!important;max-height:100vh!important}
+  #panel-diagram .sld-grid,#panel-diagram .sld-major{stroke:#cbd5e1!important}
+  #panel-diagram .sld-art{stroke:#111827!important;fill:#fff!important}
+  #panel-diagram .sld-wire{stroke:#111827!important}
+  #panel-diagram .sld-terminal{fill:#111827!important}
+  #panel-diagram .sld-label,#panel-diagram .sld-parameter{fill:#111827!important}
+  #panel-diagram .sld-empty{display:none!important}
+}
+.sld-stage .sld-wire.selected{stroke:#fbbf24;stroke-width:4}
+.sld-symbol{cursor:move}
+.sld-symbol.selected .sld-art{stroke:#fbbf24;filter:drop-shadow(0 0 5px rgba(251,191,36,.75))}
+.sld-symbol .sld-selection-hit{fill:transparent;stroke:transparent;stroke-width:18;pointer-events:all}
+.sld-symbol.selected .sld-selection-mark{fill:none;stroke:#fbbf24;stroke-width:2;stroke-dasharray:5 4;opacity:.9;pointer-events:none}
+.sld-art{stroke:#a5f3fc;stroke-width:2;fill:#0b1f31;vector-effect:non-scaling-stroke}
+.sld-terminal{fill:#fbbf24;stroke:#07111f;stroke-width:1;cursor:crosshair}
+.sld-label{fill:#cbd5e1;font:11px Arial,sans-serif;font-weight:700;text-anchor:middle;pointer-events:none}
+.sld-parameter{fill:#94a3b8;font:9px Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.sld-empty{fill:#64748b;font:14px Arial,sans-serif;text-anchor:middle}
+.sld-file{display:none}
+@media(max-width:800px){.sld-shell{grid-template-columns:1fr}.sld-sidebar{height:auto;max-height:230px}.sld-palette{grid-template-columns:repeat(4,1fr)}.sld-stage{height:480px}}
+@media(max-width:520px){.sld-palette{grid-template-columns:repeat(2,1fr)}.sld-toolbar button{flex:1}.sld-toolbar .sld-spacer{display:none}}
 </style>
 
 </head> <body> <!-- Floating particles --> <div class="particle" style="left:8%; animation-duration:12s;"></div> <div class="particle" style="left:18%; animation-duration:17s; animation-delay:2s;"></div> <div class="particle" style="left:31%; animation-duration:14s; animation-delay:5s;"></div> <div class="particle" style="left:45%; animation-duration:19s; animation-delay:1s;"></div> <div class="particle" style="left:59%; animation-duration:13s; animation-delay:4s;"></div> <div class="particle" style="left:72%; animation-duration:18s; animation-delay:7s;"></div> <div class="particle" style="left:86%; animation-duration:15s; animation-delay:3s;"></div>
@@ -583,107 +642,140 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 
 <div class="tool-grid">
 
-    <a href="javascript:void(0)" onclick="openAppPanel('ohms'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('ohms')">
         <div class="tool-icon">Ω</div>
         <h3>Ohm's Law</h3>
         <p>Calculate voltage, current, resistance and power.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('power'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('power')">
         <div class="tool-icon">⚡</div>
         <h3>Power Calculator</h3>
         <p>DC, single-phase AC and three-phase AC power calculations.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('pfi'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('pfi')">
         <div class="tool-icon">φ</div>
         <h3>Power Factor Improvement</h3>
         <p>Size capacitor banks and panel components for PF correction.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <div class="tool-card" onclick="openAppPanel('cable')" role="button" tabindex="0" style="cursor:pointer;">
+    <button type="button" class="tool-card" onclick="openAppPanel('cable')">
         <div class="tool-icon">🔌</div>
         <h3>Cable Calculator</h3>
         <p>Cable size and voltage drop calculations.</p>
         <span class="badge">OPEN TOOL →</span>
-    </div>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('breaker'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('breaker')">
         <div class="tool-icon">🔥</div>
         <h3>Breaker Calculator</h3>
         <p>Breaker selection and protection sizing.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('contactor'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('contactor')">
         <div class="tool-icon">◈</div>
         <h3>Magnetic Contactor</h3>
         <p>Select a standard contactor for motors, heaters, pumps, compressors and capacitors.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('busbar'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('busbar')">
         <div class="tool-icon">▰</div>
         <h3>Busbar Sizing</h3>
         <p>Compare copper and aluminium busbar sizes, current density, losses and voltage drop.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('resistor'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('resistor')">
         <div class="tool-icon">▥</div>
         <h3>Resistor Color Code</h3>
         <p>Select resistor color bands to calculate resistance and tolerance.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('unit'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('unit')">
         <div class="tool-icon">↔</div>
         <h3>Unit Converter</h3>
         <p>Convert electrical and engineering units easily.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('motor'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('motor')">
         <div class="tool-icon">⚙️</div>
         <h3>Motor Calculator</h3>
         <p>Estimate motor current from power, voltage, phase and power factor.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
 
-    <div class="tool-card" onclick="openAppPanel('battery')" role="button" tabindex="0" style="cursor:pointer;">
+    <button type="button" class="tool-card" onclick="openAppPanel('battery')">
         <div class="tool-icon">🔋</div>
         <h3>Battery Calculator</h3>
         <p>Battery capacity and energy calculations.</p>
         <span class="badge">OPEN TOOL →</span>
-    </div>
+    </button>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('transformer'); return false;" class="tool-card" style="text-decoration:none;color:white;">
+    <button type="button" class="tool-card" onclick="openAppPanel('transformer')">
         <div class="tool-icon">〽️</div>
         <h3>Transformer Calculator</h3>
         <p>Calculate transformer voltage, current and apparent power.</p>
         <span class="badge">OPEN TOOL →</span>
-    </a>
+    </button>
+    <button type="button" class="tool-card" onclick="openAppPanel('diagram')">
+        <div class="tool-icon">⌁</div>
+        <h3>SLD Builder</h3>
+        <p>Draft large-scale single-line diagrams with practical symbols, grid-snapped equipment and flexible wiring.</p>
+        <span class="badge">OPEN EDITOR →</span>
+    </button>
 
+</div>
+</section>
 
-    <a href="javascript:void(0)" onclick="openAppPanel('electraai'); return false;" class="tool-card" style="text-decoration:none;color:white;">
-        <div class="tool-icon">⚡</div>
-        <h3>Electra AI</h3>
-        <p>Ask electrical questions, get calculation help and engineering guidance.</p>
-        <span class="badge">OPEN AI ASSISTANT →</span>
-    </a>
-
+<section class="app-panel" id="panel-diagram">
+  <div class="panel-inner sld-panel">
+    <a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
+    <h2>⌁ SLD Builder</h2>
+    <p class="panel-subtitle">Place symbol-only equipment, snap to the engineering grid, then click terminals to route orthogonal connections.</p>
+    <div class="sld-shell">
+      <aside class="sld-sidebar" aria-label="Diagram symbol palette">
+        <h3>Symbol library</h3>
+        <p class="sld-hint">Drag a symbol onto the canvas, or click to place it. Every equipment symbol exposes two or more terminals. Choose Wire for free-direction connections.</p>
+        <div class="sld-palette" id="sldPalette"></div>
+      </aside>
+      <div class="sld-stage-wrap">
+        <div class="sld-toolbar" role="toolbar" aria-label="Diagram controls">
+          <button type="button" data-sld-action="undo" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)">↶ Undo</button>
+          <button type="button" data-sld-action="redo" aria-label="Redo (Ctrl+Y)" title="Redo (Ctrl+Y)">↷ Redo</button>
+          <button type="button" data-sld-action="rotate" aria-label="Rotate selected 90 degrees" title="Rotate (R)">⟳ Rotate</button>
+          <button type="button" data-sld-action="edit" aria-label="Edit selected component parameters" title="Edit selected component">✎ Edit</button>
+          <button type="button" data-sld-action="delete" aria-label="Delete selected" title="Delete (Delete)">⌫ Delete</button>
+          <button type="button" data-sld-action="zoom-out" aria-label="Zoom out">−</button>
+          <button type="button" data-sld-action="zoom-in" aria-label="Zoom in">+</button>
+          <button type="button" data-sld-action="fit" aria-label="Fit diagram to view">Fit</button>
+          <button type="button" data-sld-action="grid" aria-pressed="true">Grid</button>
+          <span class="sld-spacer"></span>
+          <button type="button" data-sld-action="print" aria-label="Print the single-line diagram" title="Print diagram">🖨 Print</button>
+          <button type="button" data-sld-action="clear">Clear all</button>
+        </div>
+        <div class="sld-stage" id="sldStage" tabindex="0" aria-label="Single-line diagram canvas. Use arrow keys to move selected symbols.">
+          <svg id="sldSvg" viewBox="0 0 1200 700" role="img" aria-label="Electrical single-line diagram canvas"></svg>
+        </div>
+        <div class="sld-status" id="sldStatus" role="status">Ready · click a terminal to start a wire</div>
+      </div>
     </div>
+  </div>
 </section>
 
 <section class="dashboard-ai" id="electra-ai">
   <div class="dashboard-ai-copy">
-    <div class="ai-badge">◉ Electra AI <small>AI</small></div>
+    <div class="ai-badge">◉ Electra AI</div>
     <h2>Electra AI</h2>
     <p>Ask anything about electrical engineering,<br>get instant help and guidance.</p>
-    <a class="start-button" href="javascript:void(0)" onclick="openAppPanel('electraai')">Open AI Assistant →</a>
+    <a class="start-button" href="#electraai" onclick="openAppPanel('electraai'); return false;">Open AI Assistant →</a>
   </div>
   <div class="dashboard-ai-chat">
     <strong>◉ Electra AI</strong><br><small style="color:#22c55e">● Online</small>
@@ -1037,15 +1129,10 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 <div class="ai-box">
 <a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
 <h2>⚡ Electra AI</h2>
-<p class="panel-subtitle">Offline electrical engineering assistant. Ask questions or request calculation help.</p>
-<div class="ai-chat" id="aiChat"><div class="ai-msg ai-bot">Hello! I am Electra AI. Ask me about electrical calculations, formulas or engineering problems.</div></div>
-<div class="ai-suggestions">
-<button class="ai-suggestion" onclick="useAISuggestion(this)">Calculate current for 15kW 415V 3-phase motor</button>
-<button class="ai-suggestion" onclick="useAISuggestion(this)">What breaker size for 10kW load?</button>
-<button class="ai-suggestion" onclick="useAISuggestion(this)">Select cable size for 30A load</button>
-<button class="ai-suggestion" onclick="useAISuggestion(this)">Explain voltage drop</button>
+<p class="panel-subtitle">Ask electrical engineering questions using the Electra AI chat assistant.</p>
+<div class="elfsight-chat-host" aria-label="Electra AI chat assistant">
+  <div class="elfsight-app-9e04b6e3-701d-424a-b21a-f3ea87821623" data-elfsight-app-lazy></div>
 </div>
-<div class="ai-input"><input id="aiPrompt" placeholder="Ask Electra AI..."><button class="calc-action" style="width:120px;margin-top:0" onclick="sendElectraAI()">SEND</button></div>
 </div>
 </section>
 
@@ -1054,8 +1141,11 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 ⚡ ElectraLab
 <br><br>
 Electrical Engineering Toolbox
+<br><br>
+<small>Preliminary design aid only — verify against nameplate data, applicable standards, and a qualified engineer before construction.</small>
 
 </footer> 
+<script src="https://elfsightcdn.com/platform.js" async></script>
 <script>
 function n(id) {
     const v = parseFloat(document.getElementById(id).value);
@@ -1158,15 +1248,32 @@ function calculateBattery() {
          Stored energy: <span class="result-value">${fmt(Wh/1000)} kWh</span>`;
 }
 
+function safeLocalStorageGet(key, fallback){
+    try {
+        return localStorage.getItem(key) ?? fallback;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function safeLocalStorageSet(key, value){
+    try {
+        localStorage.setItem(key, value);
+    } catch (error) {
+        // Ignore storage issues in privacy-restricted browsers.
+    }
+}
+
 // Theme switch
 function toggleTheme(){
     document.body.classList.toggle("light-theme");
     const light = document.body.classList.contains("light-theme");
-    localStorage.setItem("electraTheme", light ? "light" : "dark");
-    document.getElementById("themeButton").textContent = light ? "☀" : "☾";
+    safeLocalStorageSet("electraTheme", light ? "light" : "dark");
+    const button = document.getElementById("themeButton");
+    if (button) button.textContent = light ? "☀" : "☾";
 }
 (function(){
-    if(localStorage.getItem("electraTheme")==="light"){
+    if(safeLocalStorageGet("electraTheme", "dark") === "light"){
         document.body.classList.add("light-theme");
         window.addEventListener("DOMContentLoaded",()=>{
             const b=document.getElementById("themeButton");
@@ -1223,7 +1330,7 @@ function calcBreaker(){
 </script>
 
 <script>
-const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi"];
+const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi","diagram"];
 
 function openAppPanel(name) {
     document.querySelectorAll(".app-panel").forEach(p => p.classList.remove("active"));
@@ -1990,4 +2097,125 @@ function sendElectraAI(){
 </script>
 
 
+<script>
+/* Single-line diagram editor: self-contained SVG model and event delegation. */
+(function(){
+  const NS="http://www.w3.org/2000/svg", snap=20, W=1200, H=700;
+  const defs={
+    source:{name:"AC source",term:["L","R"],shape:"source"},generator:{name:"Generator",term:["L","R"],shape:"generator"},
+    transformer:{name:"Transformer",term:["L","R"],shape:"transformer"},autotransformer:{name:"Autotransformer",term:["L","R"],shape:"autotransformer"},
+    feeder:{name:"Feeder",term:["L","R"],shape:"feeder"},bus:{name:"Busbar",term:["L","R","T","B"],shape:"bus"},
+    breaker:{name:"Circuit breaker",term:["L","R"],shape:"breaker"},acb:{name:"ACB",term:["L","R"],shape:"acb"},
+    vcb:{name:"VCB",term:["L","R"],shape:"vcb"},sf6:{name:"SF6 breaker",term:["L","R"],shape:"sf6"},
+    switch:{name:"Isolator",term:["L","R"],shape:"switch"},fuse:{name:"Fuse",term:["L","R"],shape:"fuse"},
+    mcb:{name:"MCB",term:["L","R"],shape:"mcb"},mccb:{name:"MCCB",term:["L","R"],shape:"mccb"},
+    rcd:{name:"RCD",term:["L","R"],shape:"rcd"},ct:{name:"Current transformer",term:["L","R"],shape:"ct"},
+    pt:{name:"Voltage transformer",term:["L","R"],shape:"pt"},meter:{name:"Energy meter",term:["L","R"],shape:"meter"},
+    relay:{name:"Protection relay",term:["L","R"],shape:"relay"},contactor:{name:"Contactor",term:["L","R"],shape:"contactor"},
+    motor:{name:"Motor",term:["L","R"],shape:"motor"},load:{name:"Load",term:["L","R"],shape:"load"},
+    capacitor:{name:"Capacitor bank",term:["L","R"],shape:"capacitor"},reactor:{name:"Reactor",term:["L","R"],shape:"reactor"},
+    ups:{name:"UPS",term:["L","R"],shape:"ups"},inverter:{name:"Inverter",term:["L","R"],shape:"inverter"},
+    solar:{name:"Solar source",term:["L","R"],shape:"solar"},battery:{name:"Battery bank",term:["L","R"],shape:"battery"},
+    ground:{name:"Earth",term:["L","R"],shape:"ground"},wire:{name:"Wire",term:[],shape:"wire",tool:true}
+  };
+  const state={nodes:[],wires:[],freeWires:[],selected:null,wireStart:null,wireMode:false,wireDraft:null,wirePointer:false,suppressClick:false,zoom:1,pan:{x:0,y:0},grid:true,undo:[],redo:[],drag:null};
+  const svg=document.getElementById("sldSvg"), stage=document.getElementById("sldStage"), palette=document.getElementById("sldPalette"), status=document.getElementById("sldStatus");
+  if(!svg||!palette)return;
+  const el=(tag,attrs={})=>{const x=document.createElementNS(NS,tag);Object.keys(attrs).forEach(k=>x.setAttribute(k,attrs[k]));return x;};
+  Object.keys(defs).forEach(type=>{const b=document.createElement("button");b.type="button";b.draggable=!defs[type].tool;b.dataset.sldType=type;b.title=defs[type].tool?"Draw a free-direction wire":"Place "+defs[type].name;b.setAttribute("aria-label",b.title);
+    const mini=el("svg",{viewBox:"0 0 100 35",ariaHidden:"true"}); drawShape(mini,defs[type].shape,50,17,0,.45); const name=document.createElement("span"); name.textContent=defs[type].name; b.append(mini,name); palette.append(b);
+  });
+  function drawShape(g,shape,x,y,r=0,scale=1){
+    const q=el("g",{transform:`translate(${x} ${y}) rotate(${r}) scale(${scale})`}), a={class:"sld-art"};
+    if(shape==="source"){q.append(el("circle",{...a,cx:0,cy:0,r:17}),el("path",{...a,d:"M-7 0 Q-3 -8 1 0 T9 0"}));}
+    if(shape==="transformer"){q.append(el("circle",{...a,cx:-9,cy:0,r:14}),el("circle",{...a,cx:9,cy:0,r:14}),el("path",{...a,d:"M0 -18 V18"}));}
+    if(shape==="autotransformer"){q.append(el("path",{...a,d:"M-12 -16 Q-24 0 -12 16 M12 -16 Q0 0 12 16 M-12 -16 H12 M-12 16 H12"}),el("path",{...a,d:"M0 -16 V16"}));}
+    if(shape==="feeder"){q.append(el("path",{...a,d:"M-18 0 H18 M-11 -8 V8 M-3 -8 V8 M5 -8 V8 M13 -8 V8"}));}
+    if(shape==="breaker"){q.append(el("rect",{...a,x:-18,y:-14,width:36,height:28,rx:3}),el("path",{...a,d:"M-10 8 L9 -8"}));}
+    if(shape==="acb"){q.append(el("rect",{...a,x:-20,y:-15,width:40,height:30,rx:2}),el("path",{...a,d:"M-12 8 L10 -8 M-12 -8 H10"}));}
+    if(shape==="vcb"){q.append(el("rect",{...a,x:-18,y:-14,width:36,height:28}),el("path",{...a,d:"M-10 8 L10 -8 M-10 -8 H10"}),el("circle",{...a,cx:0,cy:0,r:3}));}
+    if(shape==="sf6"){q.append(el("rect",{...a,x:-21,y:-14,width:42,height:28,rx:7}),el("path",{...a,d:"M-11 8 L10 -8"}));}
+    if(shape==="switch"){q.append(el("path",{...a,d:"M-18 0 H-7 L10 -10 H18"}),el("circle",{...a,cx:-7,cy:0,r:3}),el("circle",{...a,cx:18,cy:0,r:3}));}
+    if(shape==="fuse"){q.append(el("path",{...a,d:"M-18 0 H-10 L-5 -9 L5 9 L10 0 H18"}));}
+    if(shape==="mcb"){q.append(el("rect",{...a,x:-15,y:-16,width:30,height:32,rx:4}),el("path",{...a,d:"M-8 8 L8 -8"}));}
+    if(shape==="mccb"){q.append(el("rect",{...a,x:-20,y:-15,width:40,height:30,rx:3}),el("path",{...a,d:"M-11 8 L10 -8"}),el("path",{...a,d:"M-12 -10 H12"}));}
+    if(shape==="rcd"){q.append(el("rect",{...a,x:-18,y:-15,width:36,height:30,rx:4}),el("circle",{...a,cx:0,cy:0,r:7}),el("path",{...a,d:"M-3 0 H3"}));}
+    if(shape==="ct"){q.append(el("circle",{...a,cx:0,cy:0,r:16}),el("circle",{...a,cx:0,cy:0,r:7}));}
+    if(shape==="pt"){q.append(el("circle",{...a,cx:0,cy:0,r:16}),el("path",{...a,d:"M-7 -8 L7 8 M7 -8 L-7 8"}));}
+    if(shape==="meter"){q.append(el("circle",{...a,cx:0,cy:0,r:17}),el("path",{...a,d:"M-9 5 A10 10 0 0 1 9 5 M0 5 L6 -5"}));}
+    if(shape==="relay"){q.append(el("rect",{...a,x:-16,y:-14,width:32,height:28,rx:2}),el("path",{...a,d:"M-8 8 L8 -8 M-8 -8 H8"}));}
+    if(shape==="contactor"){q.append(el("rect",{...a,x:-17,y:-16,width:34,height:32}),el("path",{...a,d:"M-9 8 L9 -8 M-9 -8 H9"}));}
+    if(shape==="motor"){q.append(el("circle",{...a,cx:0,cy:0,r:17}),el("path",{...a,d:"M-7 9 L9 -9 M-9 -9 L7 9"}));}
+    if(shape==="generator"){q.append(el("circle",{...a,cx:0,cy:0,r:17}),el("path",{...a,d:"M-8 -2 Q0 -13 8 -2 M-8 5 Q0 -6 8 5"}));}
+    if(shape==="load"){q.append(el("path",{...a,d:"M-17 0 L-9 -14 L0 14 L9 -14 L17 0 Z"}));}
+    if(shape==="bus"){q.append(el("path",{...a,d:"M-18 0 H18 M-12 -12 V12 M0 -12 V12 M12 -12 V12"}));}
+    if(shape==="capacitor"){q.append(el("path",{...a,d:"M-4 -16 V16 M4 -16 V16 M-18 0 H-4 M4 0 H18"}));}
+    if(shape==="reactor"){q.append(el("path",{...a,d:"M-18 0 Q-13 -12 -8 0 T2 0 T12 0 T18 0"}));}
+    if(shape==="ups"){q.append(el("path",{...a,d:"M-16 -12 H16 V12 H-16 Z M-7 0 H7 M0 -7 V7"}));}
+    if(shape==="inverter"){q.append(el("rect",{...a,x:-17,y:-16,width:34,height:32}),el("path",{...a,d:"M-9 0 L-3 -6 L3 6 L9 0"}));}
+    if(shape==="solar"){q.append(el("path",{...a,d:"M-18 10 H18 L12 -12 H-12 Z M-9 -2 H15 M-13 5 H16 M-4 -12 L0 10 M6 -12 L10 10"}));}
+    if(shape==="battery"){q.append(el("path",{...a,d:"M-14 -8 H-4 V-16 H4 V-8 H14 V8 H-14 Z"}),el("path",{...a,d:"M-7 0 H0 M-3 -4 V4 M6 0 H11"}));}
+    if(shape==="ground"){q.append(el("path",{...a,d:"M-16 -3 H16 M-11 4 H11 M-6 11 H6"}));}
+    if(shape==="wire"){q.append(el("path",{...a,d:"M-22 0 H22"}),el("circle",{...a,cx:-22,cy:0,r:3}),el("circle",{...a,cx:22,cy:0,r:3}));}
+    g.append(q);
+  }
+  function terminals(node){
+    const r=node.r||0, out={};
+    const pts={L:[-40,0],R:[40,0],T:[0,-40],B:[0,40]};
+    Object.keys(pts).forEach(k=>{let [x,y]=pts[k],rad=r*Math.PI/180;out[k]={x:node.x+x*Math.cos(rad)-y*Math.sin(rad),y:node.y+x*Math.sin(rad)+y*Math.cos(rad)};}); return out;
+  }
+  function localTerminals(type){const p={L:[-40,0],R:[40,0],T:[0,-40],B:[0,40]},out={};defs[type].term.forEach(k=>out[k]={x:p[k][0],y:p[k][1]});return out;}
+  function snapTo(v){return Math.round(v/snap)*snap;}
+  function point(evt){const box=svg.getBoundingClientRect(),x=(evt.clientX-box.left)/box.width*W,y=(evt.clientY-box.top)/box.height*H;return{x:snapTo((x-state.pan.x)/state.zoom),y:snapTo((y-state.pan.y)/state.zoom)};}
+  function setStatus(t){status.textContent=t;}
+  function endpointPoint(ep){if(ep&&ep.node){const n=state.nodes.find(x=>x.id===ep.node);return n&&terminals(n)[ep.term];}return ep;}
+  function nearestTerminal(p){let best=null,dist=18;state.nodes.forEach(n=>Object.entries(terminals(n)).forEach(([term,q])=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<dist){best={node:n.id,term};dist=d;}}));return best;}
+  function wireEndpoint(p){return nearestTerminal(p)||p;}
+  function snapshot(){return JSON.stringify({nodes:state.nodes,wires:state.wires,freeWires:state.freeWires,grid:state.grid});}
+  function commit(){state.undo.push(snapshot());if(state.undo.length>80)state.undo.shift();state.redo=[];}
+  function editSelected(){
+    if(!state.selected||state.selected[0]==="w"||state.selected[0]==="f"){setStatus("Select a component before editing parameters");return;}
+    const node=state.nodes.find(x=>x.id===state.selected);if(!node)return;
+    const name=window.prompt("Component name:",node.label||defs[node.type].name);if(name===null)return;
+    const parameters=window.prompt("Component parameters (optional):",node.parameters||"");if(parameters===null)return;
+    commit();node.label=name.trim()||defs[node.type].name;node.parameters=parameters.trim();render();setStatus("Component parameters updated");
+  }
+  function render(){
+    svg.innerHTML=""; const root=el("g",{transform:`translate(${state.pan.x} ${state.pan.y}) scale(${state.zoom})`}); svg.append(root);
+    if(state.grid){for(let x=0;x<=W;x+=snap)root.append(el("path",{class:x%100===0?"sld-major":"sld-grid",d:`M${x} 0V${H}`}));for(let y=0;y<=H;y+=snap)root.append(el("path",{class:y%100===0?"sld-major":"sld-grid",d:`M0 ${y}H${W}`}));}
+    const wg=el("g");
+    state.wires.forEach((wire,i)=>{const p=endpointPoint(wire.a),q=endpointPoint(wire.b);if(!p||!q)return;const mx=snapTo((p.x+q.x)/2),d=`M${p.x} ${p.y} H${mx} V${q.y} H${q.x}`;wg.append(el("path",{class:"sld-wire-hit",d,"data-sld-wire":i}));wg.append(el("path",{class:"sld-wire"+(state.selected==="w"+i?" selected":""),d,"data-sld-wire":i}));});
+    state.freeWires.forEach((wire,i)=>{const p=endpointPoint(wire.a),q=endpointPoint(wire.b);if(p&&q){const d=`M${p.x} ${p.y} L${q.x} ${q.y}`;wg.append(el("path",{class:"sld-wire-hit",d,"data-sld-free-wire":i}));wg.append(el("path",{class:"sld-wire"+(state.selected==="f"+i?" selected":""),d,"data-sld-free-wire":i}));}});
+    if(state.wireDraft){const p=state.wireDraft.start,q=state.wireDraft.end||p;wg.append(el("path",{class:"sld-wire sld-wire-draft",d:`M${p.x} ${p.y} L${q.x} ${q.y}`}));}
+    root.append(wg);
+    state.nodes.forEach(n=>{const g=el("g",{class:"sld-symbol"+(state.selected===n.id?" selected":""),transform:`translate(${n.x} ${n.y}) rotate(${n.r||0})`,"data-sld-node":n.id});g.append(el("circle",{class:"sld-selection-hit",cx:0,cy:0,r:30,"data-sld-node":n.id}));g.append(el("circle",{class:"sld-selection-mark",cx:0,cy:0,r:29}));const art=el("g",{class:"sld-art"});drawShape(art,defs[n.type].shape,0,0,0,1);g.append(art);const label=el("text",{class:"sld-label",x:0,y:42});label.textContent=n.label||defs[n.type].name;g.append(label);if(n.parameters){const param=el("text",{class:"sld-parameter",x:0,y:56});param.textContent=n.parameters;g.append(param);}const ts=localTerminals(n.type);Object.keys(ts).forEach(k=>{const p=ts[k];g.append(el("circle",{class:"sld-terminal",cx:p.x,cy:p.y,r:5,"data-sld-terminal":k,"data-sld-node":n.id}));});root.append(g);});
+    if(!state.nodes.length&&!state.wires.length&&!state.freeWires.length)root.append(Object.assign(el("text",{class:"sld-empty",x:W/2,y:H/2}),{textContent:"Drop a symbol here to begin"}));
+  }
+  function addNode(type,p){if(defs[type].tool){state.wireMode=true;state.wireStart=null;setStatus("Wire tool active · drag between any two grid points or terminals");return;}commit();const id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);state.nodes.push({id,type,x:Math.max(60,Math.min(W-60,p.x)),y:Math.max(60,Math.min(H-60,p.y)),r:0,label:defs[type].name,parameters:""});state.selected=id;render();setStatus(defs[type].name+" placed · drag to move");}
+  function removeSelected(){if(!state.selected)return;commit();if(state.selected[0]==="w")state.wires.splice(Number(state.selected.slice(1)),1);else if(state.selected[0]==="f")state.freeWires.splice(Number(state.selected.slice(1)),1);else{state.wires=state.wires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.freeWires=state.freeWires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.nodes=state.nodes.filter(n=>n.id!==state.selected);}state.selected=null;render();}
+  function terminalClick(node,term){if(state.wireMode){if(!state.wireDraft){state.wireDraft={start:terminals(state.nodes.find(n=>n.id===node))[term],startRef:{node,term}};setStatus("Wire start selected · choose another terminal or grid point");}else{commit();state.freeWires.push({a:state.wireDraft.startRef,b:{node,term}});state.wireDraft=null;setStatus("Wire connected");}render();return;}if(!state.wireStart){state.wireStart={node,term};state.selected=node;setStatus("Terminal selected · click a second terminal to connect");return;}if(state.wireStart.node===node&&state.wireStart.term===term)return;commit();state.wires.push({a:state.wireStart,b:{node,term}});state.wireStart=null;state.selected=null;render();setStatus("Orthogonal wire added");}
+  stage.addEventListener("click",e=>{if(state.suppressClick){state.suppressClick=false;return;}const t=e.target.closest("[data-sld-terminal]"),n=e.target.closest("[data-sld-node]"),w=e.target.closest("[data-sld-wire]"),fw=e.target.closest("[data-sld-free-wire]");if(t){terminalClick(t.dataset.sldNode,t.dataset.sldTerminal);return;}if(w){state.selected="w"+w.dataset.sldWire;render();return;}if(fw){state.selected="f"+fw.dataset.sldFreeWire;render();return;}if(n&&!state.wireMode){state.selected=n.dataset.sldNode;render();return;}if(!state.wireMode){state.selected=null;state.wireStart=null;render();}});
+  stage.addEventListener("pointerdown",e=>{const terminal=e.target.closest("[data-sld-terminal]");const g=e.target.closest("[data-sld-node]");if(state.wireMode&&terminal){const node=state.nodes.find(n=>n.id===terminal.dataset.sldNode),ref={node:node.id,term:terminal.dataset.sldTerminal},pos=terminals(node)[terminal.dataset.sldTerminal];if(state.wireDraft){commit();state.freeWires.push({a:state.wireDraft.startRef||state.wireDraft.start,b:ref});state.wireDraft=null;setStatus("Wire connected to terminal");}else{state.wireDraft={start:pos,startRef:ref,end:pos};setStatus("Wire started at terminal · drag to another terminal or grid point");}state.wirePointer=true;state.suppressClick=true;stage.setPointerCapture(e.pointerId);render();return;}if(state.wireMode){state.wireDraft={start:point(e),end:point(e)};stage.setPointerCapture(e.pointerId);render();return;}if(!g||terminal)return;const node=state.nodes.find(n=>n.id===g.dataset.sldNode),start=point(e);state.drag={node,start,orig:{x:node.x,y:node.y}};commit();stage.setPointerCapture(e.pointerId);});
+  stage.addEventListener("pointermove",e=>{if(state.wireDraft){state.wireDraft.end=point(e);render();return;}if(!state.drag)return;const p=point(e),n=state.drag.node;n.x=Math.max(40,Math.min(W-40,state.drag.orig.x+p.x-state.drag.start.x));n.y=Math.max(40,Math.min(H-40,state.drag.orig.y+p.y-state.drag.start.y));render();});
+  stage.addEventListener("pointerup",e=>{if(state.drag){state.drag=null;setStatus("Symbol moved");}else if(state.wireDraft){const end=wireEndpoint(point(e)),distance=Math.hypot(point(e).x-state.wireDraft.start.x,point(e).y-state.wireDraft.start.y);if(distance>=snap){commit();state.freeWires.push({a:state.wireDraft.startRef||state.wireDraft.start,b:end});state.wireDraft=null;setStatus("Free-direction wire added");}else if(state.wirePointer){setStatus("Wire start fixed at terminal · select another terminal or drag to finish");}else{state.wireDraft=null;}}if(state.wirePointer)state.suppressClick=true;state.wirePointer=false;render();});
+  palette.addEventListener("click",e=>{const b=e.target.closest("[data-sld-type]");if(b)addNode(b.dataset.sldType,{x:360,y:300});});
+  palette.addEventListener("dragstart",e=>{const b=e.target.closest("[data-sld-type]");if(b&&!defs[b.dataset.sldType].tool)e.dataTransfer.setData("text/plain",b.dataset.sldType);});
+  stage.addEventListener("dragover",e=>e.preventDefault());stage.addEventListener("drop",e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(defs[type])addNode(type,point(e));});
+  document.querySelector(".sld-toolbar").addEventListener("click",e=>{const b=e.target.closest("[data-sld-action]");if(!b)return;const action=b.dataset.sldAction;
+    if(action==="undo"&&state.undo.length){state.redo.push(snapshot());Object.assign(state,JSON.parse(state.undo.pop()),{selected:null,wireStart:null,wireDraft:null});render();setStatus("Undo applied");}
+    else if(action==="redo"&&state.redo.length){state.undo.push(snapshot());Object.assign(state,JSON.parse(state.redo.pop()),{selected:null,wireStart:null,wireDraft:null});render();setStatus("Redo applied");}
+    else if(action==="delete")removeSelected();
+    else if(action==="edit")editSelected();
+    else if(action==="rotate"&&state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"){const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.r=(n.r+90)%360;render();}}
+    else if(action==="zoom-in"){state.zoom=Math.min(2.5,state.zoom+.15);render();}
+    else if(action==="zoom-out"){state.zoom=Math.max(.5,state.zoom-.15);render();}
+    else if(action==="fit"){state.zoom=1;state.pan={x:0,y:0};render();}
+    else if(action==="grid"){state.grid=!state.grid;b.setAttribute("aria-pressed",state.grid);render();}
+    else if(action==="clear"&&confirm("Clear the entire diagram? All symbols and wires will be removed.")){commit();state.nodes=[];state.wires=[];state.freeWires=[];state.selected=null;state.wireStart=null;state.wireDraft=null;state.wireMode=false;render();setStatus("Diagram cleared");}
+    else if(action==="print"){window.print();}
+  });
+  document.addEventListener("keydown",e=>{if(!document.getElementById("panel-diagram").classList.contains("active"))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();document.querySelector('[data-sld-action="undo"]').click();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();document.querySelector('[data-sld-action="redo"]').click();}else if(e.key.toLowerCase()==="r"){document.querySelector('[data-sld-action="rotate"]').click();}else if(e.key==="Escape"){state.wireMode=false;state.wireDraft=null;state.wireStart=null;render();setStatus("Wire mode cancelled");}else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();removeSelected();}else if(state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.x+=e.key==="ArrowLeft"?-snap:e.key==="ArrowRight"?snap:0;n.y+=e.key==="ArrowUp"?-snap:e.key==="ArrowDown"?snap:0;render();}}});
+  render();
+})();
+</script>
 </body> </html>
