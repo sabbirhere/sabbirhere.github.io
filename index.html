@@ -538,7 +538,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 .sld-sidebar{height:580px;padding:14px;overflow-y:auto;overflow-x:hidden}
 .sld-sidebar h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#67e8f9;margin:4px 0 12px}
 .sld-hint{font-size:11px;line-height:1.5;color:#64748b;margin:-4px 0 14px}
-.sld-device-note{margin:0 0 14px;padding:9px 10px;border:1px solid rgba(251,191,36,.25);border-radius:8px;background:rgba(251,191,36,.06);color:#fcd34d;font-size:11px;line-height:1.45}
+.sld-device-note{display:block!important;width:100%;margin:0 0 16px;padding:11px 13px;border:1px solid rgba(251,191,36,.6);border-radius:8px;background:#30260b;color:#ffe08a!important;font-size:12px;font-weight:600;line-height:1.5;visibility:visible!important;opacity:1!important}
 .sld-palette{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sld-palette button{min-height:74px;padding:7px;border:1px solid rgba(148,163,184,.16);border-radius:10px;background:#0b1b2d;color:#cbd5e1;cursor:grab;font-size:11px}
 .sld-palette button:hover,.sld-palette button:focus-visible{border-color:#22d3ee;background:#102942;color:#fff;outline:none}
@@ -795,7 +795,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
     <a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
     <h2>⌁ SLD Builder</h2>
     <p class="panel-subtitle">Place symbol-only equipment, snap to the engineering grid, then click terminals to route orthogonal connections.</p>
-    <p class="sld-device-note" role="note">For the best drawing experience, use this SLD Builder on a desktop or switch your phone browser to <strong>Desktop site</strong> mode.</p>
+    <div class="sld-device-note" role="note">⚠ Best experience: use the SLD Builder on a desktop. On a phone, switch your browser to <strong>Desktop site</strong> mode for the full drawing workspace.</div>
     <div class="sld-shell">
       <aside class="sld-sidebar" aria-label="Diagram symbol palette">
         <h3>Symbol library</h3>
