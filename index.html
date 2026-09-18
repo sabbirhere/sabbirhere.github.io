@@ -600,15 +600,27 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 @media(max-width:800px){.sld-shell{grid-template-columns:1fr}.sld-sidebar{height:auto;max-height:230px}.sld-palette{grid-template-columns:repeat(4,1fr)}.sld-stage{height:480px}}
 @media(max-width:520px){.sld-palette{grid-template-columns:repeat(2,1fr)}.sld-toolbar button{flex:1}.sld-toolbar .sld-spacer{display:none}}
 @media (pointer:coarse){
-  .sld-sidebar{padding:12px}
+  .sld-sidebar{padding:12px;max-height:250px;scrollbar-width:thin}
   .sld-palette{gap:10px}
   .sld-palette button{min-height:88px;padding:10px;font-size:12px;touch-action:manipulation}
   .sld-palette button span{font-size:11px}
   .sld-palette svg{height:42px}
-  .sld-toolbar{gap:9px;padding:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .sld-toolbar{position:sticky;top:0;z-index:2;gap:9px;padding:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .sld-toolbar::-webkit-scrollbar{display:none}
   .sld-toolbar button{min-width:72px;min-height:46px;padding:10px 12px;font-size:13px;white-space:nowrap;touch-action:manipulation}
-  .sld-stage{height:min(62vh,560px);min-height:400px}
+  .sld-stage{height:min(64vh,600px);min-height:420px;-webkit-tap-highlight-color:transparent}
+  .sld-stage .sld-label{font-size:13px!important}
+  .sld-stage .sld-parameter{font-size:10px!important}
+  .sld-stage .sld-wire{stroke-width:4}
+  .sld-stage .sld-wire-hit{stroke-width:28}
   .sld-status{min-height:42px;padding:12px;font-size:12px}
+  .sld-toolbar button:active,.sld-palette button:active{transform:scale(.97);background:#123556}
+}
+@media (pointer:coarse) and (max-width:520px){
+  .sld-shell{gap:10px}
+  .sld-sidebar{max-height:220px}
+  .sld-stage-wrap{border-radius:12px}
+  .sld-stage{height:58vh;min-height:360px}
 }
 </style>
 
@@ -2243,7 +2255,7 @@ function sendElectraAI(){
     state.nodes.forEach(n=>{const active=state.wireStart&&state.wireStart.node===n.id?" terminal-source":"";const g=el("g",{class:"sld-symbol"+(state.selected===n.id?" selected":"")+active,transform:`translate(${n.x} ${n.y}) rotate(${n.r})`,"data-node":n.id});g.append(el("circle",{class:"sld-selection-hit",cx:0,cy:0,r:coarse?42:32}));g.append(el("circle",{class:"sld-selection-mark",cx:0,cy:0,r:30}));const art=el("g");drawShape(art,defs[n.type].shape,0,0,0,1);g.append(art);const label=el("text",{class:"sld-label",x:0,y:42});label.textContent=n.label;g.append(label);if(n.parameters){const p=el("text",{class:"sld-parameter",x:0,y:56});p.textContent=n.parameters;g.append(p);}Object.keys(localTerminals(n.type)).forEach(k=>{const q=localTerminals(n.type)[k];g.append(el("circle",{class:"sld-terminal-hit",cx:q.x,cy:q.y,r:coarse?28:20,"data-terminal":k,"data-node":n.id}));g.append(el("circle",{class:"sld-terminal",cx:q.x,cy:q.y,r:coarse?7:6}));});root.append(g);});
     if(!state.nodes.length&&!state.wires.length&&!state.freeWires.length)root.append(Object.assign(el("text",{class:"sld-empty",x:W/2,y:H/2}),{textContent:"Drop a symbol here to begin"}));
   }
-  function addNode(type,p){if(defs[type].tool){state.wireMode=true;state.wireStart=null;setStatus("Wire mode · click a terminal, then another terminal");render();return;}commit();const id="n"+Date.now().toString(36);state.nodes.push({id,type,x:Math.max(60,Math.min(W-60,p.x)),y:Math.max(60,Math.min(H-60,p.y)),r:0,label:defs[type].name,parameters:""});state.selected=id;render();setStatus(defs[type].name+" placed");}
+  function addNode(type,p){if(defs[type].tool){state.wireMode=true;state.wireStart=null;setStatus("Wire mode · click a terminal, then another terminal");render();return;}commit();const id="n"+Date.now().toString(36);state.nodes.push({id,type,x:Math.max(60,Math.min(W-60,snapTo(p.x))),y:Math.max(60,Math.min(H-60,snapTo(p.y))),r:0,label:defs[type].name,parameters:""});state.selected=id;render();setStatus(defs[type].name+" placed on grid");}
   function select(id){state.selected=id;state.wireStart=null;render();}
   function removeSelected(){if(!state.selected)return;commit();if(state.selected[0]==="w")state.wires.splice(+state.selected.slice(1),1);else if(state.selected[0]==="f")state.freeWires.splice(+state.selected.slice(1),1);else{state.wires=state.wires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.freeWires=state.freeWires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.nodes=state.nodes.filter(n=>n.id!==state.selected);}state.selected=null;render();setStatus("Selection deleted");}
   function terminal(node,term){state.wireMode=false;if(!state.wireStart){state.wireStart={node,term};state.selected=node;render();setStatus("Terminal selected · choose another terminal");return;}if(state.wireStart.node===node&&state.wireStart.term===term)return;commit();state.wires.push({a:state.wireStart,b:{node,term}});state.wireStart=null;state.selected=null;render();setStatus("Connected on grid");}
