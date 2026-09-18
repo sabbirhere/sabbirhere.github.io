@@ -547,7 +547,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 .sld-toolbar button:hover,.sld-toolbar button:focus-visible{border-color:#22d3ee;color:#fff;outline:none}
 .sld-toolbar .sld-spacer{flex:1}
 .sld-status{padding:8px 12px;color:#64748b;font-size:11px;border-top:1px solid rgba(34,211,238,.12)}
-.sld-stage{height:580px;overflow:hidden;position:relative;cursor:crosshair;background:#06101d}
+.sld-stage{height:580px;overflow:hidden;position:relative;cursor:crosshair;background:#06101d;touch-action:none;overscroll-behavior:contain;user-select:none;-webkit-user-select:none}
 .sld-stage svg{width:100%;height:100%;display:block}
 .sld-stage .sld-grid{stroke:#1e3a50;stroke-width:.7}
 .sld-stage .sld-major{stroke:#28506a;stroke-width:1}
@@ -588,9 +588,28 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 .sld-parameter{fill:#94a3b8;font:9px Arial,sans-serif;text-anchor:middle;pointer-events:none}
 .sld-empty{fill:#64748b;font:14px Arial,sans-serif;text-anchor:middle}
 .elfsight-local-notice{min-height:480px;display:grid;place-items:center;text-align:center;padding:28px;color:#cbd5e1;line-height:1.7;border:1px dashed rgba(34,211,238,.35);border-radius:12px}
+.local-ai-chat{min-height:480px;padding:18px;border:1px solid rgba(34,211,238,.25);border-radius:14px;background:#06101d}
+.local-ai-messages{height:340px;overflow:auto;padding:8px}
+.local-ai-message{max-width:88%;margin:10px 0;padding:11px 13px;border-radius:12px;line-height:1.55;font-size:14px}
+.local-ai-message.bot{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.16)}
+.local-ai-message.user{margin-left:auto;background:rgba(99,102,241,.25);border:1px solid rgba(129,140,248,.25)}
+.local-ai-form{display:flex;gap:8px;margin-top:12px}
+.local-ai-form input{flex:1;min-width:0;padding:12px;border:1px solid rgba(34,211,238,.25);border-radius:10px;background:#020617;color:#fff}
+.local-ai-form button{padding:12px 16px;border-radius:10px;background:#0bb9ed;color:#03152b;font-weight:700;cursor:pointer}
 .sld-file{display:none}
 @media(max-width:800px){.sld-shell{grid-template-columns:1fr}.sld-sidebar{height:auto;max-height:230px}.sld-palette{grid-template-columns:repeat(4,1fr)}.sld-stage{height:480px}}
 @media(max-width:520px){.sld-palette{grid-template-columns:repeat(2,1fr)}.sld-toolbar button{flex:1}.sld-toolbar .sld-spacer{display:none}}
+@media (pointer:coarse){
+  .sld-sidebar{padding:12px}
+  .sld-palette{gap:10px}
+  .sld-palette button{min-height:88px;padding:10px;font-size:12px;touch-action:manipulation}
+  .sld-palette button span{font-size:11px}
+  .sld-palette svg{height:42px}
+  .sld-toolbar{gap:9px;padding:12px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .sld-toolbar button{min-width:72px;min-height:46px;padding:10px 12px;font-size:13px;white-space:nowrap;touch-action:manipulation}
+  .sld-stage{height:min(62vh,560px);min-height:400px}
+  .sld-status{min-height:42px;padding:12px;font-size:12px}
+}
 </style>
 
 </head> <body> <!-- Floating particles --> <div class="particle" style="left:8%; animation-duration:12s;"></div> <div class="particle" style="left:18%; animation-duration:17s; animation-delay:2s;"></div> <div class="particle" style="left:31%; animation-duration:14s; animation-delay:5s;"></div> <div class="particle" style="left:45%; animation-duration:19s; animation-delay:1s;"></div> <div class="particle" style="left:59%; animation-duration:13s; animation-delay:4s;"></div> <div class="particle" style="left:72%; animation-duration:18s; animation-delay:7s;"></div> <div class="particle" style="left:86%; animation-duration:15s; animation-delay:3s;"></div>
@@ -1348,11 +1367,15 @@ function openAppPanel(name) {
     }
 }
 
+if (window.location.search.indexOf("electraai=1") !== -1) {
+    window.addEventListener("DOMContentLoaded", () => openAppPanel("electraai"));
+}
+
 function ensureElfsightChat() {
     const host = document.querySelector(".elfsight-chat-host");
     if (!host) return;
     if (window.location.protocol === "file:") {
-        host.innerHTML = '<div class="elfsight-local-notice"><div><strong>Electra AI chat is ready for the published site.</strong><br>Elfsight blocks widgets opened directly from a <code>file://</code> HTML file.<br>Upload this page to GitHub Pages and open the HTTPS address to load the chat window.</div></div>';
+        host.innerHTML = '<div class="elfsight-local-notice"><div><strong>Open Electra AI online</strong><br>This local HTML file cannot load an online widget. Open the published HTTPS version instead.<br><a class="start-button" href="https://sabbirhere.github.io/?electraai=1" target="_blank" rel="noopener">Open online AI chat →</a></div></div>';
         host.dataset.elfsightActivated = "local";
         return;
     }
@@ -2161,8 +2184,7 @@ function sendElectraAI(){
     solar:{name:"Solar source",term:["L","R"],shape:"solar"},battery:{name:"Battery bank",term:["L","R"],shape:"battery"},
     ground:{name:"Earth",term:["L","R"],shape:"ground"},wire:{name:"Wire",term:[],shape:"wire",tool:true}
   };
-  const state={nodes:[],wires:[],freeWires:[],selected:null,wireStart:null,wireMode:false,wireDraft:null,wirePointer:false,suppressClick:false,zoom:1,pan:{x:0,y:0},grid:true,undo:[],redo:[],drag:null};
-  let terminalClickTimer=null, lastTerminalDoubleClick=0;
+  const state={nodes:[],wires:[],freeWires:[],selected:null,wireStart:null,wireMode:false,draft:null,zoom:1,pan:{x:0,y:0},grid:true,undo:[],redo:[],drag:null};
   const svg=document.getElementById("sldSvg"), stage=document.getElementById("sldStage"), palette=document.getElementById("sldPalette"), status=document.getElementById("sldStatus");
   if(!svg||!palette)return;
   const el=(tag,attrs={})=>{const x=document.createElementNS(NS,tag);Object.keys(attrs).forEach(k=>x.setAttribute(k,attrs[k]));return x;};
@@ -2203,53 +2225,36 @@ function sendElectraAI(){
     if(shape==="wire"){q.append(el("path",{...a,d:"M-22 0 H22"}),el("circle",{...a,cx:-22,cy:0,r:3}),el("circle",{...a,cx:22,cy:0,r:3}));}
     g.append(q);
   }
-  function terminals(node){
-    const r=node.r||0, out={};
-    const pts={L:[-40,0],R:[40,0],T:[0,-40],B:[0,40]};
-    Object.keys(pts).forEach(k=>{let [x,y]=pts[k],rad=r*Math.PI/180;out[k]={x:node.x+x*Math.cos(rad)-y*Math.sin(rad),y:node.y+x*Math.sin(rad)+y*Math.cos(rad)};}); return out;
-  }
+  function terminals(node){const a=node.r*Math.PI/180,c=Math.cos(a),s=Math.sin(a),p={L:[-40,0],R:[40,0],T:[0,-40],B:[0,40]},out={};defs[node.type].term.forEach(k=>{const q=p[k];out[k]={x:node.x+q[0]*c-q[1]*s,y:node.y+q[0]*s+q[1]*c};});return out;}
   function localTerminals(type){const p={L:[-40,0],R:[40,0],T:[0,-40],B:[0,40]},out={};defs[type].term.forEach(k=>out[k]={x:p[k][0],y:p[k][1]});return out;}
   function snapTo(v){return Math.round(v/snap)*snap;}
-  function point(evt){const box=svg.getBoundingClientRect(),x=(evt.clientX-box.left)/box.width*W,y=(evt.clientY-box.top)/box.height*H;return{x:snapTo((x-state.pan.x)/state.zoom),y:snapTo((y-state.pan.y)/state.zoom)};}
+  function point(e){const b=svg.getBoundingClientRect();return{x:snapTo(((e.clientX-b.left)/b.width*W-state.pan.x)/state.zoom),y:snapTo(((e.clientY-b.top)/b.height*H-state.pan.y)/state.zoom)};}
   function setStatus(t){status.textContent=t;}
-  function endpointPoint(ep){if(ep&&ep.node){const n=state.nodes.find(x=>x.id===ep.node);return n&&terminals(n)[ep.term];}return ep;}
-  function nearestTerminal(p){let best=null,dist=18;state.nodes.forEach(n=>Object.entries(terminals(n)).forEach(([term,q])=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<dist){best={node:n.id,term};dist=d;}}));return best;}
-  function wireEndpoint(p){return nearestTerminal(p)||p;}
+  function endpoint(ep){if(ep.node){const n=state.nodes.find(x=>x.id===ep.node);return n&&terminals(n)[ep.term];}return ep;}
+  function nearest(p){let hit=null,best=24;state.nodes.forEach(n=>Object.entries(terminals(n)).forEach(([term,q])=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<best){best=d;hit={node:n.id,term};}}));return hit;}
   function snapshot(){return JSON.stringify({nodes:state.nodes,wires:state.wires,freeWires:state.freeWires,grid:state.grid});}
   function commit(){state.undo.push(snapshot());if(state.undo.length>80)state.undo.shift();state.redo=[];}
-  function editSelected(){
-    if(!state.selected||state.selected[0]==="w"||state.selected[0]==="f"){setStatus("Select a component before editing parameters");return;}
-    const node=state.nodes.find(x=>x.id===state.selected);if(!node)return;
-    const name=window.prompt("Component name:",node.label||defs[node.type].name);if(name===null)return;
-    const parameters=window.prompt("Component parameters (optional):",node.parameters||"");if(parameters===null)return;
-    commit();node.label=name.trim()||defs[node.type].name;node.parameters=parameters.trim();render();setStatus("Component parameters updated");
-  }
+  function editSelected(){if(!state.selected||state.selected[0]==="w"||state.selected[0]==="f"){setStatus("Select a component before editing");return;}const n=state.nodes.find(x=>x.id===state.selected);if(!n)return;const label=prompt("Component name:",n.label);if(label===null)return;const parameters=prompt("Component parameters (optional):",n.parameters||"");if(parameters===null)return;commit();n.label=label.trim()||defs[n.type].name;n.parameters=parameters.trim();render();setStatus("Component updated");}
   function render(){
-    svg.innerHTML=""; const root=el("g",{transform:`translate(${state.pan.x} ${state.pan.y}) scale(${state.zoom})`}); svg.append(root);
-    if(state.grid){for(let x=0;x<=W;x+=snap)root.append(el("path",{class:x%100===0?"sld-major":"sld-grid",d:`M${x} 0V${H}`}));for(let y=0;y<=H;y+=snap)root.append(el("path",{class:y%100===0?"sld-major":"sld-grid",d:`M0 ${y}H${W}`}));}
-    const wg=el("g");
-    state.wires.forEach((wire,i)=>{const p=endpointPoint(wire.a),q=endpointPoint(wire.b);if(!p||!q)return;const mx=snapTo((p.x+q.x)/2),d=`M${p.x} ${p.y} H${mx} V${q.y} H${q.x}`;wg.append(el("path",{class:"sld-wire-hit",d,"data-sld-wire":i}));wg.append(el("path",{class:"sld-wire"+(state.selected==="w"+i?" selected":""),d,"data-sld-wire":i}));});
-    state.freeWires.forEach((wire,i)=>{const p=endpointPoint(wire.a),q=endpointPoint(wire.b);if(p&&q){const d=`M${p.x} ${p.y} L${q.x} ${q.y}`;wg.append(el("path",{class:"sld-wire-hit",d,"data-sld-free-wire":i}));wg.append(el("path",{class:"sld-wire"+(state.selected==="f"+i?" selected":""),d,"data-sld-free-wire":i}));}});
-    if(state.wireDraft){const p=state.wireDraft.start,q=state.wireDraft.end||p;wg.append(el("path",{class:"sld-wire sld-wire-draft",d:`M${p.x} ${p.y} L${q.x} ${q.y}`}));}
-    root.append(wg);
-    state.nodes.forEach(n=>{const terminalSource=state.wireStart&&state.wireStart.node===n.id?" terminal-source":"";const g=el("g",{class:"sld-symbol"+(state.selected===n.id?" selected":"")+terminalSource,transform:`translate(${n.x} ${n.y}) rotate(${n.r||0})`,"data-sld-node":n.id});g.append(el("circle",{class:"sld-selection-hit",cx:0,cy:0,r:30,"data-sld-node":n.id}));g.append(el("circle",{class:"sld-selection-mark",cx:0,cy:0,r:29}));const art=el("g",{class:"sld-art"});drawShape(art,defs[n.type].shape,0,0,0,1);g.append(art);const label=el("text",{class:"sld-label",x:0,y:42});label.textContent=n.label||defs[n.type].name;g.append(label);if(n.parameters){const param=el("text",{class:"sld-parameter",x:0,y:56});param.textContent=n.parameters;g.append(param);}const ts=localTerminals(n.type);Object.keys(ts).forEach(k=>{const p=ts[k];g.append(el("circle",{class:"sld-terminal-hit",cx:p.x,cy:p.y,r:18,"data-sld-terminal":k,"data-sld-node":n.id,"aria-label":`${n.label||defs[n.type].name} ${k} terminal`}));g.append(el("circle",{class:"sld-terminal",cx:p.x,cy:p.y,r:6,"data-sld-terminal":k,"data-sld-node":n.id}));});root.append(g);});
+    svg.innerHTML="";const root=el("g",{transform:`translate(${state.pan.x} ${state.pan.y}) scale(${state.zoom})`});svg.append(root);
+    if(state.grid){for(let x=0;x<=W;x+=snap)root.append(el("path",{class:x%100?"sld-grid":"sld-major",d:`M${x} 0V${H}`}));for(let y=0;y<=H;y+=snap)root.append(el("path",{class:y%100?"sld-grid":"sld-major",d:`M0 ${y}H${W}`}));}
+    const wires=el("g");state.wires.forEach((w,i)=>{const a=endpoint(w.a),b=endpoint(w.b);if(!a||!b)return;const m=snapTo((a.x+b.x)/2),d=`M${a.x} ${a.y}H${m}V${b.y}H${b.x}`;wires.append(el("path",{class:"sld-wire-hit",d,"data-wire":"w"+i}));wires.append(el("path",{class:"sld-wire"+(state.selected==="w"+i?" selected":""),d,"data-wire":"w"+i}));});state.freeWires.forEach((w,i)=>{const a=endpoint(w.a),b=endpoint(w.b);if(!a||!b)return;const d=`M${a.x} ${a.y}L${b.x} ${b.y}`;wires.append(el("path",{class:"sld-wire-hit",d,"data-wire":"f"+i}));wires.append(el("path",{class:"sld-wire"+(state.selected==="f"+i?" selected":""),d,"data-wire":"f"+i}));});if(state.draft){const a=state.draft.start,b=state.draft.end||a;wires.append(el("path",{class:"sld-wire sld-wire-draft",d:`M${a.x} ${a.y}L${b.x} ${b.y}`}));}root.append(wires);
+    const coarse=window.matchMedia&&window.matchMedia("(pointer: coarse)").matches;
+    state.nodes.forEach(n=>{const active=state.wireStart&&state.wireStart.node===n.id?" terminal-source":"";const g=el("g",{class:"sld-symbol"+(state.selected===n.id?" selected":"")+active,transform:`translate(${n.x} ${n.y}) rotate(${n.r})`,"data-node":n.id});g.append(el("circle",{class:"sld-selection-hit",cx:0,cy:0,r:coarse?42:32}));g.append(el("circle",{class:"sld-selection-mark",cx:0,cy:0,r:30}));const art=el("g");drawShape(art,defs[n.type].shape,0,0,0,1);g.append(art);const label=el("text",{class:"sld-label",x:0,y:42});label.textContent=n.label;g.append(label);if(n.parameters){const p=el("text",{class:"sld-parameter",x:0,y:56});p.textContent=n.parameters;g.append(p);}Object.keys(localTerminals(n.type)).forEach(k=>{const q=localTerminals(n.type)[k];g.append(el("circle",{class:"sld-terminal-hit",cx:q.x,cy:q.y,r:coarse?28:20,"data-terminal":k,"data-node":n.id}));g.append(el("circle",{class:"sld-terminal",cx:q.x,cy:q.y,r:coarse?7:6}));});root.append(g);});
     if(!state.nodes.length&&!state.wires.length&&!state.freeWires.length)root.append(Object.assign(el("text",{class:"sld-empty",x:W/2,y:H/2}),{textContent:"Drop a symbol here to begin"}));
   }
-  function addNode(type,p){if(defs[type].tool){state.wireMode=true;state.wireStart=null;setStatus("Wire tool active · drag between any two grid points or terminals");return;}commit();const id="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);state.nodes.push({id,type,x:Math.max(60,Math.min(W-60,p.x)),y:Math.max(60,Math.min(H-60,p.y)),r:0,label:defs[type].name,parameters:""});state.selected=id;render();setStatus(defs[type].name+" placed · drag to move");}
-  function removeSelected(){if(!state.selected)return;commit();if(state.selected[0]==="w")state.wires.splice(Number(state.selected.slice(1)),1);else if(state.selected[0]==="f")state.freeWires.splice(Number(state.selected.slice(1)),1);else{state.wires=state.wires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.freeWires=state.freeWires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.nodes=state.nodes.filter(n=>n.id!==state.selected);}state.selected=null;render();}
-  function terminalClick(node,term){if(state.wireMode){if(!state.wireDraft){state.wireDraft={start:terminals(state.nodes.find(n=>n.id===node))[term],startRef:{node,term}};setStatus("Wire start selected · choose another terminal or grid point");}else{commit();state.freeWires.push({a:state.wireDraft.startRef,b:{node,term}});state.wireDraft=null;setStatus("Wire connected");}render();return;}if(!state.wireStart){state.wireStart={node,term};state.selected=node;render();setStatus("Terminal selected · click another terminal to connect");return;}if(state.wireStart.node===node&&state.wireStart.term===term)return;commit();state.wires.push({a:state.wireStart,b:{node,term}});state.wireStart=null;state.selected=null;render();setStatus("Orthogonal wire added");}
-  function scheduleTerminalClick(terminal,immediate){if(terminalClickTimer){window.clearTimeout(terminalClickTimer);terminalClickTimer=null;}if(immediate){terminalClick(terminal.dataset.sldNode,terminal.dataset.sldTerminal);return;}terminalClickTimer=window.setTimeout(()=>{terminalClickTimer=null;terminalClick(terminal.dataset.sldNode,terminal.dataset.sldTerminal);},220);}
-  stage.addEventListener("click",e=>{if(state.suppressClick){state.suppressClick=false;return;}const t=e.target.closest("[data-sld-terminal]"),n=e.target.closest("[data-sld-node]"),w=e.target.closest("[data-sld-wire]"),fw=e.target.closest("[data-sld-free-wire]");if(t){if(e.detail!==2)scheduleTerminalClick(t,false);return;}if(w){state.selected="w"+w.dataset.sldWire;state.wireStart=null;render();setStatus("Wire selected · use Delete to remove");return;}if(fw){state.selected="f"+fw.dataset.sldFreeWire;state.wireStart=null;render();setStatus("Wire selected · use Delete to remove");return;}if(n&&!state.wireMode){state.selected=n.dataset.sldNode;render();setStatus("Component selected · use Rotate or Delete");return;}state.selected=null;state.wireStart=null;render();setStatus("Selection cleared");});
-  stage.addEventListener("dblclick",e=>{const terminal=e.target.closest("[data-sld-terminal]");if(!terminal)return;e.preventDefault();e.stopPropagation();if(Date.now()-lastTerminalDoubleClick<500)return;scheduleTerminalClick(terminal,true);});
-  stage.addEventListener("pointerdown",e=>{const terminal=e.target.closest("[data-sld-terminal]");const g=e.target.closest("[data-sld-node]");if(state.wireMode&&terminal){const node=state.nodes.find(n=>n.id===terminal.dataset.sldNode),ref={node:node.id,term:terminal.dataset.sldTerminal},pos=terminals(node)[terminal.dataset.sldTerminal];if(state.wireDraft){commit();state.freeWires.push({a:state.wireDraft.startRef||state.wireDraft.start,b:ref});state.wireDraft=null;setStatus("Wire connected to terminal");}else{state.wireDraft={start:pos,startRef:ref,end:pos};setStatus("Wire started at terminal · drag to another terminal or grid point");}state.wirePointer=true;state.suppressClick=true;stage.setPointerCapture(e.pointerId);render();return;}if(state.wireMode){state.wireDraft={start:point(e),end:point(e)};stage.setPointerCapture(e.pointerId);render();return;}if(!g||terminal)return;const node=state.nodes.find(n=>n.id===g.dataset.sldNode),start=point(e);state.drag={node,start,orig:{x:node.x,y:node.y}};commit();stage.setPointerCapture(e.pointerId);});
-  stage.addEventListener("pointermove",e=>{if(state.wireDraft){state.wireDraft.end=point(e);render();return;}if(!state.drag)return;const p=point(e),n=state.drag.node;n.x=Math.max(40,Math.min(W-40,state.drag.orig.x+p.x-state.drag.start.x));n.y=Math.max(40,Math.min(H-40,state.drag.orig.y+p.y-state.drag.start.y));render();});
-  stage.addEventListener("pointerup",e=>{if(!state.wireMode){const terminal=e.target.closest("[data-sld-terminal]");if(terminal&&e.detail===2){if(terminalClickTimer){window.clearTimeout(terminalClickTimer);terminalClickTimer=null;}lastTerminalDoubleClick=Date.now();terminalClick(terminal.dataset.sldNode,terminal.dataset.sldTerminal);render();return;}}if(state.drag){state.drag=null;setStatus("Symbol moved");}else if(state.wireDraft){const end=wireEndpoint(point(e)),distance=Math.hypot(point(e).x-state.wireDraft.start.x,point(e).y-state.wireDraft.start.y);if(distance>=snap){commit();state.freeWires.push({a:state.wireDraft.startRef||state.wireDraft.start,b:end});state.wireDraft=null;setStatus("Free-direction wire added");}else if(state.wirePointer){setStatus("Wire start fixed at terminal · select another terminal or drag to finish");}else{state.wireDraft=null;}}if(state.wirePointer)state.suppressClick=true;state.wirePointer=false;render();});
-  palette.addEventListener("click",e=>{const b=e.target.closest("[data-sld-type]");if(b)addNode(b.dataset.sldType,{x:360,y:300});});
-  palette.addEventListener("dragstart",e=>{const b=e.target.closest("[data-sld-type]");if(b&&!defs[b.dataset.sldType].tool)e.dataTransfer.setData("text/plain",b.dataset.sldType);});
-  stage.addEventListener("dragover",e=>e.preventDefault());stage.addEventListener("drop",e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(defs[type])addNode(type,point(e));});
+  function addNode(type,p){if(defs[type].tool){state.wireMode=true;state.wireStart=null;setStatus("Wire mode · click a terminal, then another terminal");render();return;}commit();const id="n"+Date.now().toString(36);state.nodes.push({id,type,x:Math.max(60,Math.min(W-60,p.x)),y:Math.max(60,Math.min(H-60,p.y)),r:0,label:defs[type].name,parameters:""});state.selected=id;render();setStatus(defs[type].name+" placed");}
+  function select(id){state.selected=id;state.wireStart=null;render();}
+  function removeSelected(){if(!state.selected)return;commit();if(state.selected[0]==="w")state.wires.splice(+state.selected.slice(1),1);else if(state.selected[0]==="f")state.freeWires.splice(+state.selected.slice(1),1);else{state.wires=state.wires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.freeWires=state.freeWires.filter(w=>w.a.node!==state.selected&&w.b.node!==state.selected);state.nodes=state.nodes.filter(n=>n.id!==state.selected);}state.selected=null;render();setStatus("Selection deleted");}
+  function terminal(node,term){state.wireMode=false;if(!state.wireStart){state.wireStart={node,term};state.selected=node;render();setStatus("Terminal selected · choose another terminal");return;}if(state.wireStart.node===node&&state.wireStart.term===term)return;commit();state.wires.push({a:state.wireStart,b:{node,term}});state.wireStart=null;state.selected=null;render();setStatus("Connected on grid");}
+  stage.addEventListener("click",e=>{const t=e.target.closest("[data-terminal]"),n=e.target.closest("[data-node]"),w=e.target.closest("[data-wire]");if(t){terminal(t.dataset.node,t.dataset.terminal);return;}if(w){select(w.dataset.wire);setStatus("Wire selected");return;}if(n&&!state.wireMode){select(n.dataset.node);setStatus("Component selected");return;}state.selected=null;state.wireStart=null;render();setStatus("Selection cleared");});
+  stage.addEventListener("pointerdown",e=>{if(e.target.closest("[data-terminal]"))return;if(state.wireMode){state.draft={start:point(e),end:point(e)};stage.setPointerCapture(e.pointerId);render();return;}const n=e.target.closest("[data-node]");if(!n)return;const node=state.nodes.find(x=>x.id===n.dataset.node);state.drag={node,start:point(e),moved:false};stage.setPointerCapture(e.pointerId);});
+  stage.addEventListener("pointermove",e=>{if(state.draft){state.draft.end=point(e);render();return;}if(!state.drag)return;const p=point(e),d=state.drag;d.moved=true;d.node.x=Math.max(40,Math.min(W-40,d.node.x+p.x-d.start.x));d.node.y=Math.max(40,Math.min(H-40,d.node.y+p.y-d.start.y));d.start=p;state.selected=d.node.id;render();});
+  stage.addEventListener("pointerup",e=>{if(state.draft){const p=point(e),a=nearest(state.draft.start),b=nearest(p);if(a&&b&&!(a.node===b.node&&a.term===b.term)){commit();state.wires.push({a,b});setStatus("Connected on grid");}state.draft=null;state.wireMode=false;render();return;}if(state.drag){if(state.drag.moved)commit();state.selected=state.drag.node.id;state.drag=null;render();}});
+  palette.addEventListener("click",e=>{const b=e.target.closest("[data-sld-type]");if(b)addNode(b.dataset.sldType,{x:360,y:300});});palette.addEventListener("dragstart",e=>{const b=e.target.closest("[data-sld-type]");if(b&&!defs[b.dataset.sldType].tool)e.dataTransfer.setData("text/plain",b.dataset.sldType);});stage.addEventListener("dragover",e=>e.preventDefault());stage.addEventListener("drop",e=>{e.preventDefault();const type=e.dataTransfer.getData("text/plain");if(defs[type])addNode(type,point(e));});
   document.querySelector(".sld-toolbar").addEventListener("click",e=>{const b=e.target.closest("[data-sld-action]");if(!b)return;const action=b.dataset.sldAction;
-    if(action==="undo"&&state.undo.length){state.redo.push(snapshot());Object.assign(state,JSON.parse(state.undo.pop()),{selected:null,wireStart:null,wireDraft:null});render();setStatus("Undo applied");}
-    else if(action==="redo"&&state.redo.length){state.undo.push(snapshot());Object.assign(state,JSON.parse(state.redo.pop()),{selected:null,wireStart:null,wireDraft:null});render();setStatus("Redo applied");}
+    if(action==="undo"&&state.undo.length){state.redo.push(snapshot());Object.assign(state,JSON.parse(state.undo.pop()),{selected:null,wireStart:null,draft:null});render();setStatus("Undo applied");}
+    else if(action==="redo"&&state.redo.length){state.undo.push(snapshot());Object.assign(state,JSON.parse(state.redo.pop()),{selected:null,wireStart:null,draft:null});render();setStatus("Redo applied");}
     else if(action==="delete")removeSelected();
     else if(action==="edit")editSelected();
     else if(action==="rotate"&&state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"){const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.r=(n.r+90)%360;render();}}
@@ -2257,10 +2262,10 @@ function sendElectraAI(){
     else if(action==="zoom-out"){state.zoom=Math.max(.5,state.zoom-.15);render();}
     else if(action==="fit"){state.zoom=1;state.pan={x:0,y:0};render();}
     else if(action==="grid"){state.grid=!state.grid;b.setAttribute("aria-pressed",state.grid);render();}
-    else if(action==="clear"&&confirm("Clear the entire diagram? All symbols and wires will be removed.")){commit();state.nodes=[];state.wires=[];state.freeWires=[];state.selected=null;state.wireStart=null;state.wireDraft=null;state.wireMode=false;render();setStatus("Diagram cleared");}
+    else if(action==="clear"&&confirm("Clear the entire diagram? All symbols and wires will be removed.")){commit();state.nodes=[];state.wires=[];state.freeWires=[];state.selected=null;state.wireStart=null;state.draft=null;state.wireMode=false;render();setStatus("Diagram cleared");}
     else if(action==="print"){window.print();}
   });
-  document.addEventListener("keydown",e=>{if(!document.getElementById("panel-diagram").classList.contains("active"))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();document.querySelector('[data-sld-action="undo"]').click();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();document.querySelector('[data-sld-action="redo"]').click();}else if(e.key.toLowerCase()==="r"){document.querySelector('[data-sld-action="rotate"]').click();}else if(e.key==="Escape"){state.wireMode=false;state.wireDraft=null;state.wireStart=null;state.selected=null;render();setStatus("Selection cleared · wire mode cancelled");}else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();removeSelected();}else if(state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.x+=e.key==="ArrowLeft"?-snap:e.key==="ArrowRight"?snap:0;n.y+=e.key==="ArrowUp"?-snap:e.key==="ArrowDown"?snap:0;render();}}});
+  document.addEventListener("keydown",e=>{if(!document.getElementById("panel-diagram").classList.contains("active"))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();document.querySelector('[data-sld-action="undo"]').click();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();document.querySelector('[data-sld-action="redo"]').click();}else if(e.key.toLowerCase()==="r"){document.querySelector('[data-sld-action="rotate"]').click();}else if(e.key==="Escape"){state.wireMode=false;state.draft=null;state.wireStart=null;state.selected=null;render();setStatus("Selection cleared · wire mode cancelled");}else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();removeSelected();}else if(state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.x+=e.key==="ArrowLeft"?-snap:e.key==="ArrowRight"?snap:0;n.y+=e.key==="ArrowUp"?-snap:e.key==="ArrowDown"?snap:0;render();}}});
   render();
 })();
 </script>
