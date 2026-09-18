@@ -599,6 +599,18 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
 .sld-file{display:none}
 @media(max-width:800px){.sld-shell{grid-template-columns:1fr}.sld-sidebar{height:auto;max-height:230px}.sld-palette{grid-template-columns:repeat(4,1fr)}.sld-stage{height:480px}}
 @media(max-width:520px){.sld-palette{grid-template-columns:repeat(2,1fr)}.sld-toolbar button{flex:1}.sld-toolbar .sld-spacer{display:none}}
+@media(max-width:800px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  #panel-diagram,.sld-panel,.sld-shell,.sld-stage-wrap{width:100%;max-width:100%;min-width:0}
+  #panel-diagram{padding-left:8px!important;padding-right:8px!important}
+  #panel-diagram .panel-inner{width:100%;max-width:100%;margin:0;padding-left:12px;padding-right:12px}
+  .sld-shell{display:block;min-height:0}
+  .sld-sidebar{width:100%;height:auto;max-height:220px;margin:0 0 10px}
+  .sld-stage-wrap{display:block;overflow:hidden}
+  .sld-toolbar{width:100%;max-width:100%;min-width:0}
+  .sld-stage{width:100%;max-width:100%;height:56vh;min-height:360px}
+  .sld-stage svg{width:100%;max-width:100%;height:100%}
+}
 @media (pointer:coarse){
   .sld-sidebar{padding:12px;max-height:250px;scrollbar-width:thin}
   .sld-palette{gap:10px}
