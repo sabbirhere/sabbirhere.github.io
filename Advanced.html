@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectraLab — Advanced Industrial Engineering Toolbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0a0f1d;
+            --card: #131c31;
+            --border: #1e293b;
+            --cyan: #06b6d4;
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --green: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background:
+                radial-gradient(circle at 10% 0%, rgba(6,182,212,.08), transparent 30%),
+                radial-gradient(circle at 90% 10%, rgba(59,130,246,.07), transparent 28%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #bubble-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-btn, .nav-btn {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .back-btn:hover, .nav-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+
+        .page-title {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            color: var(--muted);
+            font-size: clamp(0.85rem, 3vw, 0.95rem);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .section-heading {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-sub {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        /* Tools Grid Layout */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .tool-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            background: linear-gradient(145deg, rgba(19,28,49,.72), rgba(10,15,29,.62));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .tool-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -30% -65% 20%;
+            height: 140px;
+            background: radial-gradient(circle, rgba(6,182,212,.12), transparent 65%);
+            pointer-events: none;
+        }
+        .tool-card:hover {
+            border-color: rgba(6,182,212,.65);
+            box-shadow: 0 18px 45px rgba(0,0,0,.28), 0 0 0 1px rgba(6,182,212,.08);
+            transform: translateY(-4px);
+        }
+        .tool-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tool-icon {
+            font-size: 1.25rem;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--cyan);
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .tool-icon.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue);
+        }
+
+        .tool-card h3 { font-size: 1.15rem; font-weight: 600; }
+        .tool-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+        .card-arrow { margin-top: 18px; color: var(--cyan); font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+        .assumption-note { margin-top:14px; padding:11px 13px; border:1px solid rgba(245,158,11,.22); border-left:3px solid var(--amber); border-radius:9px; background:rgba(245,158,11,.055); color:var(--muted); font-size:.78rem; line-height:1.5; }
+        .result-meta { margin-top:4px; color:var(--muted); font-size:.74rem; line-height:1.45; }
+        .result-tools { display:flex; gap:8px; }
+        .ghost-btn { background:rgba(255,255,255,.04); color:var(--muted); border:1px solid var(--border); border-radius:7px; padding:6px 10px; cursor:pointer; font-size:.78rem; }
+        .ghost-btn:hover { color:var(--text); border-color:rgba(6,182,212,.5); }
+        .inline-status { min-height:18px; color:var(--amber); font-size:.78rem; margin-top:6px; }
+        .metric-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:999px; background:rgba(6,182,212,.09); border:1px solid rgba(6,182,212,.16); color:var(--cyan); font-size:.72rem; font-weight:700; }
+        .eyebrow { display:flex; gap:8px; align-items:center; margin-bottom:10px; color:var(--cyan); font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; } #bubble-canvas { display:none; } }
+
+        .workspace-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .estimator-card {
+            background: rgba(10, 15, 29, 0.6);
+            border: 1px dashed var(--border);
+            gap: 20px;
+        }
+
+        .form-column, .result-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .input-group label { display: block; font-size: 0.85rem; color: var(--text); margin-bottom: 4px; font-weight: 600; }
+        .input-hint { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; line-height: 1.3; }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            background: rgba(10, 15, 29, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus, .input-group select:focus { border-color: var(--cyan); }
+
+        .estimator-result-box {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .estimator-result-box span { font-size: 0.85rem; color: var(--cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .estimator-result-box .value { font-size: 1.75rem; color: #fff; font-weight: 700; }
+        .estimator-result-box .hint { font-size: 0.8rem; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--cyan), #0284c7);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .action-btn:hover { opacity: 0.9; }
+
+        .clear-btn {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .clear-btn:hover { background: rgba(148, 163, 184, 0.2); color: #fff; border-color: var(--muted); }
+
+        .results-panel {
+            background: rgba(10, 15, 29, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .results-header h4 {
+            font-size: 1.05rem;
+            color: var(--cyan);
+        }
+
+        .print-btn {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .print-btn:hover {
+            background: var(--cyan);
+            color: #fff;
+        }
+
+        .result-block {
+            border-bottom: 1px dashed rgba(255,255,255,0.06);
+            padding-bottom: 12px;
+        }
+        .result-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .result-main span:last-child { color: var(--cyan); font-size: 1.05rem; }
+        .result-subtext { font-size: 0.85rem; color: var(--green); font-weight: 400; margin-top: 4px; }
+        
+        .engineering-notice {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 8px;
+            line-height: 1.4;
+            background: rgba(255,255,255,0.02);
+            padding: 8px 10px;
+            border-radius: 4px;
+            border-left: 2px solid var(--amber);
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        /* Responsive Media Queries */
+        @media(min-width: 768px) {
+            .container { padding: 24px 20px; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .workspace-card { padding: 24px; }
+            .input-row { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .estimator-card { grid-template-columns: 2fr 1fr; align-items: center; }
+            .result-main { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+            .result-main span:last-child { text-align: right; }
+        }
+
+        @media(min-width: 1024px) {
+            .container { padding: 32px 24px; }
+            .tools-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; /* Allows up to 3+ columns for future tiles */ }
+            .workspace-card { grid-template-columns: 1fr 1fr; gap: 40px; padding: 32px; }
+            .estimator-card { padding: 24px 32px; }
+            .results-panel { padding: 24px; }
+        }
+
+
+/* ===== Responsive UX enhancements ===== */
+.input-group label{display:flex;align-items:center;gap:7px}
+.input-group label::after{content:"INPUT";font-size:.58rem;letter-spacing:.08em;font-weight:700;color:var(--cyan);border:1px solid rgba(6,182,212,.2);background:rgba(6,182,212,.06);border-radius:999px;padding:2px 6px;margin-left:auto;opacity:.8}
+.input-hint{display:flex;gap:7px;align-items:flex-start;min-height:1.15em;margin:5px 0 7px;color:#9fb0c7;font-size:.72rem;line-height:1.4}
+.input-hint::before{content:"ⓘ";color:var(--cyan);font-weight:700;flex:0 0 auto}
+.input-group input::placeholder{color:#60718a}
+.input-group input:hover,.input-group select:hover{border-color:#33445e}
+.workspace-card{box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.results-panel{padding:0;overflow:hidden;background:linear-gradient(180deg,rgba(19,28,49,.72),rgba(10,15,29,.82))}
+.results-header{padding:15px 17px;margin:0;background:rgba(6,182,212,.035)}
+.results-header h4{display:flex;align-items:center;gap:8px}
+.results-header h4::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px rgba(6,182,212,.7)}
+.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.06)}
+.result-block{border:0;padding:14px 15px;min-width:0;background:rgba(10,15,29,.54)}
+.result-main{gap:7px;min-width:0}
+.result-main>span:first-child{color:#9fb0c7;font-size:.72rem;font-weight:600;line-height:1.35;text-transform:uppercase;letter-spacing:.035em}
+.result-main span:last-child,.result-main>div>span{color:#f8fafc;font-size:.98rem;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.result-main span:last-child{text-align:left}
+.result-subtext{color:#7dd3fc;font-size:.7rem;line-height:1.4}
+.result-meta{font-size:.68rem}
+.result-tools{flex-wrap:wrap;justify-content:flex-end}
+.button-group{position:sticky;bottom:10px;z-index:4;padding:8px;margin:2px -8px -8px;background:rgba(10,15,29,.82);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.05);border-radius:10px}
+@media(min-width:768px){.result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.result-block{padding:16px}.result-main{flex-direction:column;align-items:flex-start}.result-main span:last-child{text-align:left}}
+@media(min-width:1100px){.result-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.result-block{min-height:92px}}
+@media(max-width:767px){.container{padding:12px 10px}.workspace-card{padding:12px;gap:20px;border-radius:14px}.input-row{gap:10px}.input-group input,.input-group select{min-height:46px}.button-group{grid-template-columns:1fr}.results-header{align-items:flex-start;gap:10px;flex-wrap:wrap}.result-tools{width:100%;justify-content:flex-start}.result-tools button{flex:1 1 0;min-height:38px}.result-grid{grid-template-columns:1fr}.result-block{padding:13px 14px}.result-main{flex-direction:row;justify-content:space-between;align-items:flex-start;gap:12px}.result-main>span:first-child{flex:1 1 48%}.result-main span:last-child,.result-main>div{flex:1 1 52%;text-align:right}.result-main>div>span{display:block}.result-subtext,.result-meta{text-align:right}}
+@media(max-width:390px){.result-main{flex-direction:column;gap:4px}.result-main span:last-child,.result-main>div{width:100%;text-align:left}.result-subtext,.result-meta{text-align:left}.page-title{font-size:1.45rem}}
+@media print{.result-grid{display:block;background:none}.result-block{border-bottom:1px solid #ddd}.button-group{position:static}}
+
+        /* ===== Dark / Light mode ===== */
+        .top-nav-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle {
+            width: 34px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            box-shadow: 0 4px 14px rgba(0,0,0,.18);
+            transition: background-color .45s ease, color .45s ease, border-color .45s ease, transform .25s ease, box-shadow .45s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-1px) scale(1.04);
+            border-color: var(--cyan);
+            box-shadow: 0 7px 20px rgba(6,182,212,.16);
+        }
+
+        .theme-toggle:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 3px;
+        }
+
+        body, .top-nav, .back-btn, .nav-btn, .tool-card, .workspace-card, .results-panel, .advanced-card, .calc-module, .joiff-results-window, .input-group input, .input-group select, .action-btn, .clear-btn, footer, .metric-pill {
+            transition: background-color .55s ease, color .55s ease, border-color .55s ease, box-shadow .55s ease;
+        }
+
+        body.theme-light {
+            --bg: #eef4fb;
+            --card: #ffffff;
+            --border: #cbd5e1;
+            --text: #102033;
+            --muted: #5f7187;
+            --cyan: #0891b2;
+            --blue: #2563eb;
+            --amber: #b45309;
+            --green: #047857;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(6,182,212,.12), transparent 30%),
+                radial-gradient(circle at 90% 10%, rgba(59,130,246,.10), transparent 28%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        body.theme-light #bubble-canvas { opacity: .42; }
+
+        body.theme-light .top-nav .back-btn,
+        body.theme-light .nav-btn,
+        body.theme-light .theme-toggle,
+        body.theme-light .metric-pill {
+            background: rgba(255,255,255,.82);
+            color: var(--muted);
+            border-color: #cbd5e1;
+        }
+
+        body.theme-light .tool-card {
+            background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(238,244,251,.88));
+            border-color: rgba(71,85,105,.16);
+        }
+
+        body.theme-light .workspace-card,
+        body.theme-light .advanced-card,
+        body.theme-light .calc-module {
+            background: linear-gradient(145deg, rgba(255,255,255,.94), rgba(238,244,251,.90));
+            border-color: rgba(71,85,105,.18);
+        }
+
+        body.theme-light .results-panel,
+        body.theme-light .joiff-results-window {
+            background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(241,245,249,.94));
+            border-color: #cbd5e1;
+        }
+
+        body.theme-light .input-group input,
+        body.theme-light .input-group select {
+            background: #ffffff;
+            color: var(--text);
+            border-color: #cbd5e1;
+        }
+
+        body.theme-light .estimator-card {
+            background: rgba(255,255,255,.78);
+        }
+
+        body.theme-light footer {
+            color: #64748b;
+            border-top-color: #dbe4ee;
+        }
+
+        .theme-transition-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(circle at var(--theme-x, 50%) var(--theme-y, 50%), rgba(255,255,255,.88), rgba(255,255,255,.22) 24%, rgba(255,255,255,0) 62%);
+            transform: scale(.35);
+            transition: opacity .18s ease, transform .72s cubic-bezier(.22,.61,.36,1);
+        }
+
+        .theme-transition-overlay.active {
+            opacity: 1;
+            transform: scale(2.5);
+        }
+
+        @media(max-width:767px){
+            .top-nav-actions { gap: 6px; }
+            .theme-toggle { width: 32px; height: 28px; }
+        }
+
+        /* Print CSS for Clean PDF Generation */
+
+        .advanced-card {
+            background: linear-gradient(145deg, rgba(6,182,212,.045), rgba(10,15,29,.72));
+            border: 1px solid rgba(6,182,212,.16);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+        }
+        .advanced-card .card-head {
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:flex-start;
+            margin-bottom:12px;
+        }
+        .advanced-card h3 { font-size:1rem; margin-bottom:4px; }
+        .advanced-card p { color:var(--muted); font-size:.78rem; line-height:1.45; }
+        .source-link { color:var(--cyan); text-decoration:none; font-size:.72rem; }
+        .source-link:hover { text-decoration:underline; }
+        .helper-line {
+            margin-top:8px;
+            color:var(--muted);
+            font-size:.72rem;
+            line-height:1.45;
+            padding:8px 10px;
+            border-radius:8px;
+            background:rgba(255,255,255,.025);
+            border:1px solid rgba(255,255,255,.05);
+        }
+        .advanced-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+        .advanced-actions .ghost-btn { min-height:36px; }
+        .test-result-grid {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:1px;
+            margin-top:14px;
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.06);
+            border-radius:10px;
+            overflow:hidden;
+        }
+        .test-result {
+            background:rgba(10,15,29,.6);
+            padding:11px 12px;
+            min-height:70px;
+        }
+        .test-result .k { color:var(--muted); font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px; }
+        .test-result .v { font-size:.95rem; font-weight:700; line-height:1.3; }
+        .test-result .m { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:3px; }
+        .source-note {
+            margin-top:12px;
+            padding:10px 12px;
+            border-left:3px solid var(--cyan);
+            border-radius:8px;
+            background:rgba(6,182,212,.045);
+            color:var(--muted);
+            font-size:.72rem;
+            line-height:1.5;
+        }
+        .severity-grid {
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:8px;
+            margin-top:10px;
+        }
+        .mini-flow-input { display:flex; flex-direction:column; gap:4px; }
+        .mini-flow-input label { font-size:.7rem; color:var(--muted); font-weight:600; }
+        .mini-flow-input input { padding:9px 10px !important; }
+        .flow-table-head { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-top:14px; }
+        .flow-table-head strong { font-size:.78rem; }
+        .test-status { min-height:18px; margin-top:8px; color:var(--amber); font-size:.74rem; line-height:1.4; }
+        .source-badge {
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            padding:5px 8px;
+            border-radius:999px;
+            border:1px solid rgba(6,182,212,.18);
+            background:rgba(6,182,212,.07);
+            color:var(--cyan);
+            font-size:.66rem;
+            font-weight:700;
+            white-space:nowrap;
+        }
+        @media(max-width:767px){
+            .test-result-grid{grid-template-columns:1fr}
+            .advanced-card{padding:13px}
+            .severity-grid{grid-template-columns:1fr}
+            .advanced-card .card-head{flex-direction:column}
+        }
+
+        /* Dedicated JOIFF test result window */
+        .joiff-pressure-note { margin-top:8px; padding:8px 10px; border:1px solid rgba(245,158,11,.22); border-left:3px solid var(--amber); border-radius:8px; background:rgba(245,158,11,.055); color:#dbe7f5; font-size:.72rem; line-height:1.45; }
+        .joiff-pressure-note strong { color:#fbbf24; }
+        .joiff-results-window { margin-top:16px; background:linear-gradient(145deg, rgba(6,182,212,.055), rgba(10,15,29,.86)); border:1px solid rgba(6,182,212,.20); border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.12); }
+        .joiff-results-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding:15px 16px 12px; border-bottom:1px solid rgba(255,255,255,.07); background:rgba(6,182,212,.035); }
+        .joiff-results-head .eyebrow { color:var(--cyan); margin-bottom:4px; }
+        .joiff-results-head h3 { font-size:1rem; margin:0 0 4px; }
+        .joiff-results-head p { color:var(--muted); font-size:.72rem; line-height:1.45; margin:0; }
+        .joiff-result-tools { display:flex; flex-wrap:wrap; gap:7px; justify-content:flex-end; }
+        .joiff-result-tools button { min-height:36px; }
+        .joiff-results-body { padding:12px 14px 14px; }
+        .joiff-test-status { min-height:20px; margin-bottom:9px; color:var(--amber); font-size:.74rem; line-height:1.45; }
+        .joiff-results-window .test-result-grid { margin-top:0; }
+        .joiff-results-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:10px; }
+        .joiff-summary-card { padding:10px 11px; border:1px solid rgba(255,255,255,.06); border-radius:9px; background:rgba(255,255,255,.025); }
+        .joiff-summary-card .k { color:var(--muted); font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; }
+        .joiff-summary-card .v { margin-top:3px; font-size:.88rem; font-weight:700; line-height:1.35; overflow-wrap:anywhere; }
+        .joiff-report-note { margin-top:10px; padding:9px 10px; border:1px solid rgba(255,255,255,.06); border-radius:8px; color:var(--muted); font-size:.68rem; line-height:1.5; }
+        .fire-workspace-stack{display:block !important;}
+        .fire-stack{max-width:none !important;}
+        .fire-calculation-actions{margin-top:16px;}
+        .fire-result-section,.joiff-calculation-section,.joiff-results-window{margin-top:18px;}
+        .joiff-calculation-section .advanced-card{margin-top:0;}
+        .fire-result-section .results-panel{width:100%;}
+        .joiff-results-window{width:100%;}
+        .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+        @media(min-width:1024px){.fire-workspace-stack{padding:20px 22px 22px;}.fire-result-section .result-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+        @media(max-width:767px){.fire-workspace-stack{padding:14px;}.fire-result-section .results-header{gap:10px;}.fire-result-section .result-tools{width:100%;}}
+
+        @media(max-width:767px){ .joiff-results-head{flex-direction:column}.joiff-result-tools{width:100%;justify-content:flex-start}.joiff-result-tools button{flex:1 1 0}.joiff-results-summary{grid-template-columns:1fr} }
+
+        /* ===== Two-calculator module separation ===== */
+        .fire-workspace-stack {
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .fire-stack { gap: 22px !important; }
+        .calc-module {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,.09);
+            box-shadow: 0 16px 42px rgba(0,0,0,.18);
+        }
+        .calc-module::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--blue), rgba(59,130,246,.18));
+        }
+        .preliminary-module {
+            background: linear-gradient(145deg, rgba(59,130,246,.075), rgba(19,28,49,.84) 44%, rgba(10,15,29,.88));
+            border-color: rgba(59,130,246,.20);
+        }
+        .joiff-module {
+            background: linear-gradient(145deg, rgba(6,182,212,.075), rgba(19,28,49,.84) 44%, rgba(10,15,29,.88));
+            border-color: rgba(6,182,212,.22);
+        }
+        .joiff-module::before {
+            background: linear-gradient(180deg, var(--cyan), rgba(6,182,212,.18));
+        }
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+        .module-kicker {
+            color: var(--cyan);
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .preliminary-module .module-kicker { color: #60a5fa; }
+        .module-header h2 { font-size: 1.15rem; margin-bottom: 5px; }
+        .module-header p { color: var(--muted); font-size: .76rem; line-height: 1.5; max-width: 720px; }
+        .module-badge {
+            flex: 0 0 auto; padding: 6px 9px; border-radius: 999px;
+            border: 1px solid rgba(59,130,246,.22); background: rgba(59,130,246,.07);
+            color: #93c5fd; font-size: .63rem; font-weight: 800; letter-spacing: .07em; white-space: nowrap;
+        }
+        .module-badge.source { border-color: rgba(6,182,212,.22); background: rgba(6,182,212,.07); color: #67e8f9; }
+        .preliminary-module .results-panel {
+            border-color: rgba(59,130,246,.18);
+            background: linear-gradient(180deg, rgba(13,22,43,.92), rgba(10,15,29,.92));
+        }
+        .joiff-module .advanced-card { border-color: rgba(6,182,212,.14); background: rgba(6,182,212,.025); }
+        .pressure-reference-note { margin-top: 6px; color: #9fb0c7; font-size: .66rem; line-height: 1.35; }
+        .pressure-reference-note strong { color: #67e8f9; }
+        .fire-result-section, .joiff-calculation-section, .joiff-results-window { margin-top: 0; }
+        .joiff-results-window { margin-top: 16px; }
+        @media(max-width:767px){
+            .calc-module { padding: 14px; border-radius: 14px; }
+            .module-header { flex-direction: column; padding-bottom: 13px; margin-bottom: 13px; }
+            .module-badge { align-self: flex-start; }
+        }
+
+        @media print {
+            #view-fire-system .fire-workspace-stack .form-column { display:block !important; }
+            #view-fire-system .fire-workspace-stack .input-group,
+            #view-fire-system .fire-workspace-stack .input-row,
+            #view-fire-system .fire-workspace-stack .button-group,
+            #view-fire-system .fire-workspace-stack .inline-status,
+            #view-fire-system .fire-workspace-stack .joiff-calculation-section { display:none !important; }
+            #view-fire-system .fire-result-section,
+            #view-fire-system .fire-result-section .results-panel,
+            #view-fire-system .joiff-results-window { display:block !important; }
+            body { background: white !important; color: black !important; display: block; }
+            #bubble-canvas, .top-nav, .page-subtitle, .section-heading, 
+            .section-sub, .estimator-card, .form-column, footer, .print-btn, .advanced-card .advanced-actions, .advanced-card .source-link { display: none !important; }
+            .container { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+            .page-title { color: black !important; text-align: center; margin-bottom: 20px; font-size: 18pt !important; }
+            .workspace-card { display: block; border: none !important; padding: 0 !important; box-shadow: none !important; }
+            .calc-module { border: none !important; padding: 0 !important; box-shadow: none !important; background: white !important; }
+            .calc-module::before, .module-header { display: none !important; }
+            .result-column { width: 100%; display: block; }
+            .results-panel { background: white !important; border: 1px solid #ccc !important; padding: 20px !important; color: black !important; }
+            .joiff-results-window { background: white !important; border: 1px solid #ccc !important; box-shadow:none !important; }
+            .joiff-results-head { background: white !important; border-bottom:1px solid #aaa !important; }
+            .joiff-results-head h3, .joiff-results-head p, .joiff-results-head .eyebrow { color:black !important; }
+            .joiff-results-window .test-result { background:white !important; }
+            .joiff-results-window .test-result .k, .joiff-results-window .test-result .m, .joiff-report-note { color:#444 !important; }
+            .joiff-results-window .test-result .v, .joiff-summary-card .v { color:#111 !important; }
+            .results-header h4 { color: black !important; border-bottom: 2px solid #000 !important; }
+            .result-main span:last-child { color: black !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bubble-canvas"></canvas>
+
+    <div class="theme-transition-overlay" id="theme-transition-overlay" aria-hidden="true"></div>
+
+    <div class="container">
+        <!-- ================= HOME / DASHBOARD VIEW (Add more tiles here) ================= -->
+        <div id="view-home" class="view-section active">
+            <div class="top-nav">
+                <a href="index.html" class="back-btn">Back To Basic lab</a>
+                <div class="top-nav-actions">
+                    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode">☾</button>
+                    <span class="metric-pill">● ENGINEERING MODE</span>
+                </div>
+            </div>
+            <div class="eyebrow">Industrial calculation workspace</div>
+            <h1 class="page-title">Advanced Engineering Toolbox</h1>
+            <p class="page-subtitle">Select an industrial calculator module below. More tool modules can be easily appended here.</p>
+            
+            <div class="tools-grid">
+                <!-- Tile 1: Air Compressor Sizing -->
+                <div class="tool-card" role="button" tabindex="0" onclick="switchView('compressor')" onkeydown="cardKey(event,'compressor')">
+                    <div class="tool-header">
+                        <div class="tool-icon">💨</div>
+                        <h3>Air Compressor Selection</h3>
+                    </div>
+                    <p>FAD demand, indicative motor sizing, receiver starting point, dryer selection, and main-pipe sizing.</p>
+                        <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile 2: Fire Hydrant & Suppression -->
+                <div class="tool-card" role="button" tabindex="0" onclick="switchView('fire-system')" onkeydown="cardKey(event,'fire-system')">
+                    <div class="tool-header">
+                        <div class="tool-icon blue">🚒</div>
+                        <h3>Fire Hydrant & Suppression</h3>
+                    </div>
+                    <p>Parametric flow, pump-head, tank-volume, hydrant-count, and header-size estimates with assumptions clearly separated from code verification.</p>
+                        <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- TEMPLATE FOR FUTURE TILES: Copy paste block below and change ID -->
+                <!-- 
+                <div class="tool-card" onclick="switchView('your-new-tool')">
+                    <div class="tool-header">
+                        <div class="tool-icon">⚡</div>
+                        <h3>Your New Tool Title</h3>
+                    </div>
+                    <p>Short description of what your new engineering module calculates.</p>
+                </div> 
+                -->
+            </div>
+        </div>
+
+        <!-- ================= TOOL 1: AIR COMPRESSOR VIEW ================= -->
+        <div id="view-compressor" class="view-section">
+            <div class="top-nav">
+                <button class="nav-btn" onclick="switchView('home')">← BACK TO TOOLBOX</button>
+            </div>
+            <h1 class="page-title">💨 Air Compressor Sizing Engine</h1>
+            <p class="page-subtitle">Calculate exact FAD, verified motor kW, and detailed piping metrics based on ISO 1217 standards.</p>
+
+            <h2 class="section-heading">📊 1. Plant Air Volume Estimator</h2>
+            <p class="section-sub">Estimate rough baseline flow requirements based on typical heavy industry profiles.</p>
+            
+            <div class="workspace-card estimator-card">
+                <div class="form-column" style="gap: 12px;">
+                    <div class="input-group">
+                        <label>Industry / Plant Type</label><div class="input-hint">Choose the closest plant profile; its typical air demand per line is used as the starting estimate.</div>
+                        <select id="industry-type" oninput="updateEstimator()">
+                            <option value="2.5">Textiles & Garments (Air-jet looms, spinning) ~ 2.5 m³/min per line</option>
+                            <option value="1.5">Battery Manufacturing (Presses, assembly) ~ 1.5 m³/min per line</option>
+                            <option value="3.0">Automotive & Heavy Assembly (Robotics, paint) ~ 3.0 m³/min per line</option>
+                            <option value="1.0">Food & Beverage (Packaging lines, sorting) ~ 1.0 m³/min per line</option>
+                            <option value="0.8">Pharmaceutical (Clean packaging, filling) ~ 0.8 m³/min per line</option>
+                            <option value="0.5">General Light Manufacturing ~ 0.5 m³/min per line</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Number of Active Production Lines / Major Cell Units</label><div class="input-hint">Enter the number of production lines or major air-consuming cells operating together.</div>
+                        <input type="number" id="industry-scale" value="1" min="1" oninput="updateEstimator()">
+                    </div>
+                </div>
+                
+                <div class="estimator-result-box">
+                    <span>Estimated Baseline Demand</span>
+                    <div class="value" id="estimator-result">2.5 m³/min</div>
+                    <div class="hint">Starting-point estimate only; it is not a measured demand.</div>
+                    <button class="ghost-btn" type="button" onclick="useEstimate()">Use in sizing engine</button>
+                </div>
+            </div>
+
+            <h2 class="section-heading">⚙️ 2. Compressor Sizing Engine</h2>
+            <div class="workspace-card">
+                <div class="form-column">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Required Air Volume (FAD)</label><div class="input-hint">Enter measured or calculated free-air demand at the compressor inlet reference condition.</div>
+                            <input type="number" id="air-flow" placeholder="e.g. 3.5" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Volume Unit</label><div class="input-hint">Select the unit used for your FAD value.</div>
+                            <select id="flow-unit">
+                                <option value="m3min">m³/min</option>
+                                <option value="cfm">CFM</option>
+                                <option value="lmin">L/min</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Working Pressure Required</label><div class="input-hint">Enter the pressure the plant must receive at the required operating point.</div>
+                            <input type="number" id="air-pressure" value="7.0" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Pressure Unit</label><div class="input-hint">Select the pressure unit used above.</div>
+                            <select id="pressure-unit">
+                                <option value="bar">bar</option>
+                                <option value="psi">psi</option>
+                                <option value="mpa">MPa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Design Margin</label>
+                        <select id="design-margin">
+                            <option value="0.10">10% Design Margin</option>
+                            <option value="0.15" selected>15% Design Margin</option>
+                            <option value="0.20">20% Design Margin</option>
+                            <option value="0.25">25% Design Margin</option>
+                        </select>
+                        <div class="input-hint">Applied to the entered FAD demand before selecting compressor capacity.</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Operation Duty & Air Demand Profile</label><div class="input-hint">Choose continuous operation or intermittent demand/storage behavior.</div>
+                        <select id="duty-mode">
+                            <option value="continuous">Continuous Heavy Output (24/7 Industrial)</option>
+                            <option value="intermittent">Intermittent / Temporary Storage</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Ambient Operating Condition</label><div class="input-hint">Select normal or hot/dusty conditions for the treatment recommendation.</div>
+                        <select id="temp-condition">
+                            <option value="normal">Normal (up to 35°C ambient)</option>
+                            <option value="hot">High Ambient / Dust (40°C - 45°C)</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                            <button class="action-btn" onclick="calculateCompressor()">Calculate & Generate Specifications</button>
+                            <button class="clear-btn" onclick="clearCompressor()">Reset</button>
+                        </div>
+                        <div class="inline-status" id="compressor-status" aria-live="polite"></div>
+                </div>
+
+                <div class="result-column">
+                    <div class="results-panel">
+                        <div class="results-header">
+                            <h4>Engineering Specifications</h4>
+                            <div class="result-tools">
+                                <button class="ghost-btn" onclick="copyResults('compressor')">Copy</button>
+                                <button class="print-btn" onclick="window.print()">🖨️ PDF</button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-grid">
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Compressor Type:</span>
+                                <div><span id="res-type">--</span></div>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Corrected FAD Output:</span>
+                                <span id="res-fad">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Verified Motor Rating (kW):</span>
+                                <span id="res-power">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Receiver Tank Capacity:</span>
+                                <span id="res-tank">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Air Treatment Recommendation:</span>
+                                <span id="res-dryer">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Main Distribution Piping:</span>
+                                <div>
+                                    <span id="res-pipe">--</span>
+                                    <div class="result-subtext" id="res-pipe-wall">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="assumption-note">
+                        Assumptions: entered flow is treated as FAD; motor power is an indicative estimate using
+                        6.5 kW/(m³/min) at 7 bar; receiver is a 30-second starting point at 1 bar usable differential;
+                        pipe sizing targets 6 m/s. Confirm against OEM curves, actual pressure losses, fittings,
+                        elevation, temperature and receiver pressure-band data.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TOOL 2: FIRE HYDRANT VIEW ================= -->
+        <div id="view-fire-system" class="view-section">
+            <div class="top-nav">
+                <button class="nav-btn" onclick="switchView('home')">← BACK TO TOOLBOX</button>
+            </div>
+            <h1 class="page-title">🚒 Industrial Fire Hydrant & Suppression Engine</h1>
+            <p class="page-subtitle">Preliminary fire-system sizing plus a JOIFF 2004 hydrant flow-test analyzer. Use the test analyzer for measured water-supply performance; use the sizing section for early-stage planning only.</p>
+
+            <div class="workspace-card fire-workspace-stack" id="fire-form">
+                <div class="form-column fire-stack">
+                    <section class="calc-module preliminary-module" aria-labelledby="preliminary-module-title">
+                        <div class="module-header">
+                            <div>
+                                <div class="module-kicker">PRELIMINARY SIZING</div>
+                                <h2 id="preliminary-module-title">Fire System Sizing Calculator</h2>
+                                <p>Early-stage sizing for flow, pump head, storage, outlets and main header. Verify the final design with the adopted code and hydraulic calculations.</p>
+                            </div>
+                            <span class="module-badge">PLANNING TOOL</span>
+                        </div>
+
+                    <div class="input-group">
+                        <label>Design Code / Regulatory Standard</label><div class="input-hint">Select the project basis for this preliminary fire-system sizing.</div>
+                        <select id="fire-standard" onchange="updateStandardDefaults()">
+                            <option value="nfpa" selected>International Standard (NFPA 20, 13, 22)</option>
+                            <option value="bnbc">Bangladesh Standard (BNBC 2020 & RSC/ACCORD RMG Guidelines)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Extended Facility Hazard / Occupancy Profile</label><div class="input-hint">Choose the occupancy/hazard profile that most closely matches the facility.</div>
+                        <select id="fire-hazard" onchange="autoSetDuration()">
+                            <option value="light">Light Hazard (Offices, Educational, Institutional)</option>
+                            <option value="oh1">Ordinary Hazard Group 1 (Parking Garages, Bakeries)</option>
+                            <option value="oh2" selected>Ordinary Hazard Group 2 (Textiles, RMG Assembly, Warehousing)</option>
+                            <option value="storage_high">High-Piled / Rack Storage (Logistics Hubs, High-bay Warehousing)</option>
+                            <option value="eh1">Extra Hazard Group 1 (Woodworking, Plastic Extrusion, Sawmills)</option>
+                            <option value="eh2">Extra Hazard Group 2 (Flammable Liquids, Paint Spraying, Petrochemical)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Total Built-up Floor Area</label><div class="input-hint">Enter the total built-up floor area covered by this planning basis.</div>
+                            <input type="number" id="fire-area" value="25000" step="500">
+                        </div>
+                        <div class="input-group">
+                            <label>Area Unit Dimension</label><div class="input-hint">Select the unit used for the floor-area value.</div>
+                            <select id="fire-area-unit">
+                                <option value="sqm">Square Meters (m²)</option>
+                                <option value="sqft">Square Feet (sq. ft)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Required Residual Pressure</label><div class="input-hint">Enter the target residual pressure used for the preliminary pump/head estimate.</div>
+                            <input type="number" id="fire-pressure" value="100" step="5">
+                            <div class="pressure-reference-note" role="note">Standard reference: <strong>1.4 bar (20 psi)</strong> residual pressure.</div>
+                        </div>
+                        <div class="input-group">
+                            <label>Pressure Scale Unit</label><div class="input-hint">Select the pressure unit used above.</div>
+                            <select id="fire-press-unit">
+                                <option value="psi">PSI (Standard Code)</option>
+                                <option value="bar">Bar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>System Run-time Duration</label><div class="input-hint">Choose the intended water-storage duration for this preliminary calculation.</div>
+                        <select id="fire-duration">
+                            <option value="60">60 Minutes (1 Hour)</option>
+                            <option value="90" selected>90 Minutes (Standard RMG / Industrial)</option>
+                            <option value="120">120 Minutes (2 Hours - High Risk)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Elevation Rise to Critical Hydrant (m)</label><div class="input-hint">Enter the vertical rise from the pump reference level to the hydraulically critical hydrant. Use 0 when not known.</div>
+                            <input type="number" id="fire-elevation" value="0" min="0" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>System Loss Allowance (bar)</label><div class="input-hint">Preliminary allowance for pipe, fittings, valves and other losses between the pump and critical point.</div>
+                            <input type="number" id="fire-loss" value="1.0" min="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="action-btn" onclick="calculateAdvancedFireSystem()">Run Engineering Calculation</button>
+                        <button class="clear-btn" onclick="clearFireForm()">Clear All</button>
+                    </div>
+                    <div class="inline-status" id="fire-status" aria-live="polite"></div>
+
+                    <section class="fire-result-section" aria-labelledby="res-standard-title">
+                    <div class="results-panel">
+                        <div class="results-header">
+                            <h4 id="res-standard-title">Preliminary Sizing Results</h4>
+                            <div class="result-tools">
+                                <button class="ghost-btn" onclick="copyResults('fire')">Copy</button>
+                                <button class="print-btn" onclick="window.print()">🖨️ PDF Report</button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-grid">
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Preliminary Planning Fire Flow:</span>
+                                <span id="res-flow">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Rated Pump Head & Pressure:</span>
+                                <span id="res-head">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>TDH Basis:</span>
+                                <div><span id="res-tdh-basis">--</span><div class="result-meta" id="res-tdh-meta">Residual + elevation + loss allowance</div></div>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Indicative Pump Motor / Power:</span>
+                                <div><span id="res-pump-power">--</span></div>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Underground Water Tank Storage:</span>
+                                <span id="res-tank-size">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Preliminary Outlet Count:</span>
+                                <span id="res-hydrant-count">--</span>
+                            </div>
+                        </div>
+
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Preliminary Main Header:</span>
+                                <div>
+                                    <span id="res-fire-pipe">--</span>
+                                    <div class="result-subtext" id="res-pipe-note">Water velocity limited below code safety caps.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="assumption-note">
+                        Preliminary sizing only. Hazard classification, sprinkler/hydrant demand, pump arrangement,
+                        storage duration and pipe sizing must be checked against the adopted code edition,
+                        project hydraulic calculations, manufacturer data and AHJ requirements. This tool does not
+                        establish NFPA or BNBC/RSC compliance by itself.
+                    </div>
+                    </section>
+                    </section>
+
+                    <section class="calc-module joiff-module" aria-labelledby="joiff-module-title">
+                        <div class="module-header">
+                            <div>
+                                <div class="module-kicker">JOIFF 2004</div>
+                                <h2 id="joiff-module-title">Hydrant Flow & Pressure Test Calculator</h2>
+                                <p>Use measured field readings to analyze hydrant pressure performance and estimate flow at the selected rating pressure.</p>
+                            </div>
+                            <span class="module-badge source">SOURCE-DERIVED</span>
+                        </div>
+
+                    <section class="joiff-calculation-section" aria-labelledby="joiff-calculation-title">
+                        <span id="joiff-calculation-title" class="sr-only">JOIFF 2004 Hydrant Flow & Pressure Test Calculation</span>
+                    <div class="advanced-card">
+                        <div class="card-head">
+                            <div>
+                                <div class="eyebrow">JOIFF 2004 FLOW TEST</div>
+                                <h3>Hydrant Flow & Pressure Test Analyzer</h3>
+                                <p>Source-derived test conversion using the JOIFF guideline's rating-pressure logic and 0.54 pressure-drop relationship. Enter measured field data when available.</p>
+                                <a class="source-link" href="https://www.joiff.com/members/documents/hydrant_testing.pdf" target="_blank" rel="noopener">Open source guideline - June 2004</a>
+                            </div>
+                            <span class="source-badge">SOURCE-DERIVED</span>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Test Location</label><div class="input-hint">Optional report field for the hydrant test record.</div>
+                                <input type="text" id="fire-test-location" placeholder="Plant / building / area">
+                            </div>
+                            <div class="input-group">
+                                <label>Hydrant ID / Number</label><div class="input-hint">Identify the test hydrant used as the pressure-reference point.</div>
+                                <input type="text" id="fire-test-id" placeholder="e.g. H-01">
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Measured Static Pressure (bar)</label><div class="input-hint">Pressure with the hydrant closed under normal system-use conditions.</div>
+                                <input type="number" id="fire-test-static" min="0" step="0.1" placeholder="e.g. 5.2">
+                            </div>
+                            <div class="input-group">
+                                <label>Measured Residual Pressure (bar)</label><div class="input-hint">Pressure at the test hydrant while water is flowing during the test.</div>
+                                <input type="number" id="fire-test-residual" min="0" step="0.1" placeholder="e.g. 4.1">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Observed Test Flow (L/min)</label><div class="input-hint">Enter the digital flow-meter reading recorded at the measured residual pressure.</div>
+                                <input type="number" id="fire-test-flow" min="0" step="10" placeholder="e.g. 1800">
+                            </div>
+                            <div class="input-group">
+                                <label>Flow Test Duration (seconds)</label><div class="input-hint">Optional duration used to estimate the water volume used during the recorded flow.</div>
+                                <input type="number" id="fire-test-duration" min="1" step="1" value="60">
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label>Rating Pressure Mode</label><div class="input-hint">JOIFF default: 1.4 bar; when static pressure is below 2.8 bar, use one-half of static pressure.</div>
+                                <select id="fire-rating-mode" onchange="updateHydrantRatingPressure()">
+                                    <option value="auto" selected>Auto from JOIFF rating rule</option>
+                                    <option value="manual">Manual target residual pressure</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Manual Target Rating Pressure (bar)</label><div class="input-hint">Used only when Manual mode is selected; keep it below the measured static pressure.</div>
+                                <input type="number" id="fire-rating-target" min="0" step="0.1" value="1.4">
+                            </div>
+                        </div>
+                        <div class="helper-line" id="fire-rating-note">Auto target will be calculated after a static pressure is entered.</div>
+
+                        <div class="flow-table-head">
+                            <strong>High-capacity multi-hydrant check (optional)</strong>
+                            <span class="metric-pill">Up to 7 flowing hydrants</span>
+                        </div>
+                        <div class="input-group" style="margin-top:8px;">
+                            <label>High-Risk Reference Severity</label><div class="input-hint">JOIFF Appendix D reference ranges for major fires: Low 9,000-18,000 L/min; Medium 18,000-27,000 L/min; High 27,000-54,000 L/min. This is a reference comparison, not a code-compliance verdict.</div>
+                            <select id="fire-joiff-severity">
+                                <option value="low" selected>Low - 9,000 to 18,000 L/min</option>
+                                <option value="medium">Medium - 18,000 to 27,000 L/min</option>
+                                <option value="high">High - 27,000 to 54,000 L/min</option>
+                            </select>
+                        </div>
+                        <div class="severity-grid">
+                            <div class="mini-flow-input"><label>Hydrant 1 (L/min)</label><input type="number" id="flow-h1" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 2 (L/min)</label><input type="number" id="flow-h2" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 3 (L/min)</label><input type="number" id="flow-h3" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 4 (L/min)</label><input type="number" id="flow-h4" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 5 (L/min)</label><input type="number" id="flow-h5" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 6 (L/min)</label><input type="number" id="flow-h6" min="0" step="10" placeholder="optional"></div>
+                            <div class="mini-flow-input"><label>Hydrant 7 (L/min)</label><input type="number" id="flow-h7" min="0" step="10" placeholder="optional"></div>
+                        </div>
+
+                        <div class="advanced-actions">
+                            <button class="action-btn" type="button" onclick="analyzeHydrantTest()">Analyze Measured Test</button>
+                            <button class="ghost-btn" type="button" onclick="clearHydrantTest()">Reset Test Inputs</button>
+                        </div>
+                        <div class="source-note">
+                            <strong>JOIFF field-test reminders:</strong> use the correct standpipe/adaptors and a flow/pressure test instrument that does not restrict flow; flush the hydrant/test setup before recording readings (the guideline notes typically 30 seconds); record static and residual pressure plus flow; turn hydrants off slowly; and coordinate tests with the local water authority. The guideline also states that gauges and flow meters should be calibrated at least every 12 months, or more frequently depending on use.
+                            <br><br>JOIFF defines static pressure as pressure with hydrants closed, residual pressure as pressure while flowing, and generally recommends retaining 1.4 bar (20 psi). For static pressure below 2.8 bar (40 psi), it says to rate at one-half static pressure. Appendix E uses the 0.54-power relationship to estimate flow at another residual pressure.
+                        </div>
+                    </div>
+                    </section>
+
+                    <section class="joiff-results-window" aria-labelledby="joiff-results-title">
+                        <div class="joiff-results-head">
+                            <div>
+                                <div class="eyebrow">JOIFF 2004 FIELD TEST</div>
+                                <h3 id="joiff-results-title">Hydrant Flow & Pressure Test Results</h3>
+                                <p>Separate test-report window for measured hydrant performance and JOIFF Appendix E estimation.</p>
+                            </div>
+                            <div class="joiff-result-tools">
+                                <button class="ghost-btn" type="button" onclick="copyHydrantResults()">Copy Test</button>
+                                <button class="print-btn" type="button" onclick="printHydrantReport()">🖨️ Print Test Report</button>
+                            </div>
+                        </div>
+                        <div class="joiff-results-body">
+                            <div class="joiff-test-status" id="hydrant-test-status" aria-live="polite">Enter measured static pressure, residual pressure and observed flow, then run the hydrant test analyzer.</div>
+                            <div class="test-result-grid">
+                                <div class="test-result"><div class="k">JOIFF Rating Pressure</div><div class="v" id="test-rating-pressure">--</div><div class="m" id="test-rating-rule">--</div></div>
+                                <div class="test-result"><div class="k">Estimated Flow at Rating</div><div class="v" id="test-estimated-flow">--</div><div class="m">Q₂ = Q₁ × [(S-R₂)/(S-R₁)]^0.54</div></div>
+                                <div class="test-result"><div class="k">Static-to-Residual Drop</div><div class="v" id="test-pressure-drop">--</div><div class="m">Measured pressure drop during the flow test</div></div>
+                                <div class="test-result"><div class="k">Estimated Volume Used</div><div class="v" id="test-volume-used">--</div><div class="m">Observed flow × entered test duration</div></div>
+                                <div class="test-result"><div class="k">Town-Main Reference</div><div class="v" id="test-town-reference">--</div><div class="m">JOIFF cites BS 5306:9.2 at 1,500 L/min per hydrant</div></div>
+                                <div class="test-result"><div class="k">High-Capacity Total Flow</div><div class="v" id="test-total-flow">--</div><div class="m" id="test-total-range">Enter one or more flowing-hydrant readings</div></div>
+                            </div>
+                            <div class="joiff-results-summary">
+                                <div class="joiff-summary-card"><div class="k">Observed Test Point</div><div class="v" id="test-observed-point">--</div></div>
+                                <div class="joiff-summary-card"><div class="k">Rating Method</div><div class="v" id="test-rating-method-summary">--</div></div>
+                                <div class="joiff-summary-card"><div class="k">Pressure Margin to 1.4 bar</div><div class="v" id="test-pressure-margin">--</div></div>
+                                <div class="joiff-summary-card"><div class="k">Reference Flow Position</div><div class="v" id="test-reference-position">--</div></div>
+                            </div>
+                            <div class="joiff-report-note">
+                                JOIFF 2004 recommends recording location, date/time, tester, operating pumps where relevant, hydrant number, static pressure, residual pressure, flow rate, volume used, result, notes and signatures. It also states that gauges and flow meters should be calibrated at least every 12 months, subject to use. This analyzer is a calculation aid and does not replace an approved field test, local authority requirement, adopted code, insurer requirement, or hydraulic analysis.
+                            </div>
+                        </div>
+                    </section>
+                    </section>
+                </div>
+            </div>
+
+    </div>
+
+    <footer>
+        ⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid. Verify against manufacturer nameplate data and local codes before installation.
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('bubble-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, bubbles = [];
+
+        function initCanvas() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        for (let i = 0; i < 25; i++) {
+            bubbles.push({
+                x: Math.random() * w, y: Math.random() * h,
+                r: Math.random() * 2.5 + 1,
+                vy: -Math.random() * 0.35 - 0.15,
+                alpha: Math.random() * 0.4 + 0.15
+            });
+        }
+
+        function animateBubbles() {
+            ctx.clearRect(0, 0, w, h);
+            for (const b of bubbles) {
+                b.y += b.vy;
+                if (b.y < -10) { b.y = h + 10; b.x = Math.random() * w; }
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(6,182,212,${b.alpha})`;
+                ctx.shadowColor = '#06b6d4';
+                ctx.shadowBlur = 4;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            requestAnimationFrame(animateBubbles);
+        }
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) animateBubbles();
+
+        function cardKey(e, view) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                switchView(view);
+            }
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('view-' + viewName);
+            if (target) target.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setStatus(id, msg = '') {
+            const el = document.getElementById(id);
+            if (el) el.textContent = msg;
+        }
+
+        function updateEstimator() {
+            const rate = parseFloat(document.getElementById('industry-type').value);
+            let scale = parseFloat(document.getElementById('industry-scale').value);
+            if (!Number.isFinite(scale) || scale < 0) scale = 0;
+            document.getElementById('estimator-result').textContent = `${(rate * scale).toFixed(1)} m³/min`;
+        }
+        updateEstimator();
+
+        function useEstimate() {
+            const value = parseFloat(document.getElementById('estimator-result').textContent);
+            if (Number.isFinite(value)) {
+                getRequiredElement('air-flow').value = value;
+                getRequiredElement('flow-unit').value = 'm3min';
+                setStatus('compressor-status', 'Estimator value copied into FAD input.');
+            }
+        }
+
+        function getRequiredElement(id) {
+            const el = document.getElementById(id);
+            if (!el) {
+                throw new Error(`Missing page element: #${id}`);
+            }
+            return el;
+        }
+
+        function calculateCompressor() {
+            try {
+            const flowInput = parseFloat(getRequiredElement('air-flow').value);
+            const flowUnit = getRequiredElement('flow-unit').value;
+            const pressInput = parseFloat(getRequiredElement('air-pressure').value);
+            const pressUnit = getRequiredElement('pressure-unit').value;
+            const margin = parseFloat(getRequiredElement('design-margin').value);
+            const dutyMode = getRequiredElement('duty-mode').value;
+            const tempCondition = getRequiredElement('temp-condition').value;
+
+            if (![flowInput, pressInput, margin].every(Number.isFinite) || flowInput <= 0 || pressInput <= 0) {
+                setStatus('compressor-status', 'Enter positive flow and pressure values before calculating.');
+                return;
+            }
+
+            let pBar = pressUnit === 'psi' ? pressInput / 14.5038 :
+                       pressUnit === 'mpa' ? pressInput * 10 : pressInput;
+            if (pBar <= 0) {
+                setStatus('compressor-status', 'Pressure must be positive.');
+                return;
+            }
+
+            let qFad = flowInput;
+            if (flowUnit === 'cfm') qFad = flowInput * 0.0283168466;
+            if (flowUnit === 'lmin') qFad = flowInput / 1000;
+
+            // Input is explicitly FAD, so ambient temperature is NOT multiplied into demand.
+            const requiredFAD = qFad * (1 + margin);
+
+            // Indicative power model only: 6.5 kW/(m³/min) at 7 bar.
+            const specificPower = 6.5 * (pBar / 7);
+            const estimatedPowerKw = Math.max(2.2, requiredFAD * specificPower);
+
+            const standardPowers = [2.2,3.7,5.5,7.5,11,15,18.5,22,30,37,45,55,75,90,110,132,160,200,250];
+            const selectedPower = standardPowers.find(p => p >= estimatedPowerKw) ||
+                                  Math.ceil(estimatedPowerKw / 10) * 10;
+            const hpRating = Math.round(selectedPower * 1.34102);
+
+            const compressorType = dutyMode === 'continuous'
+                ? 'Rotary Screw Compressor (VSD profile)'
+                : (selectedPower <= 15
+                    ? 'Reciprocating / screw package — verify duty cycle'
+                    : 'Rotary Screw Compressor (fixed-speed candidate)');
+
+            const dryerType = tempCondition === 'hot' || requiredFAD > 10
+                ? 'Refrigerated dryer, +3°C PDP class; verify high-inlet-temperature rating'
+                : 'Refrigerated dryer, +3°C PDP class';
+
+            // Starting-point receiver: 30 s of FAD at 1 bar usable pressure differential.
+            const usableDeltaPBar = 1;
+            const tankLitres = Math.max(150, Math.round(requiredFAD * 500 / usableDeltaPBar));
+
+            // Preliminary main-pipe sizing at 6 m/s. No fittings/length/elevation loss is modeled.
+            const absolutePressureBar = pBar + 1.01325;
+            const actualFlowM3Min = requiredFAD * 1.01325 / absolutePressureBar;
+            const actualFlowM3Sec = actualFlowM3Min / 60;
+            const pipeDiameterMm = Math.sqrt((4 * actualFlowM3Sec) / (Math.PI * 6)) * 1000;
+
+            const pipeSpecs = [
+                {dn:15,inc:'1/2"',sch40:'2.77 mm',alu:'1.2 mm'},
+                {dn:20,inc:'3/4"',sch40:'2.87 mm',alu:'1.5 mm'},
+                {dn:25,inc:'1"',sch40:'3.38 mm',alu:'1.5 mm'},
+                {dn:32,inc:'1-1/4"',sch40:'3.56 mm',alu:'1.5 mm'},
+                {dn:40,inc:'1-1/2"',sch40:'3.68 mm',alu:'1.5 mm'},
+                {dn:50,inc:'2"',sch40:'3.91 mm',alu:'2.0 mm'},
+                {dn:65,inc:'2-1/2"',sch40:'5.16 mm',alu:'2.0 mm'},
+                {dn:80,inc:'3"',sch40:'5.49 mm',alu:'2.5 mm'},
+                {dn:100,inc:'4"',sch40:'6.02 mm',alu:'2.5 mm'}
+            ];
+            const selectedPipe = pipeSpecs.find(p => p.dn >= pipeDiameterMm) || pipeSpecs[pipeSpecs.length - 1];
+
+            document.getElementById('res-type').textContent = compressorType;
+            document.getElementById('res-fad').textContent =
+                `${requiredFAD.toFixed(2)} m³/min (${(requiredFAD * 35.3147).toFixed(1)} CFM)`;
+            document.getElementById('res-power').textContent = `${selectedPower} kW / ${hpRating} HP`;
+            document.getElementById('res-tank').textContent =
+                `${tankLitres.toLocaleString()} L (${Math.round(tankLitres * 0.264172)} US gal)`;
+            document.getElementById('res-dryer').textContent = dryerType;
+            document.getElementById('res-pipe').textContent = `${selectedPipe.inc} (DN${selectedPipe.dn})`;
+            document.getElementById('res-pipe-wall').innerHTML =
+                `Indicative wall: Sch-40 ${selectedPipe.sch40} / aluminum ${selectedPipe.alu}
+                 <div class="result-meta">Calculated diameter ≈ ${pipeDiameterMm.toFixed(0)} mm at 6 m/s.</div>`;
+            setStatus('compressor-status', `Calculated with ${(margin * 100).toFixed(0)}% design margin.`);
+            saveInputs();
+            } catch (error) {
+                console.error('Compressor calculation error:', error);
+                setStatus('compressor-status', `Calculation error: ${error.message}`);
+            }
+        }
+
+        function autoSetDuration() {
+            const hazard = document.getElementById('fire-hazard').value;
+            const duration = document.getElementById('fire-duration');
+            if (hazard === 'light') duration.value = '60';
+            else if (hazard === 'storage_high' || hazard.startsWith('eh')) duration.value = '120';
+            else duration.value = '90';
+        }
+
+        function updateStandardDefaults() {
+            if (document.getElementById('fire-standard').value === 'bnbc') {
+                document.getElementById('fire-duration').value = '90';
+            }
+        }
+
+        function clearCompressor() {
+            try {
+                // Restore the complete compressor module to its starting state.
+                getRequiredElement('industry-type').value = '2.5';
+                getRequiredElement('industry-scale').value = '1';
+                getRequiredElement('air-flow').value = '';
+                getRequiredElement('air-pressure').value = '7.0';
+                getRequiredElement('flow-unit').value = 'm3min';
+                getRequiredElement('pressure-unit').value = 'bar';
+                getRequiredElement('design-margin').value = '0.15';
+                getRequiredElement('duty-mode').value = 'continuous';
+                getRequiredElement('temp-condition').value = 'normal';
+                updateEstimator();
+                ['res-type','res-fad','res-power','res-tank','res-dryer','res-pipe','res-pipe-wall']
+                    .forEach(id => document.getElementById(id).textContent = '--');
+                try { localStorage.removeItem('electralab-compressor'); } catch {}
+                setStatus('compressor-status', 'Compressor form reset to defaults.');
+            } catch (error) {
+                console.error('Compressor reset error:', error);
+                setStatus('compressor-status', `Reset error: ${error.message}`);
+            }
+        }
+
+        function setText(id, value='--') {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        function updateHydrantRatingPressure() {
+            const staticEl = document.getElementById('fire-test-static');
+            const note = document.getElementById('fire-rating-note');
+            const mode = document.getElementById('fire-rating-mode');
+            const target = document.getElementById('fire-rating-target');
+            if (!staticEl || !note || !mode || !target) return;
+            const s = parseFloat(staticEl.value);
+            if (mode.value === 'manual') {
+                target.disabled = false;
+                note.textContent = Number.isFinite(s) && s > 0
+                    ? `Manual target selected. It must be greater than 0 and below the measured static pressure (${s.toFixed(1)} bar).`
+                    : 'Manual target selected. Enter a static pressure and a target rating pressure below it.';
+                return;
+            }
+            target.disabled = true;
+            if (!Number.isFinite(s) || s <= 0) {
+                note.textContent = 'Auto target will be calculated after a static pressure is entered.';
+                return;
+            }
+            const rating = s < 2.8 ? s * 0.5 : 1.4;
+            target.value = rating.toFixed(1);
+            note.textContent = `Auto rating pressure = ${rating.toFixed(1)} bar under the JOIFF rule for the entered static pressure of ${s.toFixed(1)} bar.`;
+        }
+
+
+        function clearHydrantTest() {
+            const textIds = ['fire-test-location','fire-test-id','fire-test-static','fire-test-residual','fire-test-flow'];
+            textIds.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            const duration = document.getElementById('fire-test-duration');
+            if (duration) duration.value = '60';
+            const mode = document.getElementById('fire-rating-mode');
+            if (mode) mode.value = 'auto';
+            const target = document.getElementById('fire-rating-target');
+            if (target) { target.value = '1.4'; target.disabled = true; }
+            const severity = document.getElementById('fire-joiff-severity');
+            if (severity) severity.value = 'low';
+            for (let i = 1; i <= 7; i++) {
+                const el = document.getElementById(`flow-h${i}`);
+                if (el) el.value = '';
+            }
+            ['test-rating-pressure','test-estimated-flow','test-pressure-drop','test-volume-used','test-town-reference','test-total-flow']
+                .forEach(id => setText(id));
+            setText('test-rating-rule');
+            setText('test-total-range', 'Enter one or more flowing-hydrant readings');
+            setText('test-observed-point', '--');
+            setText('test-rating-method-summary', '--');
+            setText('test-pressure-margin', '--');
+            setText('test-reference-position', '--');
+            const status = document.getElementById('hydrant-test-status');
+            if (status) status.textContent = 'Hydrant test inputs and results cleared.';
+            updateHydrantRatingPressure();
+        }
+
+        function clearFireForm() {
+            try {
+                getRequiredElement('fire-standard').value = 'nfpa';
+                getRequiredElement('fire-hazard').value = 'oh2';
+                getRequiredElement('fire-area').value = '25000';
+                getRequiredElement('fire-area-unit').value = 'sqm';
+                getRequiredElement('fire-pressure').value = '100';
+                getRequiredElement('fire-press-unit').value = 'psi';
+                getRequiredElement('fire-duration').value = '90';
+                getRequiredElement('fire-elevation').value = '0';
+                getRequiredElement('fire-loss').value = '1.0';
+                setText('res-standard-title', 'Preliminary Sizing Results');
+                ['res-flow','res-head','res-pump-power','res-tdh-basis','res-tank-size','res-hydrant-count','res-fire-pipe']
+                    .forEach(id => setText(id));
+                setText('res-pipe-note', 'Water velocity limited below code safety caps.');
+                setText('res-tdh-meta', 'Residual + elevation + loss allowance');
+                clearHydrantTest();
+                setStatus('fire-status', 'Fire / hydrant form reset to defaults.');
+            } catch (error) {
+                console.error('Fire reset error:', error);
+                setStatus('fire-status', `Reset error: ${error.message}`);
+            }
+        }
+
+        function analyzeHydrantTest() {
+            try {
+                const staticBar = parseFloat(document.getElementById('fire-test-static').value);
+                const residualBar = parseFloat(document.getElementById('fire-test-residual').value);
+                const observedFlow = parseFloat(document.getElementById('fire-test-flow').value);
+                const durationSec = parseFloat(document.getElementById('fire-test-duration').value);
+                const mode = document.getElementById('fire-rating-mode').value;
+                const manualTarget = parseFloat(document.getElementById('fire-rating-target').value);
+                const severity = document.getElementById('fire-joiff-severity').value;
+
+                if (![staticBar, residualBar, observedFlow, durationSec].every(Number.isFinite) || staticBar <= 0 || residualBar <= 0 || observedFlow <= 0 || durationSec <= 0) {
+                    setStatus('hydrant-test-status', 'Enter positive static pressure, residual pressure, observed flow and test duration values.');
+                    return;
+                }
+                if (residualBar >= staticBar) {
+                    setStatus('hydrant-test-status', 'Measured residual pressure must be below measured static pressure for a valid flowing-pressure drop.');
+                    return;
+                }
+
+                const ratingBar = mode === 'manual' ? manualTarget : (staticBar < 2.8 ? staticBar * 0.5 : 1.4);
+                if (!Number.isFinite(ratingBar) || ratingBar <= 0 || ratingBar >= staticBar) {
+                    setStatus('hydrant-test-status', `Target rating pressure must be above 0 and below static pressure (${staticBar.toFixed(1)} bar).`);
+                    return;
+                }
+
+                const measuredDrop = staticBar - residualBar;
+                const targetDrop = staticBar - ratingBar;
+                const estimatedFlow = observedFlow * Math.pow(targetDrop / measuredDrop, 0.54);
+                const volumeUsed = observedFlow * durationSec / 60;
+                const referenceMin = 1500;
+
+                setText('test-rating-pressure', `${ratingBar.toFixed(2)} bar (${(ratingBar * 14.5038).toFixed(0)} psi)`);
+                setText('test-rating-rule', mode === 'manual'
+                    ? 'Manual target selected by the tester.'
+                    : (staticBar < 2.8 ? '0.5 × static pressure because static pressure is below 2.8 bar.' : '1.4 bar general JOIFF rating-pressure reference.'));
+                setText('test-estimated-flow', `${estimatedFlow.toLocaleString(undefined,{maximumFractionDigits:0})} L/min`);
+                setText('test-pressure-drop', `${measuredDrop.toFixed(2)} bar (${(measuredDrop * 14.5038).toFixed(1)} psi)`);
+                setText('test-volume-used', `${volumeUsed.toLocaleString(undefined,{maximumFractionDigits:0})} L`);
+                setText('test-town-reference', estimatedFlow >= referenceMin ? `At/above ${referenceMin.toLocaleString()} L/min` : `Below ${referenceMin.toLocaleString()} L/min`);
+
+                const flowInputs = Array.from({length:7}, (_, i) => parseFloat(document.getElementById(`flow-h${i+1}`).value))
+                    .filter(v => Number.isFinite(v) && v > 0);
+                const totalFlow = flowInputs.reduce((a,b) => a+b, 0);
+                const ranges = {
+                    low: [9000,18000],
+                    medium: [18000,27000],
+                    high: [27000,54000]
+                };
+                if (totalFlow > 0) {
+                    const [minFlow,maxFlow] = ranges[severity];
+                    setText('test-total-flow', `${totalFlow.toLocaleString(undefined,{maximumFractionDigits:0})} L/min`);
+                    const relation = totalFlow < minFlow ? 'below' : totalFlow > maxFlow ? 'above' : 'within';
+                    setText('test-total-range', `JOIFF high-risk ${severity} reference: ${minFlow.toLocaleString()}-${maxFlow.toLocaleString()} L/min (${relation} this reference range).`);
+                } else {
+                    setText('test-total-flow', '--');
+                    setText('test-total-range', 'Enter one or more flowing-hydrant readings');
+                }
+
+                setText('test-observed-point', `${observedFlow.toLocaleString()} L/min at ${residualBar.toFixed(1)} bar residual`);
+                setText('test-rating-method-summary', mode === 'manual' ? 'Manual target residual pressure' : (staticBar < 2.8 ? '½ × static pressure (< 2.8 bar)' : '1.4 bar JOIFF general rating reference'));
+                const pressureMargin = residualBar - 1.4;
+                setText('test-pressure-margin', `${pressureMargin >= 0 ? '+' : ''}${pressureMargin.toFixed(1)} bar (${(pressureMargin * 14.5038).toFixed(0)} psi)`);
+                if (totalFlow > 0) {
+                    const [minFlow,maxFlow] = ranges[severity];
+                    const relation = totalFlow < minFlow ? 'below' : totalFlow > maxFlow ? 'above' : 'within';
+                    setText('test-reference-position', `${relation.charAt(0).toUpperCase()+relation.slice(1)} ${severity} Appendix D range`);
+                } else {
+                    setText('test-reference-position', 'No multi-hydrant total entered');
+                }
+
+                setStatus('hydrant-test-status', 'Hydrant test analyzed using the measured pressure drop and JOIFF Appendix E 0.54-power relationship. Reference comparisons are not code-compliance determinations.');
+            } catch (error) {
+                console.error('Hydrant test analysis error:', error);
+                setStatus('hydrant-test-status', `Test analysis error: ${error.message}`);
+            }
+        }
+
+        function calculateAdvancedFireSystem() {
+            try {
+                const standard = document.getElementById('fire-standard').value;
+                const hazard = document.getElementById('fire-hazard').value;
+                const areaInput = parseFloat(document.getElementById('fire-area').value);
+                const areaUnit = document.getElementById('fire-area-unit').value;
+                const pressInput = parseFloat(document.getElementById('fire-pressure').value);
+                const pressUnit = document.getElementById('fire-press-unit').value;
+                const durationMin = parseInt(document.getElementById('fire-duration').value, 10);
+                const elevationM = parseFloat(document.getElementById('fire-elevation').value);
+                const lossBar = parseFloat(document.getElementById('fire-loss').value);
+
+                if (![areaInput, pressInput, durationMin, elevationM, lossBar].every(Number.isFinite) || areaInput <= 0 || pressInput <= 0 || durationMin <= 0 || elevationM < 0 || lossBar < 0) {
+                    setStatus('fire-status', 'Enter valid positive area, pressure and duration values; elevation and loss allowance cannot be negative.');
+                    return;
+                }
+
+                const areaSqFt = areaUnit === 'sqm' ? areaInput * 10.7639 : areaInput;
+
+                // Project heuristics retained for early-stage planning; these are not JOIFF code tables.
+                const hazardFlow = {light:500, oh1:750, oh2:1250, storage_high:1750, eh1:2000, eh2:2750};
+                let gpmTotal = hazardFlow[hazard] ?? 1000;
+                if (standard === 'bnbc') gpmTotal *= 1.10;
+                if (areaSqFt > 50000) gpmTotal *= 1.25;
+                gpmTotal = Math.round(gpmTotal / 25) * 25;
+
+                const m3hTotal = gpmTotal * 0.2271246576;
+                const requiredResidualBar = pressUnit === 'bar' ? pressInput : pressInput / 14.5038;
+                const residualHeadM = requiredResidualBar * 10.19716213;
+                const lossHeadM = lossBar * 10.19716213;
+                const totalHeadM = residualHeadM + elevationM + lossHeadM;
+                const totalHeadBar = totalHeadM / 10.19716213;
+                const dischargePsi = totalHeadBar * 14.5038;
+
+                // Hydraulic power from P = rho*g*Q*H / eta, with Q in m3/s.
+                const assumedEfficiency = 0.75;
+                const qM3s = gpmTotal * 0.003785411784 / 60;
+                const hydraulicKw = (1000 * 9.80665 * qM3s * totalHeadM) / 1000 / assumedEfficiency;
+                const motorKw = Math.max(45, Math.ceil(hydraulicKw / 5) * 5);
+
+                const tankGallons = Math.round(gpmTotal * durationMin);
+                const tankLitres = Math.round(tankGallons * 3.78541);
+
+                const estimatedHydrants = Math.max(2, Math.ceil(gpmTotal / 300));
+
+                // Preliminary header sizing at 4.5 m/s and 1.5× design flow.
+                const designVelocity = 4.5;
+                const overloadGpm = gpmTotal * 1.5;
+                const overloadM3s = overloadGpm * 0.00378541178 / 60;
+                const pipeDiaMm = Math.sqrt((4 * overloadM3s) / (Math.PI * designVelocity)) * 1000;
+
+                let nominalPipeSize = '4" (DN100)';
+                if (pipeDiaMm > 110) nominalPipeSize = '6" (DN150)';
+                if (pipeDiaMm > 160) nominalPipeSize = '8" (DN200)';
+                if (pipeDiaMm > 210) nominalPipeSize = '10" (DN250)';
+
+                document.getElementById('res-standard-title').textContent =
+                    standard === 'bnbc'
+                        ? 'Preliminary Sizing — BNBC/RSC project basis selected'
+                        : 'Preliminary Sizing — NFPA project basis selected';
+                document.getElementById('res-flow').textContent =
+                    `${gpmTotal.toLocaleString()} GPM (${m3hTotal.toFixed(0)} m³/hr)`;
+                document.getElementById('res-head').textContent =
+                    `${totalHeadM.toFixed(0)} m TDH (${dischargePsi.toFixed(0)} PSI discharge basis)`;
+                document.getElementById('res-tdh-basis').textContent =
+                    `${requiredResidualBar.toFixed(1)} bar residual + ${elevationM.toFixed(1)} m rise + ${lossBar.toFixed(1)} bar losses`;
+                document.getElementById('res-tdh-meta').textContent =
+                    `Approx. ${totalHeadBar.toFixed(1)} bar total pressure head; 75% assumed hydraulic efficiency.`;
+                document.getElementById('res-pump-power').textContent =
+                    `${motorKw} kW (${Math.round(motorKw * 1.34102)} HP) — hydraulic estimate ${hydraulicKw.toFixed(1)} kW at 75% assumed efficiency`;
+                document.getElementById('res-tank-size').textContent =
+                    `${tankGallons.toLocaleString()} gal (${tankLitres.toLocaleString()} L)`;
+                document.getElementById('res-hydrant-count').textContent =
+                    `${estimatedHydrants} preliminary outlets`;
+                document.getElementById('res-fire-pipe').textContent =
+                    `${nominalPipeSize} main header`;
+                document.getElementById('res-pipe-note').textContent =
+                    `Calculated diameter ≈ ${pipeDiaMm.toFixed(0)} mm at ${designVelocity} m/s using 1.5× flow check.`;
+
+                // Auto-refresh the JOIFF analyzer only when measured data are complete.
+                const measuredFields = ['fire-test-static','fire-test-residual','fire-test-flow'];
+                const measuredComplete = measuredFields.every(id => {
+                    const value = parseFloat(document.getElementById(id).value);
+                    return Number.isFinite(value) && value > 0;
+                });
+                if (measuredComplete) analyzeHydrantTest();
+
+                setStatus('fire-status', 'Preliminary sizing complete. Pump head now includes residual pressure, elevation rise and entered loss allowance. Verify all design values against the adopted code, hydraulic calculation and AHJ requirements.');
+            } catch (error) {
+                console.error('Fire calculation error:', error);
+                setStatus('fire-status', `Calculation error: ${error.message}`);
+            }
+        }
+
+        function hydrantResultText() {
+            const pairs = [
+                ['JOIFF Rating Pressure', document.getElementById('test-rating-pressure')?.textContent],
+                ['Estimated Flow at Rating', document.getElementById('test-estimated-flow')?.textContent],
+                ['Static-to-Residual Drop', document.getElementById('test-pressure-drop')?.textContent],
+                ['Estimated Volume Used', document.getElementById('test-volume-used')?.textContent],
+                ['Town-Main Reference', document.getElementById('test-town-reference')?.textContent],
+                ['High-Capacity Total Flow', document.getElementById('test-total-flow')?.textContent],
+                ['Observed Test Point', document.getElementById('test-observed-point')?.textContent],
+                ['Rating Method', document.getElementById('test-rating-method-summary')?.textContent],
+                ['Pressure Margin to 1.4 bar', document.getElementById('test-pressure-margin')?.textContent],
+                ['Reference Flow Position', document.getElementById('test-reference-position')?.textContent]
+            ].filter(([,v]) => v && v.trim() && v.trim() !== '--');
+            const location = document.getElementById('fire-test-location')?.value?.trim() || 'Not entered';
+            const hydrant = document.getElementById('fire-test-id')?.value?.trim() || 'Not entered';
+            return ['JOIFF 2004 HYDRANT FLOW & PRESSURE TEST REPORT', `Location: ${location}`, `Hydrant: ${hydrant}`, '', ...pairs.map(([k,v]) => `${k}: ${v}`), '', 'Source: JOIFF Guideline for Flow and Pressure Testing of Hydrants, June 2004.', 'Residual pressure note: JOIFF generally recommends retaining 1.4 bar (20 psi) at hydrants when delivering fire flows.'].join('\n');
+        }
+
+        async function copyHydrantResults() {
+            try {
+                await navigator.clipboard.writeText(hydrantResultText());
+                setStatus('hydrant-test-status', 'JOIFF test results copied to clipboard.');
+            } catch {
+                setStatus('hydrant-test-status', 'Clipboard access is unavailable in this browser.');
+            }
+        }
+
+        function printHydrantReport() {
+            const get = id => document.getElementById(id);
+            const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            const location = get('fire-test-location')?.value?.trim() || 'Not entered';
+            const hydrant = get('fire-test-id')?.value?.trim() || 'Not entered';
+            const staticP = get('fire-test-static')?.value || '';
+            const residualP = get('fire-test-residual')?.value || '';
+            const flow = get('fire-test-flow')?.value || '';
+            const duration = get('fire-test-duration')?.value || '';
+            const fields = [
+                ['JOIFF Rating Pressure', get('test-rating-pressure')?.textContent], ['Estimated Flow at Rating', get('test-estimated-flow')?.textContent],
+                ['Static-to-Residual Drop', get('test-pressure-drop')?.textContent], ['Estimated Volume Used', get('test-volume-used')?.textContent],
+                ['Town-Main Reference', get('test-town-reference')?.textContent], ['High-Capacity Total Flow', get('test-total-flow')?.textContent],
+                ['Observed Test Point', get('test-observed-point')?.textContent], ['Rating Method', get('test-rating-method-summary')?.textContent],
+                ['Pressure Margin to 1.4 bar', get('test-pressure-margin')?.textContent], ['Reference Flow Position', get('test-reference-position')?.textContent]
+            ];
+            const popup = window.open('', '_blank', 'width=900,height=900');
+            if (!popup) { setStatus('hydrant-test-status', 'Pop-up blocked. Allow pop-ups to print the separate JOIFF test report.'); return; }
+            const cards = [['Static Pressure', `${staticP} bar`],['Residual Pressure', `${residualP} bar`],['Observed Flow', `${flow} L/min`],['Test Duration', `${duration} s`], ...fields].map(([k,v]) => `<div class="card"><div class="k">${esc(k)}</div><div class="v">${esc(v || '--')}</div></div>`).join('');
+            popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>JOIFF Hydrant Test Report</title><style>body{font-family:Arial,sans-serif;color:#111;margin:28px;line-height:1.45}h1{font-size:22px;margin:0 0 4px}h2{font-size:15px;margin:22px 0 8px;border-bottom:1px solid #aaa;padding-bottom:5px}.meta{color:#444;font-size:12px;margin-bottom:14px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{border:1px solid #bbb;border-radius:6px;padding:10px}.k{font-size:10px;text-transform:uppercase;color:#555;letter-spacing:.06em}.v{font-size:14px;font-weight:700;margin-top:2px}.note{margin-top:16px;border-left:3px solid #777;padding:9px 10px;background:#f5f5f5;font-size:11px}.small{font-size:11px;color:#444;margin-top:15px}@media print{body{margin:15mm}}</style></head><body><h1>JOIFF 2004 Hydrant Flow & Pressure Test Report</h1><div class="meta">Location: ${esc(location)}<br>Hydrant: ${esc(hydrant)}<br>Generated from the ElectraLab hydrant test analyzer</div><h2>Measured Test Data</h2><div class="grid">${cards}</div><div class="note"><strong>Residual pressure reference:</strong> JOIFF 2004 generally recommends retaining 1.4 bar (20 psi) at hydrants when delivering fire flows. Where static pressure is below 2.8 bar (40 psi), the guideline says to rate at one-half of static pressure.</div><div class="small">Source: The JOIFF Standard, Guideline for Flow and Pressure Testing of Hydrants, June 2004. This report is a calculation aid and does not replace field testing, local authority requirements, adopted codes, insurer requirements, or hydraulic analysis.</div><script>window.onload=function(){window.focus();window.print();}<\/script></body></html>`);
+            popup.document.close();
+        }
+
+        function resultText(scope) {
+            const root = scope === 'compressor'
+                ? document.getElementById('view-compressor')
+                : document.getElementById('view-fire-system');
+            const title = root.querySelector('.page-title').textContent.trim();
+            const rows = [...root.querySelectorAll('.result-block')].map(block => {
+                const label = block.querySelector('.result-main > span:first-child');
+                const valueNode = block.querySelector('.result-main > span:last-child, .result-main > div > span');
+                return label && valueNode
+                    ? `${label.textContent.trim()} ${valueNode.textContent.trim()}`
+                    : '';
+            }).filter(Boolean);
+            const testResults = scope === 'fire' ? [...root.querySelectorAll('.test-result')].map(card => {
+                const k = card.querySelector('.k');
+                const v = card.querySelector('.v');
+                return k && v ? `${k.textContent.trim()}: ${v.textContent.trim()}` : '';
+            }).filter(Boolean) : [];
+            return `${title}\n\n${rows.join('\n')}${testResults.length ? '\n\nHydrant Flow-Test Analysis\n' + testResults.join('\n') : ''}`;
+        }
+
+        async function copyResults(scope) {
+            try {
+                await navigator.clipboard.writeText(resultText(scope));
+                setStatus(scope === 'compressor' ? 'compressor-status' : 'fire-status', 'Results copied to clipboard.');
+            } catch {
+                setStatus(scope === 'compressor' ? 'compressor-status' : 'fire-status', 'Clipboard access is unavailable in this browser.');
+            }
+        }
+
+        function saveInputs() {
+            try {
+                const ids = ['industry-type','industry-scale','air-flow','flow-unit','air-pressure',
+                    'pressure-unit','design-margin','duty-mode','temp-condition'];
+                const data = {};
+                ids.forEach(id => data[id] = document.getElementById(id).value);
+                localStorage.setItem('electralab-compressor', JSON.stringify(data));
+            } catch {}
+        }
+
+        function restoreInputs() {
+            try {
+                const data = JSON.parse(localStorage.getItem('electralab-compressor') || 'null');
+                if (!data) return;
+                Object.entries(data).forEach(([id, value]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = value;
+                });
+                updateEstimator();
+            } catch {}
+        }
+
+        ['industry-type','industry-scale'].forEach(id =>
+            document.getElementById(id).addEventListener('input', updateEstimator));
+
+        ['air-flow','flow-unit','air-pressure','pressure-unit','design-margin','duty-mode','temp-condition']
+            .forEach(id => {
+                document.getElementById(id).addEventListener('change', saveInputs);
+                document.getElementById(id).addEventListener('input', saveInputs);
+            });
+
+        restoreInputs();
+
+        // Explicit global API for browsers that restrict inline-handler name resolution.
+        window.switchView = switchView;
+        window.cardKey = cardKey;
+        window.updateEstimator = updateEstimator;
+        window.useEstimate = useEstimate;
+        window.calculateCompressor = calculateCompressor;
+        window.clearCompressor = clearCompressor;
+        window.autoSetDuration = autoSetDuration;
+        window.updateStandardDefaults = updateStandardDefaults;
+        window.clearFireForm = clearFireForm;
+        window.calculateAdvancedFireSystem = calculateAdvancedFireSystem;
+        window.analyzeHydrantTest = analyzeHydrantTest;
+        window.clearHydrantTest = clearHydrantTest;
+        window.copyHydrantResults = copyHydrantResults;
+        window.printHydrantReport = printHydrantReport;
+        window.updateHydrantRatingPressure = updateHydrantRatingPressure;
+        window.copyResults = copyResults;
+
+        // Dark / light mode
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeOverlay = document.getElementById('theme-transition-overlay');
+
+        function applyTheme(theme, animate = false) {
+            const isLight = theme === 'light';
+            if (animate && themeOverlay) {
+                themeOverlay.style.setProperty('--theme-x', '50%');
+                themeOverlay.style.setProperty('--theme-y', '0%');
+                themeOverlay.classList.remove('active');
+                void themeOverlay.offsetWidth;
+                themeOverlay.classList.add('active');
+                window.setTimeout(() => document.body.classList.toggle('theme-light', isLight), 90);
+                window.setTimeout(() => themeOverlay.classList.remove('active'), 720);
+            } else {
+                document.body.classList.toggle('theme-light', isLight);
+            }
+            if (themeToggle) {
+                themeToggle.textContent = isLight ? '☀' : '☾';
+                themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+                themeToggle.title = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+            }
+            try { localStorage.setItem('electralab-theme', theme); } catch {}
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const nextTheme = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+                applyTheme(nextTheme, true);
+            });
+        }
+
+        let savedTheme = 'dark';
+        try { savedTheme = localStorage.getItem('electralab-theme') || 'dark'; } catch {}
+        applyTheme(savedTheme, false);
+
+        // One-time page initialization. Button actions use their explicit inline handlers above.
+        document.addEventListener('DOMContentLoaded', () => {
+            // Give the compressor a useful initial example so the module visibly works immediately.
+            const flow = getRequiredElement('air-flow');
+            if (flow && !flow.value) flow.value = '3.5';
+            updateHydrantRatingPressure();
+            const staticField = document.getElementById('fire-test-static');
+            if (staticField) staticField.addEventListener('input', updateHydrantRatingPressure);
+        });
+    </script>
+</body>
+</html>
