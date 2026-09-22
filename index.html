@@ -2319,15 +2319,26 @@ function calculatePFI(){
 
 
 <script>
-/* ========================= GEMINI ELECTRA AI ========================= */
-const ELECTRA_GEMINI_API_KEY = "AQ.Ab8RN6KDB9rusYxUioDgxV8bNO-Q6VlG-Rqufp8AqchRE75TAA";
-const ELECTRA_GEMINI_MODEL = "gemini-3.5-flash";
-const ELECTRA_GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/" +
-  ELECTRA_GEMINI_MODEL + ":generateContent";
+/* ========================= ELECTRA AI — CLOUDFLARE AGENT ========================= */
+/*
+  Only this AI integration block was replaced.
+  Backend: https://electra-ai.sabbirac.workers.dev
+  Each browser visit receives a new random Agent instance name.
+  No localStorage/sessionStorage is used for conversation history.
+*/
+const ELECTRA_CLOUDFLARE_WORKER = "https://electra-ai.sabbirac.workers.dev";
+const ELECTRA_AGENT_NAME = "electra-chat";
+const ELECTRA_SESSION_ID = crypto.randomUUID();
+const ELECTRA_SESSION_SECONDS = 10 * 60;
 
-const electraAIHistory = [];
+let electraAISocket = null;
 let electraAIRequestInProgress = false;
+let electraAISessionEnded = false;
+let electraAIRequestId = null;
+let electraAIResponseText = "";
+let electraAIResponseMessage = null;
+let electraAIHistory = [];
+let electraAIAbuseCount = 0;
 
 function aiEscape(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({
@@ -2341,18 +2352,19 @@ function aiFormat(value) {
 
 function appendElectraMessage(text, type) {
   const chat = document.getElementById("aiChat");
-  if (!chat) return;
+  if (!chat) return null;
   const msg = document.createElement("div");
   msg.className = "ai-msg " + (type === "user" ? "ai-user" : "ai-bot");
   msg.innerHTML = aiFormat(text);
   chat.appendChild(msg);
   chat.scrollTop = chat.scrollHeight;
+  return msg;
 }
 
 function showElectraThinking() {
   const chat = document.getElementById("aiChat");
   if (!chat) return null;
-
+  hideElectraThinking();
   const msg = document.createElement("div");
   msg.className = "ai-msg ai-bot ai-thinking";
   msg.id = "electraThinking";
@@ -2374,55 +2386,196 @@ function isBasicGreeting(text) {
   return /^(hi|hello|hey|hii|helo|good morning|good afternoon|good evening|good night)[!.,\s]*$/i.test(text.trim());
 }
 
-function isCreatorQuestion(text) {
-  return /\b(who|what)\b.*\b(creator|created|developer|developed|maker|made|author|owner)\b/i.test(text) ||
-         /\b(creator|developer|developed|maker|made|author|owner)\b.*\b(electra|you|this ai|this assistant)\b/i.test(text) ||
-         /\bwho made you\b/i.test(text) ||
-         /\bwho created you\b/i.test(text) ||
-         /\bwho developed you\b/i.test(text);
+function fixedElectraReply(text) {
+  const q = text.trim().toLowerCase().replace(/[?!.]+$/g, "").trim();
+
+  if (/^what can you do$/.test(q))
+    return "I can help you solve engineering and technical problems.";
+
+  if (/^who owns you$/.test(q))
+    return "My developer Engineer Sabbir Ahamed (B.Sc in EEE).";
+
+  if (/^(what('?s| is) your name)$/.test(q))
+    return "Electra AI created by Sabbir Ahamed.";
+
+  if (/^who created you$/.test(q))
+    return "Sabbir Ahamed.";
+
+  if (/^who is your developer$/.test(q))
+    return "Sabbir Ahamed.";
+
+  if (/^who made you$/.test(q))
+    return "I was created by Sabbir Ahamed.";
+
+  if (/^are you chatgpt$/.test(q))
+    return "No. I’m Electra AI, an engineering assistant created by Sabbir Ahamed.";
+
+  return null;
 }
 
+/*
+  The actual moderation vocabulary is intentionally not embedded here.
+  This lightweight hook catches common explicit English/Bangla profanity
+  categories without publishing a list of offensive terms in the page.
+  The Cloudflare server remains the authoritative moderation layer.
+*/
 function containsAbuseOrVulgarity(text) {
-  const normalized = text.toLowerCase();
-  const patterns = [
-    /\bfuck\b/, /\bfucking\b/, /\bshit\b/, /\basshole\b/, /\bbitch\b/,
-    /\bmotherf+cker\b/, /\bmotherfucker\b/, /\bdick\b/, /\bcunt\b/,
-    /\bpiss\b/, /\bslut\b/, /\bwhore\b/, /\bidiot\b/, /\bstupid\b/,
-    /\bson of a bitch\b/,
-    /\bgali\b/, /\bgalagali\b/, /\bharami\b/, /\bharaami\b/,
-    /\bshala\b/, /\bsala\b/, /\bbaal\b/, /\bbal\b/,
-    /\bbokachoda\b/, /\bbokachuda\b/, /\bchod\b/, /\bchoda\b/,
-    /\bkhanki\b/, /\bmagi\b/, /\bmaghi\b/, /\bkutti\b/,
-    /\bkutta\b/, /\bsuorer\b/, /\bshuar\b/, /\bbanchod\b/,
-    /\bmadarchod\b/, /\bmaderchod\b/,
-    /গালি|গালাগালি|হারামি|হারামীর|শালা|বাল|বোকাচোদা|বোকাচুদা|চোদ|চোদা|চোদনা|খানকি|মাগি|মাগী|কুত্তি|কুত্তা|শুয়োর|শুয়োর|বাঞ্চোদ|মাদারচোদ/u
+  const normalized = text
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/(.)\1{4,}/g, "$1$1");
+
+  const genericPatterns = [
+    /\bf+u+c+k+\b/i,
+    /\bs+h+i+t+\b/i,
+    /\ba+s+s+h+o+l+e+\b/i,
+    /\bb+i+t+c+h+\b/i
   ];
-  return patterns.some(pattern => pattern.test(normalized));
+
+  return genericPatterns.some(p => p.test(normalized));
 }
 
-async function sendElectraAI() {
+function getElectraSocketUrl() {
+  const base = ELECTRA_CLOUDFLARE_WORKER.replace(/^http:/i, "ws:").replace(/^https:/i, "wss:");
+  return base + "/agents/" + encodeURIComponent(ELECTRA_AGENT_NAME) + "/" + encodeURIComponent(ELECTRA_SESSION_ID);
+}
+
+function connectElectraAgent() {
+  if (electraAISessionEnded) return;
+
+  try {
+    electraAISocket = new WebSocket(getElectraSocketUrl());
+  } catch (error) {
+    console.error("Electra AI WebSocket:", error);
+    appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again later.", "bot");
+    return;
+  }
+
+  electraAISocket.addEventListener("open", () => {
+    if (!electraAISessionEnded) {
+      console.info("Electra AI session connected.");
+    }
+  });
+
+  electraAISocket.addEventListener("message", handleElectraSocketMessage);
+
+  electraAISocket.addEventListener("error", () => {
+    if (!electraAISessionEnded) {
+      hideElectraThinking();
+      appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again.", "bot");
+    }
+  });
+
+  electraAISocket.addEventListener("close", () => {
+    if (!electraAISessionEnded && !electraAIRequestInProgress) {
+      electraAISocket = null;
+    }
+  });
+}
+
+function handleElectraSocketMessage(event) {
+  let packet;
+  try {
+    packet = JSON.parse(event.data);
+  } catch {
+    return;
+  }
+
+  if (packet.type === "cf_agent_use_chat_response") {
+    const body = packet.body;
+
+    if (body) {
+      try {
+        const chunk = JSON.parse(body);
+
+        if (chunk.type === "text-delta" || chunk.type === "text") {
+          const delta = chunk.delta ?? chunk.text ?? "";
+          if (delta) {
+            electraAIResponseText += delta;
+            renderElectraStreamingText();
+          }
+        }
+      } catch {
+        // Some protocol responses may contain plain text.
+        if (typeof body === "string") {
+          electraAIResponseText += body;
+          renderElectraStreamingText();
+        }
+      }
+    }
+
+    if (packet.done) {
+      finishElectraResponse(!!packet.error);
+    }
+    return;
+  }
+
+  if (packet.type === "cf_agent_chat_messages") {
+    // Server-authoritative message snapshot. We only retain it for this
+    // temporary in-memory session; nothing is written to browser storage.
+    return;
+  }
+}
+
+function renderElectraStreamingText() {
+  hideElectraThinking();
+
+  if (!electraAIResponseMessage) {
+    electraAIResponseMessage = appendElectraMessage("", "bot");
+  }
+
+  if (electraAIResponseMessage) {
+    electraAIResponseMessage.innerHTML = aiFormat(electraAIResponseText);
+    const chat = document.getElementById("aiChat");
+    if (chat) chat.scrollTop = chat.scrollHeight;
+  }
+}
+
+function finishElectraResponse(hasError) {
+  hideElectraThinking();
+
+  if (hasError || !electraAIResponseText.trim()) {
+    if (electraAIResponseMessage) electraAIResponseMessage.remove();
+    appendElectraMessage(
+      "I’m unable to process that request at the moment. Please try again.",
+      "bot"
+    );
+  } else {
+    electraAIHistory.push({
+      role: "assistant",
+      text: electraAIResponseText
+    });
+  }
+
+  electraAIRequestInProgress = false;
+  electraAIRequestId = null;
+  electraAIResponseText = "";
+  electraAIResponseMessage = null;
+
+  const button = document.querySelector(".ai-input button");
+  if (button && !electraAISessionEnded) button.disabled = false;
+
   const input = document.getElementById("aiPrompt");
-  if (!input || electraAIRequestInProgress) return;
+  if (input && !electraAISessionEnded) input.focus();
+}
 
-  const question = input.value.trim();
-  if (!question) return;
+function buildElectraMessages() {
+  return electraAIHistory.map((item, index) => ({
+    id: "electra-" + ELECTRA_SESSION_ID + "-" + index,
+    role: item.role,
+    parts: [{ type: "text", text: item.text }]
+  }));
+}
 
-  appendElectraMessage(question, "user");
-  input.value = "";
-
-  // Instant local responses avoid an unnecessary network request.
-  if (containsAbuseOrVulgarity(question)) {
-    appendElectraMessage("কানের নিচে একটা খাবা?", "bot");
+function sendElectraToAgent(question) {
+  if (electraAISessionEnded) {
+    appendElectraMessage("This session has ended. Refresh the page to start a new Electra AI session.", "bot");
     return;
   }
 
-  if (isBasicGreeting(question)) {
-    appendElectraMessage("Hi. How may I assist you?", "bot");
-    return;
-  }
-
-  if (isCreatorQuestion(question)) {
-    appendElectraMessage("SABBIR AHAMED", "bot");
+  if (!electraAISocket || electraAISocket.readyState !== WebSocket.OPEN) {
+    appendElectraMessage("Electra AI is connecting. Please try again in a moment.", "bot");
     return;
   }
 
@@ -2431,67 +2584,128 @@ async function sendElectraAI() {
   if (button) button.disabled = true;
 
   showElectraThinking();
+  electraAIResponseText = "";
+  electraAIResponseMessage = null;
 
   electraAIHistory.push({
     role: "user",
-    parts: [{ text: question }]
+    text: question
   });
 
-  const systemInstruction = `You are Electra AI by SABBIR AHAMED.`
+  electraAIRequestId = crypto.randomUUID();
 
-  try {
-    const response = await fetch(ELECTRA_GEMINI_ENDPOINT, {
+  const messages = buildElectraMessages();
+
+  electraAISocket.send(JSON.stringify({
+    type: "cf_agent_use_chat_request",
+    id: electraAIRequestId,
+    init: {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": ELECTRA_GEMINI_API_KEY
-      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents: electraAIHistory,
-        generationConfig: {
-          temperature: 0.15,
-          maxOutputTokens: 800
-        }
+        messages
       })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Electra Gemini API error:", data);
-      throw new Error(data?.error?.message || `Gemini API request failed (${response.status}).`);
     }
+  }));
+}
 
-    const answer = data?.candidates?.[0]?.content?.parts
-      ?.map(part => part.text || "")
-      .join("")
-      .trim();
+function sendElectraAI() {
+  const input = document.getElementById("aiPrompt");
+  if (!input || electraAIRequestInProgress || electraAISessionEnded) return;
 
-    if (!answer) throw new Error("No response was returned by Gemini.");
+  const question = input.value.trim();
+  if (!question) return;
 
-    electraAIHistory.push({
-      role: "model",
-      parts: [{ text: answer }]
-    });
+  appendElectraMessage(question, "user");
+  input.value = "";
 
-    hideElectraThinking();
-    appendElectraMessage(answer, "bot");
-  } catch (error) {
-    hideElectraThinking();
+  const fixed = fixedElectraReply(question);
+  if (fixed) {
+    appendElectraMessage(fixed, "bot");
+    return;
+  }
+
+  if (containsAbuseOrVulgarity(question)) {
+    electraAIAbuseCount++;
     appendElectraMessage(
-      "I’m unable to process that request at the moment. Please try again.",
+      electraAIAbuseCount > 1
+        ? "Please keep the language respectful."
+        : "Please keep the language respectful.",
       "bot"
     );
-    console.error("Electra AI:", error);
-  } finally {
-    electraAIRequestInProgress = false;
-    if (button) button.disabled = false;
-    input.focus();
+    return;
   }
-}
-</script>
 
+  if (isBasicGreeting(question)) {
+    appendElectraMessage("Hi. How may I assist you?", "bot");
+    return;
+  }
+
+  sendElectraToAgent(question);
+}
+
+function endElectraAISession() {
+  if (electraAISessionEnded) return;
+
+  electraAISessionEnded = true;
+  electraAIRequestInProgress = false;
+  hideElectraThinking();
+
+  if (electraAISocket) {
+    try { electraAISocket.close(1000, "Session expired"); } catch {}
+  }
+
+  electraAISocket = null;
+
+  const input = document.getElementById("aiPrompt");
+  const button = document.querySelector(".ai-input button");
+  if (input) input.disabled = true;
+  if (button) button.disabled = true;
+
+  appendElectraMessage(
+    "This 10-minute Electra AI session has ended. Refresh the page to start a new temporary session.",
+    "bot"
+  );
+}
+
+function startElectraSessionTimer() {
+  let remaining = ELECTRA_SESSION_SECONDS;
+
+  const timer = setInterval(() => {
+    remaining = Math.max(0, remaining - 1);
+
+    const timerElement =
+      document.getElementById("electraSessionTimer") ||
+      document.getElementById("aiSessionTimer");
+
+    if (timerElement) {
+      const minutes = String(Math.floor(remaining / 60)).padStart(2, "0");
+      const seconds = String(remaining % 60).padStart(2, "0");
+      timerElement.textContent = minutes + ":" + seconds;
+    }
+
+    if (remaining === 0) {
+      clearInterval(timer);
+      endElectraAISession();
+    }
+  }, 1000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("aiPrompt");
+
+  if (input) {
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendElectraAI();
+      }
+    });
+  }
+
+  connectElectraAgent();
+  startElectraSessionTimer();
+});
+</script>
 
 <script>
 /* Single-line diagram editor: self-contained SVG model and event delegation. */
