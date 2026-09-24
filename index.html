@@ -230,6 +230,30 @@
     line-height:1.9;
 }
 .live-result b { color:#00ffff; }
+
+/* Breaker result */
+.result-table{width:100%;border-collapse:collapse}
+.result-table td{padding:9px 6px;border-bottom:1px solid rgba(148,163,184,.22);vertical-align:top;overflow-wrap:anywhere}
+.result-table td:first-child{width:42%;opacity:.8;font-size:13px}
+.result-table td:last-child{font-weight:600}
+.br-recommend{margin-top:18px;padding:14px;text-align:center;font-size:clamp(18px,5.4vw,30px);font-weight:900;line-height:1.25;border:3px solid currentColor;border-radius:12px;overflow-wrap:anywhere}
+.br-note{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5;border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.1)}
+
+/* Power factor improvement result (phone-friendly) */
+.pfi-hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pfi-tile{padding:12px;border-radius:12px;background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.25);min-width:0}
+.pfi-tile span{display:block;font-size:12px;line-height:1.3;opacity:.8}
+.pfi-tile b{display:block;margin-top:4px;font-size:22px;line-height:1.2;overflow-wrap:anywhere}
+.pfi-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 12px;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.22);line-height:1.4}
+.pfi-row:last-child{border-bottom:0}
+.pfi-row span{font-size:13px;opacity:.8}
+.pfi-row b{text-align:right;overflow-wrap:anywhere;margin-left:auto}
+.pfi-h{margin:18px 0 10px;font-weight:700;line-height:1.4}
+.pfi-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.pfi-step{padding:6px 12px 4px;border-radius:12px;border:1px solid rgba(148,163,184,.3);background:rgba(2,6,23,.35);min-width:0}
+.pfi-step-head{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,255,255,.3)}
+.pfi-note{margin-top:12px;font-size:12px;line-height:1.5;opacity:.8}
+body.light-theme .pfi-step{background:rgba(255,255,255,.75)}
 .hidden-field { display:none; }
 
 /* Resistor color bands */
@@ -657,8 +681,10 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
   .calc-action{margin-top:15px}
   .live-result{padding:13px;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
   .live-result .result-value{overflow-wrap:anywhere}
-  .result-box,.result-table{max-width:100%;overflow-x:auto;display:block}
-  .result-table{font-size:12px}
+  .result-box{max-width:100%;overflow-x:auto}
+  .result-table{font-size:13px}
+  .pfi-tile b{font-size:19px}
+  .pfi-steps{grid-template-columns:1fr}
   .ai-input{flex-direction:column}
   .ai-input .calc-action{width:100%!important}
   .ai-chat{height:300px}
@@ -1148,6 +1174,7 @@ window.MathJax = {
 
 <section class="app-panel" id="panel-breaker">
 <div class="panel-inner">
+<a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
 <h2>Breaker Calculator</h2>
 <p class="panel-subtitle">Automatic current calculation and breaker recommendation.</p>
 <div class="form-grid">
@@ -1517,13 +1544,18 @@ function toggleTheme(){
 </script>
 
 <script>
+const LV_MCB=[6,10,13,16,20,25,32,40,50,63,80,100,125];
+const LV_MCCB=[16,20,25,32,40,50,63,80,100,125,160,200,250,320,400,500,630,800,1000,1250,1600];
+const LV_ACB=[800,1000,1250,1600,2000,2500,3200,4000,5000,6300];
+const MV_VCB=[630,800,1250,1600,2000,2500,3150,4000];
+const HV_CB=[1250,1600,2000,2500,3150,4000];
+function nextRating(list,amps){return list.find(x=>x>=amps)||null;}
 function calcBreaker(){
  let sys=val("brSys")||0, V=val("brV")||0, kw=val("brKW"), A=val("brA");
  let load=document.getElementById("brLoad").value;
  let pfDefaults={"Motor":0.85,"Pump":0.85,"Compressor":0.85,"Fan":0.85,"Transformer":0.9,"Welding Machine":0.75,"Lighting":0.95,"Resistive Heater":1,"HVAC":0.85,"Socket Load":0.8,"Electronics":0.9};
  let pf=val("brPF")||pfDefaults[load]||0.8;
  let eff=(val("brEff")||90)/100;
- let phase="Single Phase";
  if(sys===0){
    if(V>1000) sys=3;
    else if(V<240) sys=2;
@@ -1535,29 +1567,51 @@ function calcBreaker(){
  if(!A && kw){let P=kw*1000; A=sys==1?P/V:(sys==3?P/(Math.sqrt(3)*V*pf*eff):P/(V*pf*eff));}
  if(!A){document.getElementById("breakerResult").innerHTML="Enter power or current";return;}
  let margins={"Motor":1.25,"Pump":1.25,"Compressor":1.3,"Transformer":1.3,"Welding Machine":1.3,"HVAC":1.25,"Lighting":1.15,"Resistive Heater":1.1,"Socket Load":1.2,"Electronics":1.15,"Fan":1.25};
- let design=A*(margins[load]||1.15);
- let mcb=[6,10,13,16,20,25,32,40,50,63,80,100,125];
- let mccb=[16,20,25,32,40,50,63,80,100,125,160,200,250,320,400,500,630,800,1000];
+ let marginFactor=margins[load]||1.15;
+ let design=A*marginFactor;
  let heavyLoads=["Motor","Pump","Compressor","Transformer","HVAC"];
  let weldingCanUseMcb=(load==="Welding Machine" && design<=63);
  let deviceNeedsMccb=(design>63||heavyLoads.includes(load));
- let std=deviceNeedsMccb?mccb:mcb;
- let br=std.find(x=>x>=design)||std[std.length-1];
+ let voltageClass=V>36000?"High Voltage":(V>1000?"Medium Voltage":"Low Voltage");
+
+ /* Pick the device family and its standard rating ladder */
+ let type,list;
+ if(voltageClass==="Medium Voltage"){type="VCB";list=MV_VCB;}
+ else if(voltageClass==="High Voltage"){type="HV Circuit Breaker / SF6 Breaker";list=HV_CB;}
+ else if(!deviceNeedsMccb){type="MCB";list=LV_MCB;}
+ else if(design<=LV_MCCB[LV_MCCB.length-1]){type="MCCB";list=LV_MCCB;}
+ else {type="ACB";list=LV_ACB;}
+
+ let br=nextRating(list,design);
+ let finalText, note="";
+ if(br!==null){
+   finalText=type+" "+br+"A";
+ }else{
+   /* Above the largest standard single device: split into parallel feeders */
+   let maxR=list[list.length-1];
+   let n=Math.ceil(design/maxR);
+   let each=nextRating(list,design/n);
+   finalText=n+" × "+type+" "+each+"A";
+   note=`Design current (${fmt(design)} A) exceeds the largest standard ${type} rating (${maxR} A). Split the load into ${n} parallel feeders, or use a higher supply voltage. Verify equal current sharing.`;
+ }
+
  let alternate="";
  if(weldingCanUseMcb){
-   let mcbSize=mcb.find(x=>x>=design)||mcb[mcb.length-1];
-   let mccbSize=mccb.find(x=>x>=design)||mccb[mccb.length-1];
+   let mcbSize=nextRating(LV_MCB,design)||LV_MCB[LV_MCB.length-1];
+   let mccbSize=nextRating(LV_MCCB,design)||LV_MCCB[LV_MCCB.length-1];
    alternate=`MCB ${mcbSize}A C/D Curve or MCCB ${mccbSize}A`;
+ }else if(type==="MCCB" && design>1000){
+   let acbSize=nextRating(LV_ACB,design);
+   if(acbSize) alternate=`ACB ${acbSize}A`;
  }
- let voltageClass=V>36000?"High Voltage":(V>1000?"Medium Voltage":"Low Voltage");
- let type;
- if(voltageClass==="Medium Voltage") type="VCB";
- else if(voltageClass==="High Voltage") type="HV Circuit Breaker / SF6 Breaker";
- else type=(br>63||heavyLoads.includes(load))?"MCCB":"MCB";
- let curve=voltageClass!=="Low Voltage"?"Protection Relay (Overcurrent/Earth Fault)":(["Motor","Pump","Compressor","Transformer","Welding Machine","Fan"].includes(load)?"D Curve":"B/C Curve");
+
+ let curve;
+ if(voltageClass!=="Low Voltage") curve="Protection Relay (Overcurrent/Earth Fault)";
+ else if(type==="ACB") curve="Electronic trip unit (LSI / LSIG)";
+ else curve=["Motor","Pump","Compressor","Transformer","Welding Machine","Fan"].includes(load)?"D Curve":"B/C Curve";
  let poles=sys==3?"3P / 4P":(sys==2?"1P+N / 2P":"DC Pole");
- let final=(voltageClass!=="Low Voltage"?type:type)+" "+br+"A";
- document.getElementById("breakerResult").innerHTML=`<table class="result-table"><tr><td>Load Type</td><td>${load}</td></tr><tr><td>Voltage Class</td><td>${voltageClass}</td></tr><tr><td>System</td><td>${sys==3?"Three Phase":sys==2?"Single Phase":"DC"}</td></tr><tr><td>Calculated Current</td><td>${fmt(A)} A</td></tr><tr><td>Power Factor</td><td>${pf}</td></tr><tr><td>Safety Margin</td><td>${((margins[load]||1.15)-1)*100}%</td></tr><tr><td>Design Current</td><td>${fmt(design)} A</td></tr><tr><td>Protection</td><td>${type}</td></tr><tr><td>Trip / Protection</td><td>${curve}</td></tr><tr><td>Poles</td><td>${poles}</td></tr><tr><td>Breaking Capacity</td><td>Verify fault level</td></tr>${alternate?`<tr><td>Protection Options</td><td>${alternate}</td></tr>`:""}</table><div style="margin-top:20px;padding:15px;text-align:center;font-size:32px;font-weight:900;border:3px solid currentColor;"><b>RECOMMENDED BREAKER: ${final}</b></div>`;
+ let marginPct=Math.round((marginFactor-1)*100);
+ document.getElementById("breakerResult").innerHTML=`<table class="result-table"><tr><td>Load Type</td><td>${load}</td></tr><tr><td>Voltage Class</td><td>${voltageClass}</td></tr><tr><td>System</td><td>${sys==3?"Three Phase":sys==2?"Single Phase":"DC"}</td></tr><tr><td>Calculated Current</td><td>${fmt(A)} A</td></tr><tr><td>Power Factor</td><td>${pf}</td></tr><tr><td>Safety Margin</td><td>${marginPct}%</td></tr><tr><td>Design Current</td><td>${fmt(design)} A</td></tr><tr><td>Protection</td><td>${type}</td></tr><tr><td>Trip / Protection</td><td>${curve}</td></tr><tr><td>Poles</td><td>${poles}</td></tr><tr><td>Breaking Capacity</td><td>Verify fault level</td></tr>${alternate?`<tr><td>Protection Options</td><td>${alternate}</td></tr>`:""}</table>${note?`<div class="br-note">${note}</div>`:""}<div class="br-recommend">RECOMMENDED BREAKER: ${finalText}</div>`;
 }
 </script>
 
@@ -2258,17 +2312,36 @@ function pfiSuggestedSteps(total,loadKW){
     return steps.filter(step=>step>0);
 }
 function pfiStandardBreaker(current){
-    const standard=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000];
-    const rating=standard.find(size=>size>=current)||standard[standard.length-1];
-    return `${rating} A ${rating>63?"MCCB":"MCB"}`;
+    const mccb=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600];
+    const acb=[2000,2500,3200,4000,5000,6300];
+    const rating=mccb.find(size=>size>=current);
+    if(rating) return `${rating} A ${rating>63?"MCCB":"MCB"}`;
+    const big=acb.find(size=>size>=current);
+    return big?`${big} A ACB`:"Above 6300 A – split step";
+}
+function pfiRow(label,value){
+    return `<div class="pfi-row"><span>${label}</span><b>${value}</b></div>`;
 }
 function pfiStepPlan(steps,V,phases){
     const phaseFactor=phases===3?Math.sqrt(3):1;
-    return steps.map((step,index)=>{
-        const nominalCurrent=step*1000/(phaseFactor*V);
+    /* group consecutive identical steps so the list stays short on phones */
+    const groups=[];
+    steps.forEach((step,i)=>{
+        const last=groups[groups.length-1];
+        if(last&&last.step===step) last.count++;
+        else groups.push({step,count:1,first:i+1});
+    });
+    return groups.map(g=>{
+        const nominalCurrent=g.step*1000/(phaseFactor*V);
         const conductorAmpacity=nominalCurrent*1.35;
         const breakerDesign=nominalCurrent*1.5;
-        return `<tr><td>Step ${index+1}</td><td>${fmt(step)} kVAr</td><td>${fmt(nominalCurrent)} A</td><td>${fmt(conductorAmpacity)} A min.</td><td>${pfiStandardBreaker(breakerDesign)}</td></tr>`;
+        const label=g.count===1?`Step ${g.first}`:`Steps ${g.first}–${g.first+g.count-1}`;
+        const size=g.count===1?`${fmt(g.step)} kVAr`:`${g.count} × ${fmt(g.step)} kVAr`;
+        return `<div class="pfi-step"><div class="pfi-step-head"><b>${label}</b><b>${size}</b></div>`+
+            pfiRow(g.count===1?"Capacitor current":"Current per step",`${fmt(nominalCurrent)} A`)+
+            pfiRow("Min. conductor ampacity*",`${fmt(conductorAmpacity)} A`)+
+            pfiRow("Suggested breaker**",pfiStandardBreaker(breakerDesign))+
+            `</div>`;
     }).join("");
 }
 function setPFIConnection(mode,button){
@@ -2296,21 +2369,24 @@ function calculatePFI(){
     const standardBank=Math.ceil(q/5)*5;
     const suggestedSteps=pfiSuggestedSteps(standardBank,P);
     const stepPlan=pfiStepPlan(suggestedSteps,V,phases);
-    out.innerHTML=`Required capacitor bank: <span class="result-value">${fmt(q)} kVAr</span><br>`+
-      `Suggested standard bank step: <span class="result-value">${fmt(standardBank)} kVAr</span><br>`+
-      `Suggested APFC arrangement: <span class="result-value">${suggestedSteps.map(step=>fmt(step)).join(" + ")} kVAr</span><br>`+
-      `Suggested control stages: <span class="result-value">${suggestedSteps.length}</span> (selected for ${fmt(P)} kW connected load)<br>`+
-      `Line current before correction: <span class="result-value">${fmt(currentBefore)} A</span><br>`+
-      `Line current after correction: <span class="result-value">${fmt(currentAfter)} A</span><br>`+
-      `Estimated current reduction: <span class="result-value">${fmt(currentBefore-currentAfter)} A (${fmt((1-currentAfter/currentBefore)*100)}%)</span><br>`+
-      `Apparent power before correction: <span class="result-value">${fmt(apparentBefore)} kVA</span><br>`+
-      `Apparent power after correction: <span class="result-value">${fmt(apparentAfter)} kVA</span><br>`+
-      `Capacitor connection: <span class="result-value">${phases===1?"Single-phase":pfiConnection.toUpperCase()}</span><br>`+
-      `Capacitance per phase: <span class="result-value">${fmt(capacitance*1000000)} μF</span><br><br>`+
-      `<b>Suggested step ampacity and breaker selection</b>`+
-      `<div class="result-box"><table class="result-table"><thead><tr><th>Stage</th><th>Step</th><th>Capacitor current</th><th>Minimum conductor ampacity*</th><th>Suggested breaker**</th></tr></thead><tbody>${stepPlan}</tbody></table></div>`+
-      `<small>* Conductor ampacity uses a preliminary 1.35 × capacitor-current allowance. ** Breaker selection uses the next standard rating at or above 1.50 × capacitor current; verify manufacturer instructions, coordination, fault level, harmonics and local code before construction.</small><br><br>`+
-      `<small>Preliminary PFI panel estimate. Select capacitor voltage rating, detuning reactors, discharge resistors, switching steps, harmonics protection and protection devices using the project design and applicable standards.</small>`;
+    out.innerHTML=
+      `<div class="pfi-hero">`+
+        `<div class="pfi-tile"><span>Required capacitor bank</span><b>${fmt(q)} kVAr</b></div>`+
+        `<div class="pfi-tile"><span>Suggested standard bank</span><b>${fmt(standardBank)} kVAr</b></div>`+
+      `</div>`+
+      pfiRow("APFC arrangement",suggestedSteps.map(step=>fmt(step)).join(" + ")+" kVAr")+
+      pfiRow("Control stages",`${suggestedSteps.length} (for ${fmt(P)} kW load)`)+
+      pfiRow("Line current before",`${fmt(currentBefore)} A`)+
+      pfiRow("Line current after",`${fmt(currentAfter)} A`)+
+      pfiRow("Current reduction",`${fmt(currentBefore-currentAfter)} A (${fmt((1-currentAfter/currentBefore)*100)}%)`)+
+      pfiRow("Apparent power before",`${fmt(apparentBefore)} kVA`)+
+      pfiRow("Apparent power after",`${fmt(apparentAfter)} kVA`)+
+      pfiRow("Capacitor connection",phases===1?"Single-phase":pfiConnection.toUpperCase())+
+      pfiRow("Capacitance per phase",`${fmt(capacitance*1000000)} μF`)+
+      `<div class="pfi-h">Step ampacity and breaker selection</div>`+
+      `<div class="pfi-steps">${stepPlan}</div>`+
+      `<p class="pfi-note">* Conductor ampacity uses a preliminary 1.35 × capacitor-current allowance. ** Breaker is the next standard rating at or above 1.50 × capacitor current; verify manufacturer instructions, coordination, fault level, harmonics and local code before construction.</p>`+
+      `<p class="pfi-note">Preliminary PFI panel estimate. Select capacitor voltage rating, detuning reactors, discharge resistors, switching steps, harmonics protection and protection devices using the project design and applicable standards.</p>`;
 }
 </script>
 
