@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ABB REF615 Relay - Full Hierarchy Engine & Param Editor</title>
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+  }
+
+  body {
+    background-color: #121416;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    position: relative;
+  }
+
+  /* TOP NAVIGATION BAR FOR EXTERNAL LINKS */
+  .external-nav-bar {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .nav-link-btn {
+    background: #1a1d20;
+    color: #00d2ff;
+    border: 2px solid #00d2ff;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-link-btn:hover {
+    background: #00d2ff;
+    color: #121416;
+    box-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+  }
+
+  .view-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+  }
+
+  .toggle-btn {
+    background: #2b3034;
+    color: #fff;
+    border: 2px solid #ff0000;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+
+  .toggle-btn.active {
+    background: #ff0000;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+  }
+
+  /* CHASSIS BASE */
+  .relay-chassis {
+    width: 680px;
+    background-color: #d8dee2;
+    border: 4px solid;
+    border-color: #aeb7bc #838e94 #6c777d #b8c1c7;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.7);
+    position: relative;
+  }
+
+  .view-panel {
+    display: none;
+  }
+
+  .view-panel.active {
+    display: block;
+  }
+
+  /* FRONT PANEL STYLING */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #a4afb5;
+    margin-bottom: 14px;
+  }
+
+  .abb-logo {
+    color: #ff0000;
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: -1.5px;
+  }
+
+  .relay-model {
+    font-weight: 800;
+    font-size: 20px;
+    color: #23272a;
+    letter-spacing: 0.5px;
+  }
+
+  .status-leds {
+    display: flex;
+    justify-content: space-around;
+    background-color: #b0b9bf;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 14px;
+    border: 1px solid #99a3a9;
+  }
+
+  .led-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a1d20;
+    text-transform: uppercase;
+  }
+
+  .led-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #40464a;
+    border: 1px solid #1a1d20;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .led-circle.green.active { background-color: #00ff22; box-shadow: 0 0 10px #00ff22; }
+  .led-circle.yellow.active { background-color: #ffcc00; box-shadow: 0 0 10px #ffcc00; }
+  .led-circle.red.active { background-color: #ff1100; box-shadow: 0 0 10px #ff1100; }
+
+  .middle-panel {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .screen-container {
+    flex: 1.4;
+    background-color: #729ba9;
+    border: 3px solid #2b3d44;
+    border-radius: 4px;
+    height: 260px;
+    padding: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #05161c;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+  }
+
+  .screen-header {
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 1px solid #4a6c77;
+    padding-bottom: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .screen-body {
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    height: 100%;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .screen-footer {
+    border-top: 1px solid #4a6c77;
+    padding-top: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .prog-leds {
+    flex: 0.85;
+    background: #b0b9bf;
+    border: 1px solid #99a3a9;
+    border-radius: 5px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .prog-led-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #222629;
+  }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 12px;
+    background-color: #b0b9bf;
+    padding: 14px;
+    border-radius: 6px;
+    border: 1px solid #99a3a9;
+  }
+
+  .left-btns, .right-btns {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .btn {
+    border: 1px solid #1a4360;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #15344b, 0 3px 5px rgba(0,0,0,0.4);
+    transition: all 0.05s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #15344b, 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  .btn-close {
+    background-color: #d93829;
+    border-color: #9c251a;
+    box-shadow: 0 3px 0 #781c13;
+    height: 50px;
+    font-size: 12px;
+  }
+
+  .btn-open {
+    background-color: #27ae60;
+    border-color: #1a7540;
+    box-shadow: 0 3px 0 #12542e;
+    height: 50px;
+    font-size: 12px;
+  }
+
+  .btn-blue {
+    background-color: #2980b9;
+    height: 32px;
+  }
+
+  .nav-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 4px;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .nav-btn {
+    width: 42px;
+    height: 32px;
+    background-color: #2980b9;
+    border: 1px solid #1a5175;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #143e5a;
+  }
+
+  /* ENGINE & PARAMETER PANELS */
+  .control-section {
+    margin-top: 20px;
+    width: 680px;
+    background: #1a1d20;
+    border: 2px solid #2d3339;
+    border-radius: 8px;
+    padding: 15px;
+    color: #e0e0e0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  }
+
+  .panel-header-title {
+    font-weight: bold;
+    color: #00d2ff;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #383e45;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  .slider-group, .param-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    background: #22262b;
+    border: 1px solid #343a40;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .card-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .card input, .card select {
+    width: 100%;
+    background: #121416;
+    border: 1px solid #48515a;
+    color: #00ff22;
+    padding: 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  .preset-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .preset-btn {
+    flex: 1;
+    background: #2b3238;
+    color: #fff;
+    border: 1px solid #48515a;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .preset-btn:hover {
+    background: #ff9900;
+    color: #000;
+  }
+
+  .timer-banner {
+    background: #111315;
+    border: 1px solid #2a2f35;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    color: #00ff22;
+  }
+
+  /* REAR PANEL STYLING */
+  .back-chassis {
+    background-color: #22262a;
+    border: 4px solid #16181b;
+    border-radius: 6px;
+    padding: 15px;
+    color: #e0e0e0;
+  }
+
+  .back-header {
+    text-align: center;
+    font-weight: bold;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #444;
+    margin-bottom: 12px;
+    color: #ff4444;
+    letter-spacing: 1px;
+  }
+
+  .terminal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .terminal-block {
+    background: #181a1d;
+    border: 2px solid #3c4248;
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  .block-title {
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    background: #2d3339;
+    padding: 4px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+    color: #00d2ff;
+  }
+
+  .terminal-pins {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .pin {
+    background: #262a30;
+    border: 1px solid #454c54;
+    padding: 4px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 2px;
+  }
+
+  .pin-num {
+    font-weight: bold;
+    color: #ffcc00;
+  }
+
+  .pin-label {
+    color: #bbb;
+  }
+
+  .wire-badge {
+    font-size: 8px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    color: #fff;
+  }
+
+  .wire-red { background: #d32f2f; }
+  .wire-black { background: #111; border: 1px solid #555; }
+  .wire-blue { background: #1976d2; }
+  .wire-yellow { background: #fbc02d; color: #000; }
+  .wire-green { background: #388e3c; }
+
+  .ground-lug {
+    margin-top: 12px;
+    background: #2d3339;
+    border: 2px dashed #00ff22;
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 11px;
+    color: #00ff22;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="external-nav-bar">
+  <a href="Advanced.html" class="nav-link-btn">&#9664; Back to Toolbox</a>
+  <a href="Config615.html" class="nav-link-btn">OPEN Parameter settings &#9654;</a>
+</div>
+
+<div class="view-selector">
+  <button class="toggle-btn active" id="btn-front-view" onclick="switchView('front')">FRONT PANEL (HMI)</button>
+  <button class="toggle-btn" id="btn-back-view" onclick="switchView('back')">REAR PANEL (TERMINALS & WIRING)</button>
+</div>
+
+<div class="relay-chassis">
+
+  <!-- FRONT PANEL -->
+  <div id="front-panel" class="view-panel active">
+    <div class="header">
+      <div class="abb-logo">ABB</div>
+      <div class="relay-model">REF615</div>
+    </div>
+
+    <div class="status-leds">
+      <div class="led-item"><div class="led-circle green active" id="led-ready"></div><span>Ready</span></div>
+      <div class="led-item"><div class="led-circle yellow" id="led-pickup"></div><span>Start / Pickup</span></div>
+      <div class="led-item"><div class="led-circle red" id="led-trip"></div><span>Trip</span></div>
+    </div>
+
+    <div class="middle-panel">
+      <div class="screen-container">
+        <div class="screen-header" id="screen-title">SINGLE LINE DIAGRAM</div>
+        <div class="screen-body" id="screen-body"></div>
+        <div class="screen-footer" id="screen-footer">
+          <span id="footer-mode">LOC</span>
+          <span id="footer-cb">CB: CLSD</span>
+        </div>
+      </div>
+
+      <div class="prog-leds">
+        <div class="prog-led-row"><div class="led-circle red" id="pled-1"></div> Phase A</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-2"></div> Phase B</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-3"></div> Phase C</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-4"></div> Ground Fault</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-5"></div> Overcurrent 51</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-6"></div> Inst. 50</div>
+        <div class="prog-led-row"><div class="led-circle red" id="pled-7"></div> Dir. EF 67N</div>
+        <div class="prog-led-row"><div class="led-circle yellow" id="pled-8"></div> Auto-Reclose</div>
+      </div>
+    </div>
+
+    <div class="keypad">
+      <div class="left-btns">
+        <button class="btn btn-close" onclick="handleCloseCB()">| I <br>CLOSE</button>
+        <button class="btn btn-open" onclick="handleOpenCB()">O<br>OPEN</button>
+      </div>
+
+      <div class="nav-pad">
+        <div></div>
+        <button class="nav-btn" onclick="handleNav('UP')">&#9650;</button>
+        <div></div>
+        <button class="nav-btn" onclick="handleNav('LEFT')">&#9664;</button>
+        <button class="btn btn-blue" style="width:42px; height:32px;" onclick="handleEnter()">&#8617;</button>
+        <button class="nav-btn" onclick="handleNav('RIGHT')">&#9654;</button>
+        <div></div>
+        <button class="nav-btn" onclick="handleNav('DOWN')">&#9660;</button>
+        <div></div>
+      </div>
+
+      <div class="right-btns">
+        <button class="btn btn-blue" onclick="handleEsc()">ESC</button>
+        <button class="btn btn-blue" onclick="handleClear()">Clear</button>
+        <button class="btn btn-blue" onclick="handleMenu()">Menu</button>
+        <button class="btn btn-blue" onclick="toggleLocalRemote()" id="btn-rl">R / L</button>
+        <button class="btn btn-blue" onclick="handleHelp()">Help</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAR TERMINAL PANEL -->
+  <div id="back-panel" class="view-panel">
+    <div class="back-chassis">
+      <div class="back-header">ABB REF615 REAR TERMINALS & WIRING CONNECTIONS</div>
+      <div class="terminal-grid">
+        <div class="terminal-block">
+          <div class="block-title">X100 (Power & Control)</div>
+          <div class="terminal-pins">
+            <div class="pin"><span class="pin-num">1</span><span class="pin-label">+Aux Power</span><span class="wire-badge wire-red">+110V DC</span></div>
+            <div class="pin"><span class="pin-num">2</span><span class="pin-label">-Aux Power</span><span class="wire-badge wire-black">0V DC</span></div>
+            <div class="pin"><span class="pin-num">3</span><span class="pin-label">PO1 (Trip High)</span><span class="wire-badge wire-red">To Trip Coil</span></div>
+            <div class="pin"><span class="pin-num">4</span><span class="pin-label">PO1 (Trip Low)</span><span class="wire-badge wire-black">+DC Com</span></div>
+            <div class="pin"><span class="pin-num">5</span><span class="pin-label">PO2 (Close High)</span><span class="wire-badge wire-blue">To Close Coil</span></div>
+            <div class="pin"><span class="pin-num">6</span><span class="pin-label">PO2 (Close Low)</span><span class="wire-badge wire-black">+DC Com</span></div>
+          </div>
+        </div>
+
+        <div class="terminal-block">
+          <div class="block-title">X110 (Current Transformers)</div>
+          <div class="terminal-pins">
+            <div class="pin"><span class="pin-num">1</span><span class="pin-label">IL1 (Ph A - S1)</span><span class="wire-badge wire-red">CT A1</span></div>
+            <div class="pin"><span class="pin-num">2</span><span class="pin-label">IL1 (Ph A - S2)</span><span class="wire-badge wire-black">CT A2 / Gnd</span></div>
+            <div class="pin"><span class="pin-num">3</span><span class="pin-label">IL2 (Ph B - S1)</span><span class="wire-badge wire-yellow">CT B1</span></div>
+            <div class="pin"><span class="pin-num">4</span><span class="pin-label">IL2 (Ph B - S2)</span><span class="wire-badge wire-black">CT B2 / Gnd</span></div>
+            <div class="pin"><span class="pin-num">5</span><span class="pin-label">IL3 (Ph C - S1)</span><span class="wire-badge wire-blue">CT C1</span></div>
+            <div class="pin"><span class="pin-num">6</span><span class="pin-label">IL3 (Ph C - S2)</span><span class="wire-badge wire-black">CT C2 / Gnd</span></div>
+            <div class="pin"><span class="pin-num">7</span><span class="pin-label">Io (Sensitive/CBCT S1)</span><span class="wire-badge wire-green">SEF S1</span></div>
+            <div class="pin"><span class="pin-num">8</span><span class="pin-label">Io (Sensitive/CBCT S2)</span><span class="wire-badge wire-black">SEF S2</span></div>
+          </div>
+        </div>
+
+        <div class="terminal-block">
+          <div class="block-title">X120 (Voltage & Inputs)</div>
+          <div class="terminal-pins">
+            <div class="pin"><span class="pin-num">1</span><span class="pin-label">UL1 (VT Phase A)</span><span class="wire-badge wire-red">VT A</span></div>
+            <div class="pin"><span class="pin-num">2</span><span class="pin-label">UL2 (VT Phase B)</span><span class="wire-badge wire-yellow">VT B</span></div>
+            <div class="pin"><span class="pin-num">3</span><span class="pin-label">UL3 (VT Phase C)</span><span class="wire-badge wire-blue">VT C</span></div>
+            <div class="pin"><span class="pin-num">4</span><span class="pin-label">Uo Neutral Return</span><span class="wire-badge wire-black">VT Neutral</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ground-lug">
+        &#9143; PROTECTIVE EARTH GROUND LUG (PE) - CONNECT DIRECTLY TO MAIN SUBSTATION GROUND BUS BAR (Min 6mm² Green Wire)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PROTECTION PARAMETERS CONFIGURATION PANEL -->
+<div class="control-section">
+  <div class="panel-header-title">PROTECTION PARAMETERS CONFIGURATION (50/51/67N/SEF)</div>
+  <div class="param-grid">
+    <div class="card">
+      <div class="card-label"><span>51 Pickup Threshold</span></div>
+      <input type="number" id="cfg-51-pickup" min="0.05" max="5.0" step="0.05" value="1.20" onchange="syncParamsFromUI()">
+    </div>
+    <div class="card">
+      <div class="card-label"><span>51 Time Multiplier (TMS)</span></div>
+      <input type="number" id="cfg-51-tms" min="0.05" max="15.0" step="0.05" value="0.05" onchange="syncParamsFromUI()">
+    </div>
+    <div class="card">
+      <div class="card-label"><span>51 Curve Type</span></div>
+      <select id="cfg-51-curve" onchange="syncParamsFromUI()">
+        <option value="0">IEC Normal Inv</option>
+        <option value="1">IEC Very Inv</option>
+        <option value="2">IEC Extremely Inv</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="card-label"><span>50 Inst. Pickup</span></div>
+      <input type="number" id="cfg-50-pickup" min="1.0" max="40.0" step="0.5" value="8.00" onchange="syncParamsFromUI()">
+    </div>
+    <div class="card">
+      <div class="card-label"><span>67N Directional Mode</span></div>
+      <select id="cfg-67n-mode" onchange="syncParamsFromUI()">
+        <option value="0">Forward</option>
+        <option value="1">Reverse</option>
+        <option value="2">Non-directional</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="card-label"><span>51SEF Sensitive Pickup</span></div>
+      <input type="number" id="cfg-sef-pickup" min="0.005" max="0.20" step="0.005" value="0.01" onchange="syncParamsFromUI()">
+    </div>
+  </div>
+</div>
+
+<!-- FAULT INJECTION ENGINE PANEL -->
+<div class="control-section">
+  <div class="panel-header-title" style="color:#ff9900;">LIVE FAULT INJECTION ENGINE</div>
+  
+  <div class="preset-btns">
+    <button class="preset-btn" onclick="applyPreset('NORMAL')">Normal Load (1.0 xIn)</button>
+    <button class="preset-btn" onclick="applyPreset('AG_FAULT')">Phase A-G Fault (3.5 xIn)</button>
+    <button class="preset-btn" onclick="applyPreset('3PH_FAULT')">3-Phase Short Circuit (12.0 xIn)</button>
+    <button class="preset-btn" onclick="applyPreset('CLEAR')">Reset Injection</button>
+  </div>
+
+  <div class="slider-group">
+    <div class="card">
+      <div class="card-label"><span>Phase A Current (IL1)</span><span id="val-il1">1.00 xIn</span></div>
+      <input type="range" id="slider-il1" min="0" max="20" step="0.1" value="1.0" oninput="updateCurrents()">
+    </div>
+    <div class="card">
+      <div class="card-label"><span>Phase B Current (IL2)</span><span id="val-il2">1.00 xIn</span></div>
+      <input type="range" id="slider-il2" min="0" max="20" step="0.1" value="1.0" oninput="updateCurrents()">
+    </div>
+    <div class="card">
+      <div class="card-label"><span>Phase C Current (IL3)</span><span id="val-il3">1.00 xIn</span></div>
+      <input type="range" id="slider-il3" min="0" max="20" step="0.1" value="1.0" oninput="updateCurrents()">
+    </div>
+  </div>
+
+  <div class="timer-banner">
+    <span id="timer-status">Protection Engine: Monitoring</span>
+    <span id="timer-counter">Timing: 0.00 s</span>
+  </div>
+</div>
+
+<script>
+  let isLocalMode = true;
+  let cbState = 'CLOSED';
+  
+  let menuPath = []; 
+  let selectedIndices = [0];
+
+  let settings = {
+    ocPickup: 1.20,
+    ocTimeMult: 0.05,
+    ocCurveIdx: 0,
+    ocEnabled: true,
+    instPickup: 8.00,
+    instDelay: 20,
+    instEnabled: true,
+    efPickup: 0.20,
+    efTimeMult: 0.10,
+    dirEfPickup: 0.10,
+    dirEfModeIdx: 0,
+    dirEfAngle: -45,
+    sefPickup: 0.010,
+    sefDelay: 0.50,
+    ctPrimary: 400,
+    ctSecondary: 5,
+    vtPrimary: 11000,
+    vtSecondary: 110,
+    ipAddress: "192.168.2.10",
+    subnetMask: "255.255.255.0",
+    iec61850Enabled: true,
+    autoRecloseAttempts: 3
+  };
+
+  const curveOptions = ["IEC Normal Inv", "IEC Very Inv", "IEC Extremely Inv"];
+  const dirModeOptions = ["Forward", "Reverse", "Non-directional"];
+
+  let isEditing = false;
+  let editTempVal = null;
+
+  let currentIL1 = 1.0;
+  let currentIL2 = 1.0;
+  let currentIL3 = 1.0;
+  let currentIo  = 0.0;
+
+  let ocTimer = null;
+  let ocStartTime = null;
+  let targetTripTime = null;
+  let isPickedUp = false;
+
+  function switchView(view) {
+    document.getElementById('front-panel').classList.remove('active');
+    document.getElementById('back-panel').classList.remove('active');
+    document.getElementById('btn-front-view').classList.remove('active');
+    document.getElementById('btn-back-view').classList.remove('active');
+
+    if (view === 'front') {
+      document.getElementById('front-panel').classList.add('active');
+      document.getElementById('btn-front-view').classList.add('active');
+    } else {
+      document.getElementById('back-panel').classList.add('active');
+      document.getElementById('btn-back-view').classList.add('active');
+    }
+  }
+
+  function syncParamsFromUI() {
+    settings.ocPickup = parseFloat(document.getElementById('cfg-51-pickup').value);
+    settings.ocTimeMult = parseFloat(document.getElementById('cfg-51-tms').value);
+    settings.ocCurveIdx = parseInt(document.getElementById('cfg-51-curve').value);
+    settings.instPickup = parseFloat(document.getElementById('cfg-50-pickup').value);
+    settings.dirEfModeIdx = parseInt(document.getElementById('cfg-67n-mode').value);
+    settings.sefPickup = parseFloat(document.getElementById('cfg-sef-pickup').value);
+
+    evaluateProtection();
+    updateDisplay();
+  }
+
+  function syncUIFromParams() {
+    document.getElementById('cfg-51-pickup').value = settings.ocPickup;
+    document.getElementById('cfg-51-tms').value = settings.ocTimeMult;
+    document.getElementById('cfg-51-curve').value = settings.ocCurveIdx;
+    document.getElementById('cfg-50-pickup').value = settings.instPickup;
+    document.getElementById('cfg-67n-mode').value = settings.dirEfModeIdx;
+    document.getElementById('cfg-sef-pickup').value = settings.sefPickup;
+  }
+
+  function applyPreset(type) {
+    if (type === 'NORMAL') setSliders(1.0, 1.0, 1.0);
+    else if (type === 'AG_FAULT') setSliders(3.5, 1.0, 1.0);
+    else if (type === '3PH_FAULT') setSliders(12.0, 12.0, 12.0);
+    else if (type === 'CLEAR') { setSliders(1.0, 1.0, 1.0); executeAction("CLEAR_LEDS"); }
+    updateCurrents();
+  }
+
+  function setSliders(a, b, c) {
+    document.getElementById('slider-il1').value = a;
+    document.getElementById('slider-il2').value = b;
+    document.getElementById('slider-il3').value = c;
+  }
+
+  function updateCurrents() {
+    currentIL1 = parseFloat(document.getElementById('slider-il1').value);
+    currentIL2 = parseFloat(document.getElementById('slider-il2').value);
+    currentIL3 = parseFloat(document.getElementById('slider-il3').value);
+
+    document.getElementById('val-il1').innerText = currentIL1.toFixed(2) + " xIn";
+    document.getElementById('val-il2').innerText = currentIL2.toFixed(2) + " xIn";
+    document.getElementById('val-il3').innerText = currentIL3.toFixed(2) + " xIn";
+
+    currentIo = Math.abs(currentIL1 - currentIL2) + Math.abs(currentIL2 - currentIL3);
+    evaluateProtection();
+    updateDisplay();
+  }
+
+  function evaluateProtection() {
+    if (cbState === 'OPEN') {
+      resetProtectionTimer();
+      document.getElementById('timer-status').innerText = "BREAKER OPEN";
+      document.getElementById('timer-counter').innerText = "Timing: 0.00 s";
+      return;
+    }
+
+    const maxI = Math.max(currentIL1, currentIL2, currentIL3);
+
+    // Instantaneous 50
+    if (settings.instEnabled && maxI >= settings.instPickup) {
+      triggerTrip("50 INSTANTANEOUS TRIP");
+      document.getElementById('pled-6').classList.add('active');
+      highlightPhaseLeds();
+      return;
+    }
+
+    // Time-Overcurrent 51
+    if (settings.ocEnabled && maxI >= settings.ocPickup) {
+      document.getElementById('led-pickup').classList.add('active');
+      document.getElementById('pled-5').classList.add('active');
+      highlightPhaseLeds();
+
+      if (!isPickedUp) {
+        isPickedUp = true;
+        ocStartTime = Date.now();
+        let M = maxI / settings.ocPickup;
+        
+        let k = settings.ocCurveIdx === 0 ? 0.14 : (settings.ocCurveIdx === 1 ? 13.5 : 80.0);
+        let alpha = settings.ocCurveIdx === 0 ? 0.02 : (settings.ocCurveIdx === 1 ? 1.0 : 2.0);
+        
+        let operateTimeSec = settings.ocTimeMult * (k / (Math.pow(M, alpha) - 1));
+        targetTripTime = Math.max(operateTimeSec, 0.05);
+
+        ocTimer = setInterval(() => {
+          let elapsed = (Date.now() - ocStartTime) / 1000;
+          document.getElementById('timer-status').innerText = `51 Timing... (${elapsed.toFixed(2)}s / ${targetTripTime.toFixed(2)}s)`;
+          document.getElementById('timer-counter').innerText = `Progress: ${((elapsed/targetTripTime)*100).toFixed(0)}%`;
+
+          if (elapsed >= targetTripTime) {
+            triggerTrip("51 OVERCURRENT TRIP");
+          }
+        }, 50);
+      }
+    } else {
+      if (isPickedUp) {
+        resetProtectionTimer();
+        document.getElementById('led-pickup').classList.remove('active');
+      }
+      document.getElementById('timer-status').innerText = "Protection Engine: Monitoring";
+      document.getElementById('timer-counter').innerText = "Timing: 0.00 s";
+    }
+  }
+
+  function highlightPhaseLeds() {
+    if (currentIL1 >= settings.ocPickup) document.getElementById('pled-1').classList.add('active');
+    if (currentIL2 >= settings.ocPickup) document.getElementById('pled-2').classList.add('active');
+    if (currentIL3 >= settings.ocPickup) document.getElementById('pled-3').classList.add('active');
+    if (currentIo > 1.0) document.getElementById('pled-4').classList.add('active');
+  }
+
+  function resetProtectionTimer() {
+    if (ocTimer) clearInterval(ocTimer);
+    ocTimer = null;
+    isPickedUp = false;
+  }
+
+  function triggerTrip(reason) {
+    resetProtectionTimer();
+    cbState = 'OPEN';
+    document.getElementById('led-trip').classList.add('active');
+    document.getElementById('timer-status').innerText = `TRIPPED: ${reason}`;
+    document.getElementById('timer-counter').innerText = "PO1 FIRED";
+    updateDisplay();
+  }
+
+  // FULL ABB REF615 MENU HIERARCHY TREE INCLUDING 67N & SEF
+  function getMenuTree() {
+    return {
+      title: "MAIN MENU",
+      options: [
+        {
+          name: "1. Control",
+          type: "menu",
+          title: "CONTROL MENU",
+          options: [
+            { name: "1.1 Circuit Breaker", type: "action", action: "TOGGLE_CB" },
+            { name: "1.2 Control Mode (R/L)", type: "action", action: "TOGGLE_RL" },
+            { name: "1.3 Interlocking Enable", type: "view", getContent: () => "Interlocking: ENABLED\nStatus: Normal Bypass Off" },
+            { name: "1.4 Auto-Recloser Switch", type: "view", getContent: () => `AR Status: READY\nMax Attempts: ${settings.autoRecloseAttempts}` }
+          ]
+        },
+        {
+          name: "2. Measurements",
+          type: "menu",
+          title: "MEASUREMENTS",
+          options: [
+            {
+              name: "2.1 Currents (I)",
+              type: "menu",
+              title: "CURRENT MEASUREMENTS",
+              options: [
+                { name: "2.1.1 Phase Currents", type: "view", getContent: () => `IL1 : ${(cbState==='OPEN'?0:currentIL1).toFixed(2)} xIn (${(cbState==='OPEN'?0:currentIL1*250).toFixed(1)} A)\nIL2 : ${(cbState==='OPEN'?0:currentIL2).toFixed(2)} xIn (${(cbState==='OPEN'?0:currentIL2*250).toFixed(1)} A)\nIL3 : ${(cbState==='OPEN'?0:currentIL3).toFixed(2)} xIn (${(cbState==='OPEN'?0:currentIL3*250).toFixed(1)} A)` },
+                { name: "2.1.2 Residual Current (Io)", type: "view", getContent: () => `Io  : ${(cbState==='OPEN'?0:currentIo).toFixed(2)} xIn (${(cbState==='OPEN'?0:currentIo*250).toFixed(1)} A)\nAngle: 0.0 Deg` }
+              ]
+            },
+            {
+              name: "2.2 Voltages (U)",
+              type: "menu",
+              title: "VOLTAGE MEASUREMENTS",
+              options: [
+                { name: "2.2.1 Phase-Earth Voltages", type: "view", getContent: () => "UL1 : 6.35 kV (1.00 xUn)\nUL2 : 6.35 kV (1.00 xUn)\nUL3 : 6.35 kV (1.00 xUn)" },
+                { name: "2.2.2 Residual Voltage (Uo)", type: "view", getContent: () => "Uo  : 0.02 kV (0.00 xUn)\nAngle: 0.0 Deg" }
+              ]
+            },
+            {
+              name: "2.3 Power & Energy",
+              type: "view",
+              title: "POWER MEASUREMENTS",
+              getContent: () => `Active Power P : ${(cbState==='OPEN'?0:currentIL1*4.76).toFixed(2)} MW\nReactive Q     : 0.12 MVAR\nPower Factor   : 0.98 Lag`
+            }
+          ]
+        },
+        {
+          name: "3. Settings",
+          type: "menu",
+          title: "PROTECTION SETTINGS",
+          options: [
+            {
+              name: "3.1 Overcurrent (50/51)",
+              type: "menu",
+              title: "50/51 OC SETTINGS",
+              options: [
+                { 
+                  name: () => `51 Pickup: ${settings.ocPickup.toFixed(2)} xIn`,
+                  type: "param", paramKey: "ocPickup", min: 0.05, max: 5.00, step: 0.05
+                },
+                { 
+                  name: () => `51 Time Mult: ${settings.ocTimeMult.toFixed(2)}`,
+                  type: "param", paramKey: "ocTimeMult", min: 0.05, max: 15.00, step: 0.05
+                },
+                {
+                  name: () => `51 Curve: ${curveOptions[settings.ocCurveIdx]}`,
+                  type: "param_enum", paramKey: "ocCurveIdx", optionsList: curveOptions
+                },
+                { 
+                  name: () => `50 Inst Pickup: ${settings.instPickup.toFixed(2)} xIn`,
+                  type: "param", paramKey: "instPickup", min: 1.00, max: 40.00, step: 0.50
+                }
+              ]
+            },
+            {
+              name: "3.2 Earth-Fault (50N/51N)",
+              type: "menu",
+              title: "50N/51N EF SETTINGS",
+              options: [
+                { 
+                  name: () => `51N Pickup: ${settings.efPickup.toFixed(2)} xIn0`,
+                  type: "param", paramKey: "efPickup", min: 0.01, max: 2.00, step: 0.01
+                },
+                { 
+                  name: () => `51N Time Mult: ${settings.efTimeMult.toFixed(2)}`,
+                  type: "param", paramKey: "efTimeMult", min: 0.05, max: 10.00, step: 0.05
+                }
+              ]
+            },
+            {
+              name: "3.3 Dir Earth-Fault (67N)",
+              type: "menu",
+              title: "DEFHPTOC / DEFLPOC (67N)",
+              options: [
+                { 
+                  name: () => `67N Pickup: ${settings.dirEfPickup.toFixed(2)} xIn0`,
+                  type: "param", paramKey: "dirEfPickup", min: 0.01, max: 5.00, step: 0.01
+                },
+                { 
+                  name: () => `Direction Mode: ${dirModeOptions[settings.dirEfModeIdx]}`,
+                  type: "param_enum", paramKey: "dirEfModeIdx", optionsList: dirModeOptions
+                },
+                { 
+                  name: () => `Char Angle (RCA): ${settings.dirEfAngle} Deg`,
+                  type: "param", paramKey: "dirEfAngle", min: -179, max: 180, step: 1
+                }
+              ]
+            },
+            {
+              name: "3.4 Sensitive Earth-Fault (SEF)",
+              type: "menu",
+              title: "SEF / 51SEF SETTINGS",
+              options: [
+                { 
+                  name: () => `SEF Pickup: ${settings.sefPickup.toFixed(3)} xIn0`,
+                  type: "param", paramKey: "sefPickup", min: 0.005, max: 0.200, step: 0.005
+                },
+                { 
+                  name: () => `SEF Delay: ${settings.sefDelay.toFixed(2)} s`,
+                  type: "param", paramKey: "sefDelay", min: 0.04, max: 300.00, step: 0.05
+                }
+              ]
+            },
+            {
+              name: "3.5 Thermal Overload (49)",
+              type: "view",
+              title: "THERMAL 49 SETTINGS",
+              getContent: () => "Thermal Factor k : 1.05\nTime Constant tau : 10.0 min\nAlarm Limit       : 90 %"
+            }
+          ]
+        },
+        {
+          name: "4. Configuration",
+          type: "menu",
+          title: "SYSTEM CONFIGURATION",
+          options: [
+            {
+              name: "4.1 Analog Inputs (CT/VT)",
+              type: "menu",
+              title: "CT / VT RATIO CONFIG",
+              options: [
+                { name: () => `CT Primary: ${settings.ctPrimary} A`, type: "param", paramKey: "ctPrimary", min: 50, max: 5000, step: 50 },
+                { name: () => `CT Secondary: ${settings.ctSecondary} A`, type: "param", paramKey: "ctSecondary", min: 1, max: 5, step: 4 },
+                { name: () => `VT Primary: ${settings.vtPrimary} V`, type: "param", paramKey: "vtPrimary", min: 100, max: 33000, step: 100 },
+                { name: () => `VT Secondary: ${settings.vtSecondary} V`, type: "param", paramKey: "vtSecondary", min: 100, max: 120, step: 10 }
+              ]
+            },
+            {
+              name: "4.2 Communication (IP)",
+              type: "menu",
+              title: "ETHERNET CONFIG",
+              options: [
+                { name: () => `IP Address: ${settings.ipAddress}`, type: "view", getContent: () => `IP: ${settings.ipAddress}\nSubnet: ${settings.subnetMask}\nGateway: 192.168.2.1` },
+                { name: () => `IEC 61850: ${settings.iec61850Enabled ? "ENABLED" : "DISABLED"}`, type: "view", getContent: () => `IEC61850 GOOSE: ENABLED\nEd.2 Profile Active` }
+              ]
+            }
+          ]
+        },
+        {
+          name: "5. Information",
+          type: "menu",
+          title: "SYSTEM INFORMATION",
+          options: [
+            { name: "5.1 Relay Model", type: "view", title: "MODEL INFO", getContent: () => "Model: REF615 Feeder Prot.\nVersion: 5.0 FP1\nSerial: 1MRS091001" },
+            { name: "5.2 Software Version", type: "view", title: "FIRMWARE INFO", getContent: () => "Build: 5.0.12.A4\nRelease: 2026\nChecksum: 0x8F2D" }
+          ]
+        }
+      ]
+    };
+  }
+
+  let currentSpecialScreen = 'SLD';
+
+  function getCurrentMenuNode() {
+    let node = getMenuTree();
+    for (let idx of menuPath) {
+      if (node.options && node.options[idx]) {
+        node = node.options[idx];
+      }
+    }
+    return node;
+  }
+
+  function updateDisplay() {
+    const titleEl = document.getElementById('screen-title');
+    const bodyEl = document.getElementById('screen-body');
+    document.getElementById('footer-mode').innerText = isLocalMode ? "MODE: LOCAL" : "MODE: REMOTE";
+    document.getElementById('footer-cb').innerText = "CB: " + cbState;
+
+    if (currentSpecialScreen === 'SLD') {
+      titleEl.innerText = "SINGLE LINE DIAGRAM";
+      const cbSymbol = cbState === 'CLOSED' ? '[X]' : '[ ]';
+      const dispIL1 = cbState === 'CLOSED' ? (currentIL1 * 250).toFixed(1) : "0.0";
+      const dispIL2 = cbState === 'CLOSED' ? (currentIL2 * 250).toFixed(1) : "0.0";
+      const dispIL3 = cbState === 'CLOSED' ? (currentIL3 * 250).toFixed(1) : "0.0";
+
+      bodyEl.innerText = 
+        `  | \n  | \n ${cbSymbol}  CB: ${cbState}\n  | \n  | \n\n` +
+        `IL1: ${dispIL1} A\nIL2: ${dispIL2} A\nIL3: ${dispIL3} A`;
+    } 
+    else if (currentSpecialScreen === 'MENU_TREE') {
+      const node = getCurrentMenuNode();
+      titleEl.innerText = node.title || (typeof node.name === 'function' ? node.name() : node.name);
+
+      if (node.type === 'menu' || node.options) {
+        let text = "";
+        const curIdx = selectedIndices[selectedIndices.length - 1] || 0;
+        node.options.forEach((opt, idx) => {
+          const optName = typeof opt.name === 'function' ? opt.name() : opt.name;
+          text += (idx === curIdx) ? `> ${optName}\n` : `  ${optName}\n`;
+        });
+        bodyEl.innerText = text;
+      } 
+      else if (node.type === 'view') {
+        bodyEl.innerText = node.getContent();
+      }
+      else if (node.type === 'param' || node.type === 'param_enum') {
+        const valName = typeof node.name === 'function' ? node.name() : node.name;
+        bodyEl.innerText = `[PARAMETER EDIT]\n\n${valName}\n\nPress ENT to Modify\nPress ESC to Back`;
+      }
+      else if (node.type === 'action') {
+        bodyEl.innerText = `[ACTION MENU]\n\n${node.name}\n\nPress ENT to Execute`;
+      }
+    }
+  }
+
+  function handleCloseCB() { if (isLocalMode) { cbState = 'CLOSED'; evaluateProtection(); updateDisplay(); } }
+  function handleOpenCB() { if (isLocalMode) { cbState = 'OPEN'; evaluateProtection(); updateDisplay(); } }
+  function toggleLocalRemote() { isLocalMode = !isLocalMode; updateDisplay(); }
+  function handleMenu() { currentSpecialScreen = 'MENU_TREE'; menuPath = []; selectedIndices = [0]; updateDisplay(); }
+  function handleEsc() { 
+    if (menuPath.length > 0) {
+      menuPath.pop();
+      selectedIndices.pop();
+    } else {
+      currentSpecialScreen = 'SLD'; 
+    }
+    updateDisplay(); 
+  }
+  
+  function handleClear() { executeAction("CLEAR_LEDS"); }
+  function handleHelp() { alert("ABB REF615 HMI\nUse Nav Arrows to browse menus\nPress ENTER to select, ESC to exit"); }
+
+  function handleNav(direction) {
+    if (currentSpecialScreen === 'SLD') { 
+      if (direction === 'RIGHT' || direction === 'DOWN') handleMenu(); 
+      return; 
+    }
+    if (currentSpecialScreen === 'MENU_TREE') {
+      const node = getCurrentMenuNode();
+      if (node.type === 'menu' || node.options) {
+        let curIdx = selectedIndices[selectedIndices.length - 1] || 0;
+        if (direction === 'UP') curIdx = (curIdx - 1 + node.options.length) % node.options.length;
+        if (direction === 'DOWN') curIdx = (curIdx + 1) % node.options.length;
+        selectedIndices[selectedIndices.length - 1] = curIdx;
+        updateDisplay();
+      } else if (direction === 'LEFT') {
+        handleEsc();
+      }
+    }
+  }
+
+  function handleEnter() {
+    if (currentSpecialScreen === 'SLD') {
+      handleMenu();
+      return;
+    }
+    
+    if (currentSpecialScreen === 'MENU_TREE') {
+      const node = getCurrentMenuNode();
+      if (node.type === 'menu' || node.options) {
+        const curIdx = selectedIndices[selectedIndices.length - 1] || 0;
+        const selectedChild = node.options[curIdx];
+        if (selectedChild) {
+          menuPath.push(curIdx);
+          selectedIndices.push(0);
+        }
+      } else if (node.type === 'action') {
+        if (node.action === "TOGGLE_CB") {
+          cbState = (cbState === 'CLOSED') ? 'OPEN' : 'CLOSED';
+          evaluateProtection();
+        } else if (node.action === "TOGGLE_RL") {
+          toggleLocalRemote();
+        }
+      } else if (node.type === 'param') {
+        let currentVal = settings[node.paramKey];
+        currentVal += node.step;
+        if (currentVal > node.max) currentVal = node.min;
+        settings[node.paramKey] = currentVal;
+        syncUIFromParams();
+      } else if (node.type === 'param_enum') {
+        settings[node.paramKey] = (settings[node.paramKey] + 1) % node.optionsList.length;
+        syncUIFromParams();
+      }
+      updateDisplay();
+    }
+  }
+
+  function executeAction(action) {
+    if (action === "CLEAR_LEDS") {
+      document.getElementById('led-trip').classList.remove('active');
+      document.getElementById('led-pickup').classList.remove('active');
+      for (let i = 1; i <= 8; i++) document.getElementById(`pled-${i}`).classList.remove('active');
+      resetProtectionTimer();
+      evaluateProtection();
+    } 
+  }
+
+  syncUIFromParams();
+  updateDisplay();
+</script>
+
+</body>
+</html>

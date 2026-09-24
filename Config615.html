@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABB REF615 Comprehensive Protection Calculator</title>
+<style>
+  :root {
+    --bg-dark: #121416;
+    --card-bg: #1c2024;
+    --card-border: #2e343b;
+    --accent-red: #ff0000;
+    --accent-blue: #00d2ff;
+    --accent-green: #00ff22;
+    --text-main: #e0e0e0;
+    --text-muted: #9ba0a6;
+    --input-bg: #111315;
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', -apple-system, sans-serif; }
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    margin: 0;
+    padding: clamp(10px, 2.5vw, 24px);
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+  .calculator-container {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 2vw, 20px);
+    min-width: 0;
+  }
+  
+  .header-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-top: 4px solid var(--accent-red); border-radius: 8px; padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .top-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .top-nav button {
+    background: #2b3034;
+    color: #fff;
+    border: 1px solid var(--card-border);
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .top-nav button:hover {
+    background: var(--accent-blue);
+    color: #000;
+  }
+  @media (max-width: 600px) {
+    .top-nav button { flex: 1 1 auto; }
+  }
+  .header-title { min-width: 0; }
+  .header-title h1 { margin: 0; font-size: clamp(18px, 2.4vw, 24px); color: #fff; line-height: 1.2; }
+  .header-title p { margin: 6px 0 0 0; color: var(--text-muted); font-size: clamp(11px, 1.5vw, 13px); line-height: 1.45; }
+  .abb-badge { flex: 0 0 auto; background: var(--accent-red); color: #fff; font-weight: 900; font-size: clamp(18px, 2.5vw, 22px); padding: 6px 14px; border-radius: 4px; }
+
+  .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: clamp(12px, 2vw, 20px);
+    min-width: 0;
+    overflow: hidden;
+  }
+  .section-title {
+    font-size: 13px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+  input, select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    background: var(--input-bg); border: 1px solid var(--card-border);
+    color: #fff; padding: 9px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent-blue); }
+
+  .results-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  .results-table th, .results-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); }
+  .results-table th { color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+  .results-table td.value { font-family: 'Consolas', monospace; font-weight: bold; color: var(--accent-green); text-align: right; }
+  .results-table td.unit { color: var(--text-muted); font-size: 11px; width: 50px; }
+  .pcm-path { font-size: 10px; color: var(--accent-blue); font-family: 'Consolas', monospace; display: block; }
+
+  .chart-container { height: 220px; width: 100%; margin-top: 10px; position: relative; }
+  canvas { background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 4px; }
+
+  .btn-action {
+    background: #2b3034; color: #fff; border: 1px solid var(--card-border);
+    padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 4px;
+    cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+  }
+  .btn-action:hover { background: var(--accent-blue); color: #000; }
+  .action-bar { display: flex; justify-content: flex-end; gap: 10px; }
+  .page-footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 4px 8px 2px;
+    margin-top: 0;
+  }
+
+  @media (max-width: 900px) {
+    .header-card { align-items: flex-start; gap: 14px; }
+    .grid-layout { grid-template-columns: 1fr; }
+    .results-table { font-size: 12px; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 8px; }
+    .calculator-container { gap: 12px; }
+    .top-nav { gap: 6px; margin-bottom: 2px; }
+    .top-nav button {
+      flex: 1 1 100%;
+      min-height: 40px;
+      padding: 9px 10px;
+    }
+    .header-card {
+      padding: 14px;
+      flex-direction: column;
+    }
+    .abb-badge { align-self: flex-start; }
+    .form-grid { grid-template-columns: 1fr; }
+    .section-title { font-size: 12px; }
+    .results-table th, .results-table td { padding: 8px 6px; }
+    .results-table th:nth-child(2), .results-table td.value { white-space: nowrap; }
+    .pcm-path { font-size: 9px; overflow-wrap: anywhere; }
+    .chart-container { height: 190px; }
+    .action-bar { flex-direction: column; }
+    .action-bar .btn-action { width: 100%; min-height: 42px; }
+    .page-footer { font-size: 10px; }
+  }
+
+  @media (min-width: 601px) and (max-width: 1100px) {
+    body { padding: 14px; }
+    .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media print {
+    @page { size: A4 portrait; margin: 12mm; }
+    body { background:#fff; color:#111; padding:0; display:block; }
+    .calculator-container { max-width:none; width:100%; gap:10px; }
+    .top-nav, .action-bar, #validation-status { display:none !important; }
+    .section-card, .header-card {
+      background:#fff; color:#111; border-color:#bbb;
+      break-inside: avoid;
+    }
+    .header-title h1, label, .section-title, .results-table td, .results-table th { color:#111 !important; }
+    .header-title p, .page-footer { color:#444 !important; }
+    .pcm-path, .results-table td.unit { color:#555 !important; }
+    .grid-layout { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    canvas { border:1px solid #aaa; max-width:100%; }
+    .page-footer { margin-top: 8px; border-top: 1px solid #bbb; padding-top: 8px; }
+  }
+
+/* Compact neon-blue glass navigation */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.nav-bar button {
+  appearance: none;
+  border: 1px solid rgba(76, 201, 255, 0.48);
+  border-radius: 9px;
+  padding: 6px 10px;
+  min-height: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+  line-height: 1.1;
+  color: #dff8ff;
+  background:
+    linear-gradient(135deg, rgba(22, 72, 104, 0.48), rgba(10, 31, 52, 0.58));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    inset 0 0 14px rgba(41, 190, 255, 0.10),
+    0 0 7px rgba(0, 191, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-shadow: 0 0 7px rgba(88, 220, 255, 0.72);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.nav-bar button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(80, 218, 255, 0.88);
+  background:
+    linear-gradient(135deg, rgba(26, 104, 146, 0.58), rgba(9, 43, 69, 0.68));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 0 18px rgba(41, 206, 255, 0.16),
+    0 0 10px rgba(0, 200, 255, 0.36),
+    0 0 22px rgba(0, 170, 255, 0.12);
+}
+
+.nav-bar button:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 7px rgba(0, 0, 0, 0.24),
+    0 0 7px rgba(0, 191, 255, 0.28);
+}
+
+.nav-bar button:focus-visible {
+  outline: 2px solid rgba(91, 224, 255, 0.9);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .nav-bar {
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .nav-bar button {
+    padding: 6px 8px;
+    min-height: 29px;
+    font-size: 10px;
+    border-radius: 8px;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="calculator-container">
+  <!-- TOP NAVIGATION -->
+  <div class="top-nav">
+    <button type="button" onclick="window.location.href='REF615.html'">Back to HMI</button>
+    <button type="button" onclick="window.location.href='Advanced.html'">Back to Toolbox</button>
+    <button type="button" onclick="window.location.href='index.html'">Back to Basic lab</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header-card">
+    <div class="header-title">
+      <h1>ABB REF615 Protection Parameter Calculator</h1>
+      <p>OEM-oriented REF615 setting worksheet for 50P/51P, 50N/51N and 67N functions. Verify final values in PCM600 and the applicable ABB technical manual.</p>
+    </div>
+    <div class="abb-badge">ABB</div>
+  </div>
+
+  <div class="grid-layout">
+    <!-- INPUT PANEL -->
+    <div class="section-card">
+      <div class="section-title">1. System & Instrument Transformer Data</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>CT Primary Current (I1n)</label>
+          <input type="number" id="ct1" value="800" step="10" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>CT Secondary Current (I2n)</label>
+          <select id="ct2" onchange="calculate()">
+            <option value="5" selected>5 A</option>
+            <option value="1">1 A</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>VT Primary Voltage (V1n)</label>
+          <input type="number" id="vt1" value="11000" step="100" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>VT Secondary Voltage (V2n)</label>
+          <input type="number" id="vt2" value="110" step="1" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Max Load Current (Iload,max)</label>
+          <input type="number" id="iload" value="600" step="10" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Overload Safety Factor (ksafety)</label>
+          <input type="number" id="ksafety" value="1.25" step="0.05" oninput="calculate()">
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 20px;">2. Overcurrent & Fault Levels (50/51)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Max Downstream Fault (Ifault,ds)</label>
+          <input type="number" id="ifault_ds" value="5000" step="100" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Expected Operating Fault (Ifault)</label>
+          <input type="number" id="ifault_op" value="2400" step="100" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>51 Curve Standard</label>
+          <select id="curve_type" onchange="calculate()">
+            <option value="iec_ni" selected>IEC Normal Inverse</option>
+            <option value="iec_vi">IEC Very Inverse</option>
+            <option value="iec_ei">IEC Extremely Inverse</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>51 Time Multiplier (TMS / k)</label>
+          <input type="number" id="tms" value="0.10" step="0.01" oninput="calculate()">
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 20px;">3. Earth Fault & Directional Parameters (51N / 67N)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>NGR Rated Current (INGR)</label>
+          <input type="number" id="ingr" value="400" step="10" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Earth Pickup Factor (% NGR)</label>
+          <input type="number" id="ngr_factor" value="0.20" step="0.05" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Grounding System Preset</label>
+          <select id="ground_type" onchange="updateRCA()">
+            <option value="res" selected>Low Resistance Earthed (RCA = 0°)</option>
+            <option value="solid">Solidly Earthed (RCA = -45°)</option>
+            <option value="isolated">Isolated/Ungrounded (RCA = -90°)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>67N Char Angle / RCA (deg)</label>
+          <input type="number" id="rca" value="0" step="1" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>67N Directional Mode</label>
+          <select id="dir_mode" onchange="calculate()">
+            <option value="Forward" selected>Forward</option>
+            <option value="Reverse">Reverse</option>
+            <option value="Non-directional">Non-directional</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>67N Polarization U0> (xUn)</label>
+          <input type="number" id="u0_pickup" value="0.05" step="0.01" oninput="calculate()">
+        </div>
+      </div>
+    </div>
+
+    <!-- CALCULATED RESULTS PANEL -->
+    <div class="section-card">
+      <div class="section-title">Calculated PCM600 Parameters</div>
+      
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Function Block / Parameter</th>
+            <th style="text-align:right;">Setting</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CT Ratio</strong><span class="pcm-path">Configuration -> Analog Inputs</span></td>
+            <td class="value" id="res-ct-ratio">160.00</td>
+            <td class="unit">ratio</td>
+          </tr>
+          <tr>
+            <td><strong>51 Pickup Setting (I>)</strong><span class="pcm-path">PHLPTOC1 -> Start value</span></td>
+            <td class="value" id="res-51-pu">0.938</td>
+            <td class="unit">xIn</td>
+          </tr>
+          <tr>
+            <td><strong>51 Operating Time @ Ifault</strong><span class="pcm-path">PHLPTOC1 -> Tripping delay</span></td>
+            <td class="value" id="res-51-time">0.301</td>
+            <td class="unit">sec</td>
+          </tr>
+          <tr>
+            <td><strong>50 Inst. Pickup (I>>)</strong><span class="pcm-path">PHHPTOC1 -> Start value</span></td>
+            <td class="value" id="res-50-pu">7.500</td>
+            <td class="unit">xIn</td>
+          </tr>
+          <tr>
+            <td><strong>51N Earth Fault Pickup (I0>)</strong><span class="pcm-path">EFLPTOC1 -> Start value</span></td>
+            <td class="value" id="res-ef-pu">0.100</td>
+            <td class="unit">xIn0</td>
+          </tr>
+          <tr>
+            <td><strong>67N Pickup (I0>)</strong><span class="pcm-path">DEFLPOC1 -> Start value</span></td>
+            <td class="value" id="res-67n-pu">0.100</td>
+            <td class="unit">xIn0</td>
+          </tr>
+          <tr>
+            <td><strong>67N Polarization Voltage (U0>)</strong><span class="pcm-path">DEFLPOC1 -> Voltage start val</span></td>
+            <td class="value" id="res-67n-u0">0.050</td>
+            <td class="unit">xUn</td>
+          </tr>
+          <tr>
+            <td><strong>67N Characteristic Angle (RCA)</strong><span class="pcm-path">DEFLPOC1 -> Char angle</span></td>
+            <td class="value" id="res-67n-rca">0</td>
+            <td class="unit">deg</td>
+          </tr>
+          <tr>
+            <td><strong>67N Directional Mode</strong><span class="pcm-path">DEFLPOC1 -> Directional mode</span></td>
+            <td class="value" id="res-67n-mode">Forward</td>
+            <td class="unit">-</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-title" style="margin-top: 20px;">51 Curve Characterization</div>
+      <div class="chart-container">
+        <canvas id="curveChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn-action" onclick="printSettings()">Print Results</button>
+    <button class="btn-action" onclick="exportSettings()">Export PCM600 Setting Report</button>
+  </div>
+  <div id="validation-status" style="font-size:12px;color:#9ba0a6;text-align:right;"></div>
+
+  <footer class="page-footer">
+    ⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid. Verify against manufacturer nameplate data and local codes before installation.
+  </footer>
+</div>
+
+<script>
+  function updateRCA() {
+    const type = document.getElementById('ground_type').value;
+    const rcaInput = document.getElementById('rca');
+    if (type === 'res') rcaInput.value = 0;
+    if (type === 'solid') rcaInput.value = -45;
+    if (type === 'isolated') rcaInput.value = -90;
+    calculate();
+  }
+
+  function num(id, fallback=0) {
+    const v = parseFloat(document.getElementById(id).value);
+    return Number.isFinite(v) ? v : fallback;
+  }
+
+  function calculate() {
+    const ct1 = num('ct1', 1);
+    const ct2 = num('ct2', 1);
+    const vt1 = num('vt1', 1);
+    const vt2 = num('vt2', 1);
+    const iload = num('iload', 0);
+    const ksafety = num('ksafety', 1.25);
+    const ifault_ds = num('ifault_ds', 0);
+    const ifault_op = num('ifault_op', 0);
+    const ingr = num('ingr', 0);
+    const ngr_factor = num('ngr_factor', 0);
+    const curveType = document.getElementById('curve_type').value;
+    const tms = num('tms', 0.1);
+    const u0 = num('u0_pickup', 0.05);
+    const rca = num('rca', 0);
+    const dirMode = document.getElementById('dir_mode').value;
+
+    const errors = [];
+    if (ct1 <= 0 || ct2 <= 0) errors.push("CT values must be greater than zero.");
+    if (vt1 <= 0 || vt2 <= 0) errors.push("VT values must be greater than zero.");
+    if (iload < 0 || ifault_ds < 0 || ifault_op < 0 || ingr < 0) errors.push("Current values cannot be negative.");
+    if (ksafety <= 0) errors.push("Safety factor must be greater than zero.");
+    if (ngr_factor < 0 || ngr_factor > 1) errors.push("Earth pickup factor should be between 0 and 1.");
+    if (tms <= 0) errors.push("TMS must be greater than zero.");
+    if (u0 < 0) errors.push("U0 pickup cannot be negative.");
+
+    const ctRatio = ct1 / ct2;
+    const vtRatio = vt1 / vt2;
+
+    // OEM-oriented worksheet calculations.
+    // 51P pickup is based on protected maximum load with the entered margin.
+    const i51_pri = ksafety * iload;
+    const i51_pu = ct1 > 0 ? i51_pri / ct1 : 0;
+
+    // IEC inverse curve constants used by the existing worksheet.
+    let alpha = 0.02, beta = 0.14, curveName = "IEC Normal Inverse";
+    if (curveType === 'iec_vi') { alpha = 1.0; beta = 13.5; curveName = "IEC Very Inverse"; }
+    if (curveType === 'iec_ei') { alpha = 2.0; beta = 80.0; curveName = "IEC Extremely Inverse"; }
+
+    const M = i51_pri > 0 ? ifault_op / i51_pri : 0;
+    const t51 = M > 1 ? tms * (beta / (Math.pow(M, alpha) - 1)) : Infinity;
+
+    // 50P high-stage pickup: user-entered downstream fault is used as a
+    // conservative worksheet reference; final coordination must be checked.
+    const i50_pri = 1.2 * ifault_ds;
+    const i50_pu = ct1 > 0 ? i50_pri / ct1 : 0;
+
+    // Residual/earth-fault pickup on the relay nominal current base.
+    const ief_pri = ngr_factor * ingr;
+    const ief_pu = ct1 > 0 ? ief_pri / ct1 : 0;
+
+    document.getElementById('res-ct-ratio').innerText = ctRatio.toFixed(2);
+    document.getElementById('res-51-pu').innerText = i51_pu.toFixed(3);
+    document.getElementById('res-51-time').innerText = Number.isFinite(t51) ? t51.toFixed(3) : "No Trip";
+    document.getElementById('res-50-pu').innerText = i50_pu.toFixed(3);
+    document.getElementById('res-ef-pu').innerText = ief_pu.toFixed(3);
+    document.getElementById('res-67n-pu').innerText = ief_pu.toFixed(3);
+    document.getElementById('res-67n-u0').innerText = u0.toFixed(3);
+    document.getElementById('res-67n-rca').innerText = rca;
+    document.getElementById('res-67n-mode').innerText = dirMode;
+
+    const status = document.getElementById('validation-status');
+    status.innerText = errors.length ? errors.join(" ") : `OEM worksheet mode • ${curveName} • CT ${ct1}/${ct2} A • VT ${vt1}/${vt2} V`;
+    status.style.color = errors.length ? "#ff6b6b" : "#9ba0a6";
+
+    drawCurve(i51_pri, alpha, beta, tms);
+  }
+
+  function drawCurve(iPickup, alpha, beta, tms) {
+    const canvas = document.getElementById('curveChart');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw Grid
+    ctx.strokeStyle = '#2e343b';
+    ctx.lineWidth = 1;
+    for(let x = 40; x < canvas.width; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height - 20); ctx.stroke();
+    }
+    for(let y = 10; y < canvas.height - 20; y += 30) {
+      ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Axes Labels
+    ctx.fillStyle = '#9ba0a6';
+    ctx.font = '10px Consolas';
+    ctx.fillText('Current (x I>)', canvas.width - 80, canvas.height - 5);
+    ctx.fillText('Time (s)', 5, 15);
+
+    // Plot Curve
+    ctx.strokeStyle = '#00d2ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    let first = true;
+    for (let pixelX = 40; pixelX < canvas.width; pixelX++) {
+      const M = 1.1 + ((pixelX - 40) / (canvas.width - 40)) * 18.9;
+      const t = tms * (beta / (Math.pow(M, alpha) - 1));
+      const pixelY = (canvas.height - 20) - (Math.min(t, 5) / 5) * (canvas.height - 30);
+
+      if (first) {
+        ctx.moveTo(pixelX, pixelY);
+        first = false;
+      } else {
+        ctx.lineTo(pixelX, pixelY);
+      }
+    }
+    ctx.stroke();
+  }
+
+  function exportSettings() {
+    const now = new Date().toLocaleString();
+    const report =
+`===================================================
+       ABB REF615 OEM-ORIENTED SETTING REPORT
+===================================================
+Generated: ${now}
+
+IMPORTANT:
+This is an engineering worksheet, not a substitute for
+the approved protection study, ABB/PCM600 configuration,
+relay firmware documentation, CT/VT data, or commissioning
+tests. Verify all final settings before applying them.
+
+1. ANALOG INPUTS
+---------------------------------------------------
+CT Primary (I1n)    : ${document.getElementById('ct1').value} A
+CT Secondary (I2n)  : ${document.getElementById('ct2').value} A
+CT Ratio            : ${document.getElementById('res-ct-ratio').innerText}
+VT Primary (V1n)    : ${document.getElementById('vt1').value} V
+VT Secondary (V2n)  : ${document.getElementById('vt2').value} V
+VT Ratio            : ${(num('vt1',1)/num('vt2',1)).toFixed(2)}
+
+2. PHASE OVERCURRENT 51P / PHLPTOC1
+---------------------------------------------------
+Start Value (I>)    : ${document.getElementById('res-51-pu').innerText} xIn
+Time Multiplier     : ${document.getElementById('tms').value}
+Curve               : ${document.getElementById('curve_type').selectedOptions[0].text}
+Operating Time      : ${document.getElementById('res-51-time').innerText} s
+Reference Fault     : ${document.getElementById('ifault_op').value} A
+
+3. HIGH-STAGE PHASE OVERCURRENT 50P / PHHPTOC1
+---------------------------------------------------
+Start Value (I>>)   : ${document.getElementById('res-50-pu').innerText} xIn
+Reference Downstream Fault : ${document.getElementById('ifault_ds').value} A
+Worksheet factor    : 1.20
+
+4. EARTH FAULT 51N / EFLPTOC1
+---------------------------------------------------
+NGR Rated Current   : ${document.getElementById('ingr').value} A
+Pickup Factor       : ${document.getElementById('ngr_factor').value}
+Start Value (I0>)   : ${document.getElementById('res-ef-pu').innerText} xIn0
+
+5. DIRECTIONAL EARTH FAULT 67N / DEFLPOC1
+---------------------------------------------------
+Operation           : On
+Directional Mode    : ${document.getElementById('res-67n-mode').innerText}
+Start Value (I0>)   : ${document.getElementById('res-67n-pu').innerText} xIn0
+Voltage Start (U0>) : ${document.getElementById('res-67n-u0').innerText} xUn
+Characteristic RCA  : ${document.getElementById('res-67n-rca').innerText} deg
+
+6. ENGINEERING CHECKS REQUIRED
+---------------------------------------------------
+[ ] Confirm REF615 hardware/order code and firmware version
+[ ] Confirm selected standard configuration and enabled function blocks
+[ ] Confirm CT/VT ratios, polarity and wiring
+[ ] Confirm protection study and grading with upstream/downstream relays
+[ ] Confirm CT saturation / burden and fault-current data
+[ ] Confirm 50P/51P/50N/51N/67N setting ranges in the applicable ABB manual
+[ ] Verify directional reference/polarity during commissioning
+[ ] Verify final settings in PCM600 before download
+[ ] Perform secondary injection / functional testing
+
+===================================================
+END OF REPORT
+===================================================`;
+
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'REF615_OEM_Setting_Report.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 500);
+  }
+
+  function printSettings() {
+    calculate();
+
+    const reportWindow = window.open('', '_blank', 'width=1000,height=800');
+    if (!reportWindow) {
+      window.print();
+      return;
+    }
+
+    const resultCard = document.querySelector('.grid-layout .section-card:last-child').outerHTML;
+    const header = document.querySelector('.header-card').outerHTML;
+    const footerText = document.querySelector('.page-footer').innerHTML;
+
+    reportWindow.document.open();
+    reportWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REF615 Protection Calculation Results</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: #111;
+    background: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+  }
+  .header-card {
+    border: 1px solid #bbb;
+    border-top: 4px solid #c00;
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .header-title h1 { margin: 0; font-size: 20px; }
+  .header-title p { margin: 5px 0 0; color: #444; line-height: 1.4; }
+  .abb-badge {
+    background: #d00; color: #fff; font-weight: 900;
+    font-size: 20px; padding: 5px 12px; border-radius: 4px;
+  }
+  .section-card {
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 14px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #ccc;
+  }
+  .results-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .results-table th, .results-table td {
+    padding: 7px 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  .results-table th { color: #555; font-size: 10px; text-transform: uppercase; }
+  .results-table td.value {
+    font-family: Consolas, monospace;
+    font-weight: 700;
+    color: #111;
+    text-align: right;
+  }
+  .results-table td.unit { color: #555; width: 50px; }
+  .pcm-path {
+    display: block;
+    font-size: 9px;
+    color: #555;
+    font-family: Consolas, monospace;
+  }
+  .chart-container { height: 230px; margin-top: 12px; }
+  canvas { width: 100%; border: 1px solid #aaa; }
+  .print-footer {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #bbb;
+    text-align: center;
+    color: #444;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+  .print-note {
+    margin-top: 10px;
+    font-size: 9px;
+    color: #555;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+  ${header}
+  ${resultCard}
+  <div class="print-note">
+    This result is a preliminary engineering calculation aid. Verify final protection settings against the applicable manufacturer documentation, approved protection study, commissioning requirements, and local codes before installation.
+  </div>
+  <div class="print-footer">${footerText}</div>
+<script>
+  window.onload = function() {
+    setTimeout(function() {
+      window.print();
+    }, 300);
+  };
+<\/script>
+</body>
+</html>`);
+    reportWindow.document.close();
+  }
+
+  window.addEventListener('resize', () => {
+    clearTimeout(window.__curveResizeTimer);
+    window.__curveResizeTimer = setTimeout(() => calculate(), 120);
+  });
+
+  window.onload = calculate;
+</script>
+
+</body>
+</html>

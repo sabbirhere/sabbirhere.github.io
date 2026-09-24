@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PSPC — Power System Protection Coordination</title>
+<style>
+:root{--bg:#0b1220;--card:#121c2b;--card2:#0e1725;--line:#26364d;--text:#e7edf5;--muted:#9aa9bb;--blue:#58a6ff;--green:#52c788;--amber:#f5b942;--red:#f06a6a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1500px;margin:auto;padding:18px}.hero{padding:18px 20px;position:relative;background:linear-gradient(135deg,#132238,#0e1725);border:1px solid var(--line);border-radius:14px;margin-bottom:16px}
+h1{margin:0;color:var(--blue);font-size:1.65rem}.sub{color:var(--muted);margin-top:4px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}.card h2{margin:0 0 13px;color:#b9d9ff;font-size:1.05rem}.card h3{color:#a9cfff;font-size:.92rem;margin:14px 0 8px}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}label{display:block;color:#aebaca;font-size:.78rem;margin:8px 0 4px}input,select{width:100%;padding:9px 10px;border:1px solid var(--line);background:#09111d;color:var(--text);border-radius:7px;font-size:.9rem}input:focus,select:focus{outline:2px solid #245b91}.bad-input{border-color:var(--red)!important}
+.note{font-size:.72rem;color:#8595a8;margin-top:-1px}.info{background:#0b1626;border:1px solid #294563;border-radius:8px;padding:10px;color:#aebaca;font-size:.78rem;margin-top:10px}.warn{border-color:#725821;color:#e5c36b}.danger{border-color:#743a40;color:#ff9a9a}.success{border-color:#235d43;color:#9ae2bd}
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.btn{border:0;border-radius:8px;padding:10px 15px;background:#1769aa;color:white;font-weight:700;cursor:pointer}.btn:hover{filter:brightness(1.12)}.back-toolbox{display:inline-block;margin-bottom:10px}.secondary{background:#344356}.green{background:#217a56}.amber{background:#8a6419}
+.section{margin:20px 0 8px;color:#86bfff;border-bottom:1px solid var(--line);padding-bottom:7px}.diagram{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px}.node{border:1px solid #3d6b9c;background:#17263a;border-radius:9px;padding:10px 13px;text-align:center;font-size:.78rem;min-width:105px}.arrow{color:var(--blue);font-size:1.2rem}
+table{width:100%;border-collapse:collapse;font-size:.78rem}th{background:#18263a;color:#b8d7fa;text-align:left;padding:8px}td{padding:8px;border-bottom:1px solid #1d2a3d}tr:hover td{background:#162337}.pass{color:var(--green);font-weight:700}.fail{color:var(--red);font-weight:700}.marginal{color:var(--amber);font-weight:700}
+.result{background:#09111d;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:10px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.kpi{background:#0b1625;border:1px solid var(--line);border-radius:8px;padding:10px}.kpi b{display:block;font-size:1.05rem;color:#d9ecff}.small{font-size:.72rem;color:var(--muted)}
+canvas{width:100%;height:auto;background:#07101b;border-radius:8px;border:1px solid var(--line)}
+.input-card input.bad-input,.input-card select.bad-input{box-shadow:0 0 0 1px rgba(240,106,106,.25)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}.table-wrap table{min-width:760px}.meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.tag{display:inline-block;padding:3px 7px;border:1px solid var(--line);border-radius:999px;font-size:.7rem;color:var(--muted);margin-right:5px}
+@media(max-width:1100px){.meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.meta-grid{grid-template-columns:1fr}}
+.footer{color:#718197;font-size:.72rem;margin-top:14px;text-align:center}.print-only{display:none}.checklist{display:grid;gap:6px;margin-top:10px}.check{padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#0b1625;font-size:.78rem}.check.pass{border-color:#235d43}.check.fail{border-color:#743a40}.check.warn{border-color:#725821}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.muted{color:var(--muted)}
+@media(max-width:1100px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:700px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid4{grid-template-columns:1fr}
+  .row{flex-direction:column;gap:0}
+  .wrap{padding:8px}
+  .card{padding:12px}
+  table{font-size:.7rem}
+  input,select{min-height:42px;font-size:16px}
+  .btn{min-height:42px;padding:10px 13px}
+  .btns{gap:7px}
+  .hero{padding:14px}
+  h1{font-size:1.3rem}
+  .sub{font-size:.78rem}
+  .info{font-size:.75rem}
+  .section{margin:16px 0 7px}
+}
+@media(max-width:600px){
+  /* Keep the protection one-line visually straight on narrow phones. */
+  .diagram{
+    flex-wrap:nowrap;
+    gap:2px;
+    padding:8px 2px;
+    width:100%;
+    overflow:hidden;
+  }
+  .diagram .node{
+    flex:1 1 0;
+    min-width:0;
+    width:auto;
+    padding:7px 2px;
+    font-size:clamp(.48rem,2.35vw,.68rem);
+    line-height:1.18;
+    overflow-wrap:normal;
+    word-break:normal;
+  }
+  .diagram .node .small{
+    font-size:clamp(.42rem,1.9vw,.58rem);
+  }
+  .diagram .arrow{
+    flex:0 0 auto;
+    font-size:clamp(.65rem,3vw,.9rem);
+    line-height:1;
+  }
+}
+@media(max-width:380px){
+  .diagram{gap:1px;padding-left:0;padding-right:0}
+  .diagram .node{padding:6px 1px;font-size:.46rem}
+  .diagram .node .small{font-size:.40rem}
+  .diagram .arrow{font-size:.62rem}
+}
+@media print{
+ body{background:white!important;color:#111!important;font-size:10pt}.wrap{max-width:none;padding:0}.hero{background:white!important;border:0;border-bottom:2px solid #222;border-radius:0;padding:0 0 8px;margin-bottom:10px}.hero .info,.sub,.note,.footer,.btns,input,select,label,.section:not(.print-section){display:none!important}.screen-only{display:none!important}.print-only{display:block!important}.card{background:white!important;border:1px solid #999;border-radius:0;color:#111;break-inside:avoid;page-break-inside:avoid}.card h2,.section{color:#111!important}.print-section{display:block!important;color:#111!important;border-bottom:2px solid #333}.print-section + .card{display:block!important}table{font-size:9pt;color:#111}th{background:#e8e8e8!important;color:#111!important}td{border-bottom:1px solid #ccc}canvas{width:100%!important;height:auto!important;border:1px solid #777;background:white!important}.result,.kpi{background:#fff!important;color:#111!important;border:1px solid #aaa}.kpi b{color:#111}.pass{color:#08783d!important}.fail{color:#b00020!important}.marginal{color:#8a5a00!important}@page{size:A4 landscape;margin:10mm}
+  /* PDF/print: show only calculated results and the time-current curve */
+  body > .wrap > .hero,
+  body > .wrap > .card:not(:has(.kpis)):not(:has(#tcc)):not(:has(#tbody)):not(:has(#setting-body)):not(:has(#ctbody)),
+  body > .wrap > .section:not(.print-section),
+  body > .wrap > .btns,
+  body > .wrap > .footer{display:none!important}
+  .print-section{display:block!important}
+  .print-section + .card{display:block!important}
+  .print-only{display:block!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<button class="btn secondary back-toolbox" onclick="window.location.href='Advanced.html'">← Back to Toolbox</button>
+<h1>PSPC — Power System Protection Coordination</h1>
+<div class="sub">3-phase phase-fault study • minimum/maximum source cases • IEC / IEEE inverse curves • radial feeder coordination • offline single-file calculator</div>
+<div class="info warn"><b>Engineering-use notice:</b> This is a study aid, not a protection-setting approval. Verify utility fault levels, transformer test data, conductor R/X, CT class and saturation, breaker clearing/interrupting data, relay manufacturer curves/tolerances, motor/transformer inrush, and applicable utility/code requirements before issuing settings.</div>
+</header>
+
+<div class="card">
+<h2>System one-line / assumed protection zones</h2>
+<div class="diagram">
+<div class="node">Utility<br><span class="small">min / max fault level</span></div><span class="arrow">→</span>
+<div class="node">Transformer<br><span id="d-tf">1000 kVA</span></div><span class="arrow">→</span>
+<div class="node">R1<br><span class="small">LV main @ 0%</span></div><span class="arrow">→</span>
+<div class="node">R2<br><span id="d-r2">feeder relay @ 25%</span></div><span class="arrow">→</span>
+<div class="node">R3<br><span id="d-r3">panel relay @ 60%</span></div><span class="arrow">→</span>
+<div class="node">Feeder end<br><span class="small">100%</span></div>
+</div>
+<div class="info">Protection zones are nested: R1 protects the full feeder, R2 starts at its entered feeder location and protects downstream of that point, and R3 starts at its entered location. A relay's sensitivity is checked using the weakest-source fault at the remote end of its own zone.</div>
+</div>
+
+<div class="card input-card">
+<h2>Study identification</h2>
+<div class="meta-grid">
+<div><label>Project / study name</label><input id="projectName" type="text" value="Protection Coordination Study"><div class="note">Use a project or facility name so printed results remain traceable.</div></div>
+<div><label>Study reference</label><input id="studyRef" type="text" value="EPSA-PCS-001"><div class="note">Revision-controlled study number or document reference.</div></div>
+<div><label>Prepared by</label><input id="preparedBy" type="text" value=""><div class="note">Person or team responsible for preparing the study.</div></div>
+<div><label>Revision</label><input id="revision" type="text" value="Rev 0"><div class="note">Update this whenever settings or assumptions change.</div></div>
+</div>
+<div class="small" style="margin-top:8px">The identification fields are included in print/PDF output and saved study files.</div>
+</div>
+
+<div class="section">1. System & fault model</div>
+<div class="grid">
+<div class="card input-card">
+<h2>Electrical system</h2>
+<div class="row">
+<div><label>HV/source voltage (kV)</label><input id="vhv" type="number" value="13.8" step=".1"><div class="note">Utility/source side voltage for converting source impedance to the LV base.</div></div>
+<div><label>LV/relay voltage (kV)</label><input id="vlv" type="number" value=".48" step=".01"><div class="note">Three-phase LV bus voltage used for fault-current calculations.</div></div>
+</div>
+<div class="row">
+<div><label>Transformer rating (kVA)</label><input id="kva" type="number" value="1000" step="50"><div class="note">Nameplate three-phase transformer rating.</div></div>
+<div><label>Transformer impedance Z (%)</label><input id="tz" type="number" value="6" step=".1"><div class="note">Positive-sequence transformer impedance on its own nameplate base.</div></div>
+</div>
+<div class="row">
+<div><label>Transformer resistance R (%)</label><input id="tfrpct" type="number" value=".60" step=".01" min="0"><div class="note">Percentage resistance on transformer base—not a percentage of the already converted ohmic Z.</div></div>
+<div><label>Frequency (Hz)</label><input id="freq" type="number" value="50" step="1" min="1"><div class="note">Used only for the generic instantaneous relay nominal time assumption.</div></div>
+</div>
+</div>
+<div class="card input-card">
+<h2>Source & feeder</h2>
+<div class="row">
+<div><label>Minimum utility 3-phase short-circuit MVA</label><input id="scmvaMin" type="number" value="250" step="10" min="1"><div class="note">Weak-source case used for relay sensitivity. If only one utility value is known, set min = max.</div></div>
+<div><label>Maximum utility 3-phase short-circuit MVA</label><input id="scmvaMax" type="number" value="500" step="10" min="1"><div class="note">Strong-source case used for maximum fault duty and high-set selectivity.</div></div>
+</div>
+<div class="row">
+<div><label>Utility source X/R ratio</label><input id="srcxr" type="number" value="10" step=".1" min="0"><div class="note">Use utility-provided positive-sequence X/R where available.</div></div>
+<div><label>Feeder length (km)</label><input id="len" type="number" value="1" step=".01" min=".01"><div class="note">One-way physical feeder length.</div></div>
+</div>
+<div class="row">
+<div><label>Conductor R at 20 °C (Ω/km)</label><input id="rkm" type="number" value=".08" step=".001" min="0"><div class="note">Positive-sequence R at 20 °C; ×1.2 is applied automatically to the minimum-fault (hot conductor) case.</div></div>
+<div><label>Conductor X (Ω/km)</label><input id="xkm" type="number" value=".10" step=".001" min="0"><div class="note">Positive-sequence reactance.</div></div>
+</div>
+</div>
+</div>
+<div class="card input-card">
+<h2>Practical loading checks</h2>
+<div class="row">
+<div><label>Load power factor</label><input id="loadpf" type="number" value="0.90" min="0.50" max="1" step=".01"><div class="note">Used only for the optional feeder voltage-drop estimate.</div></div>
+<div><label>Feeder design ampacity (A)</label><input id="feederAmp" type="number" value="1600" min="0" step="10"><div class="note">Enter the actual cable/conductor ampacity for a simple thermal sanity check; 0 disables it.</div></div>
+</div>
+<div class="row"><div><label>Cable conductor area per phase (mm², total; 0 = skip)</label><input id="cableS" type="number" value="0" min="0" step="10"><div class="note">Enables cable I²t withstand check against relay clearing time.</div></div><div><label>Cable k constant (Cu XLPE 143, Cu PVC 115)</label><input id="cablek" type="number" value="143" min="1" step="1"></div></div>
+<div class="info">These are supplemental engineering checks. They do not replace cable ampacity calculations, installation derating, temperature correction, motor starting analysis, or a detailed voltage-drop study.</div>
+</div>
+
+<div class="section">2. Protection locations, CTs & coordination criteria</div>
+<div class="grid">
+<div class="card input-card">
+<h2>Relay locations and CTs</h2>
+<div class="row">
+<div><label>Relay 2 feeder location (%)</label><input id="r2loc" type="number" value="25" min="1" max="98" step="1"><div class="note">R2 is assumed at this percentage of feeder length from the LV bus.</div></div>
+<div><label>Relay 3 feeder location (%)</label><input id="r3loc" type="number" value="60" min="2" max="99" step="1"><div class="note">R3 is assumed downstream of R2 at this feeder percentage.</div></div>
+</div>
+<div class="row">
+<div><label>Relay 1 CT primary (A)</label><input id="ct1p" type="number" value="1600"><div class="note">Example 1600/1 A. Primary rating is a sanity check, not a saturation calculation.</div></div>
+<div><label>Relay 1 CT secondary (A)</label><input id="ct1s" type="number" value="1"><div class="note">Usually 1 A or 5 A; must match the actual relay input.</div></div>
+</div>
+<div class="row">
+<div><label>Relay 2 CT primary (A)</label><input id="ct2p" type="number" value="1000"><div class="note">CT ratio used to convert primary pickup/fault current to relay current.</div></div>
+<div><label>Relay 2 CT secondary (A)</label><input id="ct2s" type="number" value="1"><div class="note">Usually 1 A or 5 A; must match the actual relay input.</div></div>
+</div>
+<div class="row">
+<div><label>Relay 3 CT primary (A)</label><input id="ct3p" type="number" value="500"><div class="note">Review CT class, burden and saturation separately.</div></div>
+<div><label>Relay 3 CT secondary (A)</label><input id="ct3s" type="number" value="1"><div class="note">Usually 1 A or 5 A; must match the actual relay input.</div></div>
+</div>
+</div>
+<div class="card input-card">
+<h2>Coordination criteria</h2>
+<div class="row">
+<div><label>Safety margin added to breaker + relay allowances (s)</label><input id="cti" type="number" value=".30" min=".05" step=".01"><div class="note">Total required separation = this + breaker clearing + relay/CT allowance. If your utility CTI already includes those, set them to 0.</div></div>
+<div><label>Downstream breaker clearing time (s)</label><input id="breaker" type="number" value=".08" min="0" step=".01"><div class="note">Use the actual breaker clearing time or a conservative value.</div></div>
+</div>
+<div class="row">
+<div><label>Relay / CT timing allowance (s)</label><input id="relaytol" type="number" value=".05" min="0" step=".01"><div class="note">Generic allowance for relay/CT error, overtravel and study uncertainty. Replace with manufacturer data.</div></div>
+<div><label>Pickup margin above max load (×)</label><input id="loadmargin" type="number" value="1.20" min="1.01" step=".01"><div class="note">Study assumption only. Review against motor starting, transformer inrush and emergency loading.</div></div>
+</div>
+<div class="row">
+<div><label>Sensitivity target (fault / pickup ×)</label><input id="sensmult" type="number" value="1.50" min="1.05" step=".05"><div class="note">Weak-source remote fault should be at least this multiple of pickup.</div></div>
+<div><label>Instantaneous nominal operate time (cycles)</label><input id="instcycles" type="number" value="1" min=".1" step=".1"><div class="note">Generic relay-only assumption; breaker clearing time remains separate.</div></div>
+</div>
+</div>
+</div>
+
+<div class="section">3. CT, breaker & device data</div>
+<div class="grid grid3">
+<div class="card input-card"><h2>R1 CT / breaker data</h2>
+<label>CT class / designation</label><input id="ct1class" type="text" value="5P20"><div class="note">Actual CT class, e.g. 5P20, PX, C100, etc.</div>
+<label>CT winding resistance (Ω)</label><input id="ct1r" type="number" value="0.15" min="0" step=".01"><div class="note">Use the measured or manufacturer value where available.</div>
+<label>Lead resistance to relay (Ω)</label><input id="ct1lead" type="number" value="0.10" min="0" step=".01"><div class="note">One-way plus return loop resistance as applicable to your study basis.</div>
+<label>CT burden (VA)</label><input id="ct1burden" type="number" value="10" min="0" step=".5"><div class="note">Actual CT connected burden if known.</div>
+<label>CT knee-point voltage (V; 0 = not entered)</label><input id="ct1knee" type="number" value="0" min="0" step="1"><div class="note">Useful for PX / saturation checks; 0 means no knee-point check.</div>
+<label>Breaker short-time withstand (kA; 0 = not entered)</label><input id="br1st" type="number" value="0" min="0" step=".1"><div class="note">Symmetrical RMS withstand rating if provided by the breaker manufacturer.</div>
+<label>Relay model / setting file reference</label><input id="r1model" type="text" value="Generic"><div class="note">Record the actual relay model or settings-file reference.</div></div>
+<div class="card input-card"><h2>R2 CT / breaker data</h2>
+<label>CT class / designation</label><input id="ct2class" type="text" value="5P20"><div class="note">Actual CT class or protection class.</div>
+<label>CT winding resistance (Ω)</label><input id="ct2r" type="number" value="0.15" min="0" step=".01"><div class="note">Measured or manufacturer value.</div>
+<label>Lead resistance to relay (Ω)</label><input id="ct2lead" type="number" value="0.10" min="0" step=".01"><div class="note">Total lead-loop resistance used in the saturation sanity check.</div>
+<label>CT burden (VA)</label><input id="ct2burden" type="number" value="10" min="0" step=".5"><div class="note">Actual connected burden if known.</div>
+<label>CT knee-point voltage (V; 0 = not entered)</label><input id="ct2knee" type="number" value="0" min="0" step="1"><div class="note">Useful for PX / saturation checks.</div>
+<label>Breaker short-time withstand (kA; 0 = not entered)</label><input id="br2st" type="number" value="0" min="0" step=".1"><div class="note">Symmetrical RMS withstand rating; 0 disables this check.</div>
+<label>Relay model / setting file reference</label><input id="r2model" type="text" value="Generic"><div class="note">Record actual relay model or settings-file reference.</div></div>
+<div class="card input-card"><h2>R3 CT / breaker data</h2>
+<label>CT class / designation</label><input id="ct3class" type="text" value="5P20"><div class="note">Actual CT class or protection class.</div>
+<label>CT winding resistance (Ω)</label><input id="ct3r" type="number" value="0.15" min="0" step=".01"><div class="note">Measured or manufacturer value.</div>
+<label>Lead resistance to relay (Ω)</label><input id="ct3lead" type="number" value="0.10" min="0" step=".01"><div class="note">Total lead-loop resistance used in the saturation sanity check.</div>
+<label>CT burden (VA)</label><input id="ct3burden" type="number" value="10" min="0" step=".5"><div class="note">Actual connected burden if known.</div>
+<label>CT knee-point voltage (V; 0 = not entered)</label><input id="ct3knee" type="number" value="0" min="0" step="1"><div class="note">Useful for PX / saturation checks.</div>
+<label>Breaker short-time withstand (kA; 0 = not entered)</label><input id="br3st" type="number" value="0" min="0" step=".1"><div class="note">Symmetrical RMS withstand rating; 0 disables this check.</div>
+<label>Relay model / setting file reference</label><input id="r3model" type="text" value="Generic"><div class="note">Record actual relay model or settings-file reference.</div></div>
+</div>
+
+<div class="section">4. Relay settings</div>
+<div class="grid grid3">
+<div class="card input-card"><h2>Relay 1 — Main / Upstream</h2>
+<label>Curve standard</label><select id="r1std"><option value="iec">IEC 60255-151 style</option><option value="ieee">IEEE C37.112 style</option></select><div class="note">Use the generic curve family matching the actual relay study basis.</div>
+<label>Curve type</label><select id="r1curve"></select>
+<label>Pickup Is — primary A</label><input id="r1is" type="number" value="1200" step="1" min="1"><div class="note">51 pickup setting in primary amperes for this study.</div>
+<label>Maximum normal load current — primary A</label><input id="r1load" type="number" value="1000" step="10" min="0"><div class="note">Highest credible continuous through-current in R1's zone.</div>
+<label>TMS / TD</label><input id="r1tms" type="number" value=".19" min=".001" step=".001"><div class="note">Inverse-time multiplier.</div>
+<label>Instantaneous pickup — primary A; 0 = disabled</label><input id="r1inst" type="number" value="0" min="0" step="100"><div class="note">Conservative check: if enabled, R1 must remain above the maximum downstream through-fault to preserve selectivity.</div>
+<label>Auto-coordinate pickup step (A)</label><input id="r1step" type="number" value="10" min="1" step="1"><div class="note">Only used by Auto-coordinate.</div>
+<label>Auto TMS / TD minimum</label><input id="r1tmsMin" type="number" value=".05" min=".001" step=".01"><div class="note">Enter the actual relay's minimum TMS/TD if different.</div>
+<label>Auto TMS / TD maximum</label><input id="r1tmsMax" type="number" value="3.00" min=".01" step=".01"><div class="note">Enter the actual relay's maximum TMS/TD if different.</div>
+<label>Breaker interrupting rating (kA)</label><input id="br1int" type="number" value="25" min=".1" step=".1"><div class="note">Actual interrupting rating at R1 location; replaces the example value.</div>
+<div class="result" id="r1info"></div></div>
+
+<div class="card input-card"><h2>Relay 2 — Feeder / Mid</h2>
+<label>Curve standard</label><select id="r2std"><option value="iec">IEC 60255-151 style</option><option value="ieee">IEEE C37.112 style</option></select><div class="note">Use the generic curve family matching the actual relay study basis.</div>
+<label>Curve type</label><select id="r2curve"></select>
+<label>Pickup Is — primary A</label><input id="r2is" type="number" value="1000" step="1" min="1"><div class="note">51 pickup in primary amperes.</div>
+<label>Maximum normal load current — primary A</label><input id="r2load" type="number" value="650" step="10" min="0"><div class="note">Highest credible continuous downstream through-current.</div>
+<label>TMS / TD</label><input id="r2tms" type="number" value=".07" min=".001" step=".001"><div class="note">Inverse-time multiplier.</div>
+<label>Instantaneous pickup — primary A; 0 = disabled</label><input id="r2inst" type="number" value="0" min="0" step="100"><div class="note">Check that R2 high-set remains selective from downstream R3 faults.</div>
+<label>Auto-coordinate pickup step (A)</label><input id="r2step" type="number" value="10" min="1" step="1"><div class="note">Only used by Auto-coordinate.</div>
+<label>Auto TMS / TD minimum</label><input id="r2tmsMin" type="number" value=".05" min=".001" step=".01"><div class="note">Enter the actual relay's minimum TMS/TD if different.</div>
+<label>Auto TMS / TD maximum</label><input id="r2tmsMax" type="number" value="3.00" min=".01" step=".01"><div class="note">Enter the actual relay's maximum TMS/TD if different.</div>
+<label>Breaker interrupting rating (kA)</label><input id="br2int" type="number" value="25" min=".1" step=".1"><div class="note">Actual interrupting rating at R2 location; replaces the example value.</div>
+<div class="result" id="r2info"></div></div>
+
+<div class="card input-card"><h2>Relay 3 — Panel / Downstream</h2>
+<label>Curve standard</label><select id="r3std"><option value="iec">IEC 60255-151 style</option><option value="ieee">IEEE C37.112 style</option></select><div class="note">Use the generic curve family matching the actual relay study basis.</div>
+<label>Curve type</label><select id="r3curve"></select>
+<label>Pickup Is — primary A</label><input id="r3is" type="number" value="360" step="1" min="1"><div class="note">51 pickup in primary amperes.</div>
+<label>Maximum normal load current — primary A</label><input id="r3load" type="number" value="300" step="10" min="0"><div class="note">Highest credible continuous downstream through-current.</div>
+<label>TMS / TD</label><input id="r3tms" type="number" value=".05" min=".001" step=".001"><div class="note">Inverse-time multiplier.</div>
+<label>Instantaneous pickup — primary A; 0 = disabled</label><input id="r3inst" type="number" value="0" min="0" step="100"><div class="note">For R3, an enabled instantaneous element should generally remain below the minimum fault in its own zone.</div>
+<label>Auto-coordinate pickup step (A)</label><input id="r3step" type="number" value="10" min="1" step="1"><div class="note">Only used by Auto-coordinate.</div>
+<label>Auto TMS / TD minimum</label><input id="r3tmsMin" type="number" value=".05" min=".001" step=".01"><div class="note">Enter the actual relay's minimum TMS/TD if different.</div>
+<label>Auto TMS / TD maximum</label><input id="r3tmsMax" type="number" value="3.00" min=".01" step=".01"><div class="note">Enter the actual relay's maximum TMS/TD if different.</div>
+<label>Breaker interrupting rating (kA)</label><input id="br3int" type="number" value="25" min=".1" step=".1"><div class="note">Actual interrupting rating at R3 location; replaces the example value.</div>
+<div class="result" id="r3info"></div></div>
+</div>
+
+<div class="btns">
+<button class="btn" onclick="calculate()">Calculate & Plot</button>
+<button class="btn green" onclick="autoCoordinate()">Auto-coordinate (zone-aware)</button>
+<button class="btn secondary" onclick="estimateFaults()">Recalculate Faults</button>
+<button class="btn secondary" onclick="resetDefaults()">Reset</button>
+<button class="btn amber" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<div class="section print-section">5. Fault-current results — weak and strong source cases</div>
+<div class="card">
+<div class="kpis">
+<div class="kpi"><span class="small">LV bus F1 — min / max</span><b id="f1out">—</b></div>
+<div class="kpi"><span class="small">Feeder end — min / max</span><b id="fendout">—</b></div>
+<div class="kpi"><span class="small">LV transformer FLA</span><b id="flaout">—</b></div>
+<div class="kpi"><span class="small">Total coordination allowance</span><b id="allowout">—</b></div>
+</div>
+<div id="faultnote" class="info"></div><div id="impedanceNote" class="info mono"></div>
+<div class="table-wrap"><table><thead><tr><th>Location</th><th>Distance</th><th>Weak source current</th><th>Strong source current</th><th>Primary relay</th><th>R1 sees?</th><th>R2 sees?</th><th>R3 sees?</th></tr></thead><tbody id="fault-body"></tbody></table></div>
+</div>
+
+<div class="section print-section">6. Time-current curve</div>
+<div class="card"><canvas id="tcc" width="1200" height="620"></canvas><div class="small" style="margin-top:7px">Log-log axes. Relay curves are idealized generic IEC/IEEE characteristics. Fault markers show weak-source and strong-source current locations. Breaker clearing, CT saturation and manufacturer tolerance bands are not drawn on the canvas; they are checked numerically.</div></div>
+
+<div class="section print-section">7. Coordination check — all relevant fault locations and both source cases</div>
+<div class="card">
+<div class="table-wrap"><table><thead><tr><th>Case</th><th>Fault</th><th>Current</th><th>Primary</th><th>R3 trip</th><th>R2 trip</th><th>R1 trip</th><th>Primary total clear</th><th>R2−R3 margin</th><th>R1−R2 margin</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<div id="overall" class="info"></div>
+</div>
+
+<div class="section print-section">8. Relay setting sheet</div>
+<div class="card print-only">
+<h2>EPSA — Relay Settings Summary</h2>
+<div class="info"><b>Study:</b> <span id="printMeta">—</span><br><b>Use:</b> Transfer/check these values against the actual relay software and manufacturer documentation. This is not a substitute for final protection-setting approval.</div>
+<table><thead><tr><th>Relay</th><th>Zone start</th><th>CT ratio</th><th>Curve</th><th>51 pickup primary</th><th>51 pickup secondary</th><th>TMS / TD</th><th>High-set primary</th><th>High-set secondary</th><th>Relay model</th></tr></thead><tbody id="setting-body"></tbody></table></div>
+</div>
+
+<div class="section print-section">9. Sensitivity, CT & setting checks</div>
+<div class="card"><div class="table-wrap"><table><thead><tr><th>Relay</th><th>Zone</th><th>Weak-source min fault (ph-ph)</th><th>Pickup</th><th>Sensitivity</th><th>Strong-source downstream max fault</th><th>High-set</th><th>CT load secondary</th><th>Breaker duty / rating</th><th>Status</th></tr></thead><tbody id="ctbody"></tbody></table></div></div>
+
+<div class="section">10. Practical study checks</div>
+<div class="card"><div id="studyChecks" class="checklist"></div></div>
+
+<div class="section">11. Calculation basis & limitations</div>
+<div class="card">
+<h3>Fault-current model</h3>
+<div class="info">The model calculates symmetrical 3-phase bolted fault current as I = VLL / (√3 × |Zsource + Ztransformer + Zfeeder|). Source impedance is derived from short-circuit MVA and X/R and referred to the LV bus. Transformer Z% and R% are both calculated on the transformer base; X is then obtained from √(Z²−R²). Feeder positive-sequence R/X is added for the entered fault distance. Maximum case uses c=1.05, transformer Z −7.5% and cold conductor R; minimum case uses c=0.95, transformer Z +7.5% and hot conductor R (×1.2). Sensitivity uses the phase-to-phase minimum (0.866 × three-phase). Breaker duty is multiplied by an X/R factor relative to the standard test power factor; CT saturation uses maximum fault × (1+X/R). This is an engineering approximation, not a full IEC 60909 study.</div>
+<h3>Inverse-time relay model</h3>
+<div class="info">IEC mode: t = TMS × k / (M^α − 1). IEEE mode: t = TD × [A/(M^p − 1) + B], where M = I/Is. The curve constants are generic standard-family values. Confirm exact manufacturer curve, minimum operating time, reset behavior, tolerances and setting increments before issuing settings.</div>
+<h3>High-set selectivity model</h3>
+<div class="info">For an enabled upstream high-set, the study checks it against the maximum strong-source fault in the next downstream relay's zone. If the upstream high-set is below that downstream through-fault level, the model flags a selectivity concern. For R3, an enabled high-set is checked against the minimum weak-source fault in R3's own zone.</div>
+<h3>What this tool does not calculate</h3>
+<div class="info danger">It does not calculate motor fault contribution, transformer damage (ANSI C57.109) curves, earth-fault/zero-sequence, negative-sequence, arc-flash incident energy, CT saturation/transient performance, directional elements, communication-assisted schemes, motor starting/inrush, transformer energization/inrush, fuse curves, breaker mechanical scatter as a time curve, or formal IEC/IEEE compliance certification.</div>
+</div>
+
+<div class="footer">⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid. Verify against manufacturer nameplate data and local codes before installation.</div>
+</div>
+
+<script>
+const IEC={
+ si:{name:"Standard Inverse",k:.14,a:.02},
+ vi:{name:"Very Inverse",k:13.5,a:1},
+ ei:{name:"Extremely Inverse",k:80,a:2},
+ lti:{name:"Long Time Inverse",k:120,a:1}
+};
+const IEEE={
+ mi:{name:"Moderately Inverse",A:.0515,B:.114,p:.02},
+ vi:{name:"Very Inverse",A:19.61,B:.491,p:2},
+ ei:{name:"Extremely Inverse",A:28.2,B:.1217,p:2}
+};
+const relayNames=["Relay 1","Relay 2","Relay 3"], ids=["r1","r2","r3"];
+let faultPct=[0,10,25,50,75,100];
+function el(id){return document.getElementById(id)}
+function num(id){const v=Number(el(id).value);return Number.isFinite(v)?v:NaN}
+function fmt(t){return Number.isFinite(t)?t.toFixed(3)+" s":"—"}
+function fmtA(v){return Number.isFinite(v)?Math.round(v).toLocaleString()+" A":"—"}
+function curveTime(I,Is,tms,std,key){
+ if(!(I>Is) || !(Is>0) || !(tms>0)) return Infinity;
+ const M=I/Is;
+ if(std==="iec"){const c=IEC[key];return tms*c.k/(Math.pow(M,c.a)-1)}
+ const c=IEEE[key];return tms*(c.A/(Math.pow(M,c.p)-1)+c.B);
+}
+function instTime(){return num("instcycles")/(num("freq")||50)}
+function trip(I,n){
+ const Is=num(`r${n}is`),inst=num(`r${n}inst`);
+ if(inst>0 && I>=inst)return instTime();
+ return curveTime(I,Is,num(`r${n}tms`),el(`r${n}std`).value,el(`r${n}curve`).value);
+}
+function splitImpedance(zmag,xr){
+ if(!(zmag>=0) || !(xr>=0))return {r:NaN,x:NaN};
+ const r=zmag/Math.sqrt(1+xr*xr);return {r,x:r*xr};
+}
+function transformerImpedance(zbase,zpct,rpct){
+ const Z=zbase*zpct/100;
+ const R=zbase*rpct/100;
+ if(!(Z>=0&&R>=0)||R>Z)return {r:NaN,x:NaN};
+ return {r:R,x:Math.sqrt(Math.max(0,Z*Z-R*R)),Z};
+}
+function system(sourceMVA,mode){const mx=mode==="max",c=mx?1.05:.95,tk=mx?.925:1.075,rk=mx?1:1.2;
+ const V=num("vlv")*1000,S=num("kva")*1000,Vhv=num("vhv")*1000;
+ const zbaseLV=V*V/S;
+ const zsrcHVmag=Vhv*Vhv/(sourceMVA*1e6);
+ const ratio=V/Vhv,zsrcLVmag=zsrcHVmag*ratio*ratio;
+ const zsrc=splitImpedance(zsrcLVmag,num("srcxr"));
+ const ztf=transformerImpedance(zbaseLV,num("tz")*tk,num("tfrpct")*tk);
+ const zf={r:num("rkm")*num("len")*rk,x:num("xkm")*num("len")};
+ const r2=num("r2loc")/100,r3=num("r3loc")/100;
+ const sum=(a,b)=>({r:a.r+b.r,x:a.x+b.x});
+ const zbase=sum(zsrc,ztf);
+ const points=faultPct.map(p=>{
+   const frac=p/100,z=sum(zbase,{r:zf.r*frac,x:zf.x*frac}),I=c*V/(Math.sqrt(3)*Math.hypot(z.r,z.x));
+   const seen=[true,frac+1e-9>=r2,frac+1e-9>=r3];
+   const primary=seen[2]?3:(seen[1]?2:1);
+   return {pct:p,distanceKm:num("len")*frac,z,I,seen,primary};
+ });
+ return {c,V,S,Vhv,zbaseLV,zbase,zsrcHVmag,zsrcLVmag,zsrc,ztf,zf,points,fla:S/(Math.sqrt(3)*V),sourceMVA};
+}
+function studies(){faultPct=[...new Set([0,10,25,50,75,100,num("r2loc"),num("r3loc")])].filter(Number.isFinite).sort((a,b)=>a-b);return {weak:system(num("scmvaMin"),"min"),strong:system(num("scmvaMax"),"max")}}
+function currentAtPct(st,pct){
+ const frac=pct/100,z={r:st.zbase.r+st.zf.r*frac,x:st.zbase.x+st.zf.x*frac};
+ return st.c*st.V/(Math.sqrt(3)*Math.hypot(z.r,z.x));
+}
+function validateInputs(){
+ const errors=[], invalid=new Set();
+ const bad=(ids,msg)=>{errors.push(msg);(Array.isArray(ids)?ids:[ids]).forEach(id=>invalid.add(id));};
+ document.querySelectorAll('.bad-input').forEach(x=>x.classList.remove('bad-input'));
+ const required=["vhv","vlv","kva","tz","tfrpct","freq","scmvaMin","scmvaMax","srcxr","len","rkm","xkm","r2loc","r3loc","cti","breaker","relaytol","loadmargin","sensmult","instcycles","loadpf","feederAmp"];
+ required.forEach(id=>{if(!(num(id)>=0))bad(id,`${id} must be numeric and non-negative.`)});
+ if(!(num("vhv")>0&&num("vlv")>0&&num("kva")>0&&num("tz")>0&&num("freq")>0&&num("scmvaMin")>0&&num("scmvaMax")>0))bad(["vhv","vlv","kva","tz","freq","scmvaMin","scmvaMax"],"Voltage, transformer rating, Z%, frequency and source fault levels must be greater than zero.");
+ if(num("scmvaMin")>num("scmvaMax"))bad(["scmvaMin","scmvaMax"],"Minimum source fault MVA cannot exceed maximum source fault MVA.");
+ if(!(num("r2loc")>0&&num("r2loc")<num("r3loc")&&num("r3loc")<100))bad(["r2loc","r3loc"],"Protection locations must satisfy 0% < R2 location < R3 location < 100%.");
+ if(num("tfrpct")>num("tz"))bad(["tfrpct","tz"],"Transformer R% cannot exceed transformer Z%.");
+ if(!(num("loadmargin")>1))bad("loadmargin","Pickup load margin must be greater than 1.0×.");
+ if(!(num("loadpf")>=.5&&num("loadpf")<=1))bad("loadpf","Load power factor must be between 0.50 and 1.00.");
+ if(num("srcxr")<0||num("rkm")<0||num("xkm")<0)bad(["srcxr","rkm","xkm"],"Source X/R and feeder R/X values cannot be negative.");
+ for(let n=1;n<=3;n++){
+  const cp=num(`ct${n}p`),cs=num(`ct${n}s`),Is=num(`r${n}is`),load=num(`r${n}load`),tms=num(`r${n}tms`),inst=num(`r${n}inst`),step=num(`r${n}step`),tmin=num(`r${n}tmsMin`),tmax=num(`r${n}tmsMax`),br=num(`br${n}int`),st=num(`br${n}st`),rct=num(`ct${n}r`),lead=num(`ct${n}lead`),burden=num(`ct${n}burden`),knee=num(`ct${n}knee`);
+  const ids=[`ct${n}p`,`ct${n}s`,`r${n}is`,`r${n}load`,`r${n}tms`,`r${n}inst`,`r${n}step`,`r${n}tmsMin`,`r${n}tmsMax`,`br${n}int`,`br${n}st`,`ct${n}r`,`ct${n}lead`,`ct${n}burden`,`ct${n}knee`];
+  if(!(cp>0&&cs>0&&Is>0&&load>=0&&tms>0&&inst>=0&&step>0&&tmin>0&&tmax>=tmin&&br>0&&st>=0&&rct>=0&&lead>=0&&burden>=0&&knee>=0))bad(ids,`Relay ${n}: CT, pickup, load, TMS, TMS limits, instantaneous, CT data and breaker ratings must be valid.`);
+  if(inst>0&&inst<=Is)bad([`r${n}inst`,`r${n}is`],`Relay ${n}: instantaneous pickup should normally be above the 51 pickup, or set it to 0 to disable it.`);
+ }
+ invalid.forEach(id=>{if(el(id))el(id).classList.add('bad-input')});
+ return errors;
+}
+function zoneStart(n){return n===1?0:n===2?num("r2loc"):num("r3loc")}
+function zonePoints(n,study){return study.points.filter(p=>p.pct+1e-9>=zoneStart(n))}
+const LL=Math.sqrt(3)/2;function minimumWeakFault(n,st){return LL*Math.min(...zonePoints(n,st.weak).map(p=>p.I))}
+function maximumStrongDownstreamFault(n,st){
+ if(n===3)return Math.max(...zonePoints(3,st.strong).map(p=>p.I));
+ return Math.max(...zonePoints(n+1,st.strong).map(p=>p.I));
+}
+function faultByPct(st,p){return st.points.find(x=>x.pct===p)}
+function xrAt(st,pct){const f=pct/100;return (st.zbase.x+st.zf.x*f)/(st.zbase.r+st.zf.r*f)}
+function brkDuty(st,pct,rating){const kf=v=>1.02+.98*Math.exp(-3/v),xt=rating<=10?1.73:rating<=20?3.18:rating<=50?3.87:4.9;return currentAtPct(st,pct)/1000*Math.max(1,kf(xrAt(st,pct))/kf(xt))}
+function estimateFaults(){
+ const st=studies(), w=st.weak,s=st.strong;
+ el("f1out").textContent=`${fmtA(w.points[0].I)} / ${fmtA(s.points[0].I)}`;
+ const endW=w.points[w.points.length-1].I,endS=s.points[s.points.length-1].I;
+ el("fendout").textContent=`${fmtA(endW)} / ${fmtA(endS)}`;
+ el("flaout").textContent=fmtA(w.fla);
+ const allow=num("cti")+num("breaker")+num("relaytol");el("allowout").textContent=allow.toFixed(2)+" s";
+ el("d-tf").textContent=`${num("kva").toLocaleString()} kVA`;
+ el("d-r2").textContent=`feeder relay @ ${num("r2loc").toFixed(0)}%`;
+ el("d-r3").textContent=`panel relay @ ${num("r3loc").toFixed(0)}%`;
+ const tbody=el("fault-body");
+ tbody.innerHTML=faultPct.map((p,i)=>{const pw=w.points[i],ps=s.points[i];const pname=`R${pw.primary}`;return `<tr><td>F${i+1} — ${p}%</td><td>${pw.distanceKm.toFixed(3)} km</td><td>${fmtA(pw.I)}</td><td>${fmtA(ps.I)}</td><td><b>${pname}</b></td><td>${pw.seen[0]?"Yes":"No"}</td><td>${pw.seen[1]?"Yes":"No"}</td><td>${pw.seen[2]?"Yes":"No"}</td></tr>`}).join("");
+ el("faultnote").innerHTML=`<b>Fault study:</b> weak-source case = ${num("scmvaMin").toFixed(0)} MVA; strong-source case = ${num("scmvaMax").toFixed(0)} MVA. Sensitivity uses the weak-source case; maximum fault/high-set checks use the strong-source case.`;
+ el("impedanceNote").textContent=`LV base Z = ${w.zbaseLV.toFixed(6)} Ω; weak-source Z = ${w.zsrcLVmag.toFixed(6)} Ω (${w.zsrc.r.toFixed(6)} + j${w.zsrc.x.toFixed(6)} Ω); transformer Z = ${w.ztf.Z.toFixed(6)} Ω (${w.ztf.r.toFixed(6)} + j${w.ztf.x.toFixed(6)} Ω); full-feeder R/X = ${w.zf.r.toFixed(6)} / ${w.zf.x.toFixed(6)} Ω.`;
+ return st;
+}
+function practicalChecks(st){
+ const checks=[];const errors=validateInputs();
+ errors.forEach(e=>checks.push({cls:"fail",text:e}));
+ if(errors.length){el("studyChecks").innerHTML=checks.map(c=>`<div class="check ${c.cls}">${c.text}</div>`).join("");return errors}
+ const allow=num("cti")+num("breaker")+num("relaytol"),loadMargin=num("loadmargin"),sens=num("sensmult");
+ const fla=st.weak.fla, feederAmp=num("feederAmp"), pf=num("loadpf");
+ if(feederAmp>0){
+  if(num("r1load")<=feederAmp)checks.push({cls:"pass",text:`Feeder stated load ${num("r1load").toFixed(0)} A is within entered feeder ampacity ${feederAmp.toFixed(0)} A.`});
+  else checks.push({cls:"fail",text:`Feeder stated load ${num("r1load").toFixed(0)} A exceeds entered feeder ampacity ${feederAmp.toFixed(0)} A.`});
+ }
+ const zf=st.weak.zf, vdrop=num("r1load")*Math.sqrt(3)*(zf.r*pf+zf.x*Math.sqrt(1-pf*pf))/st.weak.V*100;
+ checks.push({cls:vdrop<=5?"pass":"warn",text:`Full-feeder voltage-drop estimate at R1 stated load = ${vdrop.toFixed(2)}% using PF ${pf.toFixed(2)}. Treat this as a screening check, not a final voltage-drop calculation.`});
+ if(num("r1load")<=fla)checks.push({cls:"pass",text:`R1 stated load ${num("r1load").toFixed(0)} A is below transformer FLA ${fla.toFixed(0)} A.`});
+ else checks.push({cls:"warn",text:`R1 stated load ${num("r1load").toFixed(0)} A exceeds transformer FLA ${fla.toFixed(0)} A; verify overload/emergency assumptions.`});
+ for(let n=1;n<=3;n++){
+  const load=num(`r${n}load`),Is=num(`r${n}is`),ctp=num(`ct${n}p`),cts=num(`ct${n}s`),minF=minimumWeakFault(n,st),ratio=ctp/cts;
+  const reqLoad=load*loadMargin,sensRatio=minF/Is;
+  if(Is>=reqLoad)checks.push({cls:"pass",text:`R${n}: pickup ${Is.toFixed(0)} A ≥ ${reqLoad.toFixed(0)} A (load margin ${loadMargin.toFixed(2)}×).`});else checks.push({cls:"fail",text:`R${n}: pickup ${Is.toFixed(0)} A is below ${reqLoad.toFixed(0)} A required by the entered load margin.`});
+  if(sensRatio>=sens)checks.push({cls:"pass",text:`R${n}: minimum weak-source fault in its zone = ${fmtA(minF)}, giving ${sensRatio.toFixed(2)}× pickup (target ≥ ${sens.toFixed(2)}×).`});else checks.push({cls:"fail",text:`R${n}: minimum weak-source fault in its zone = ${fmtA(minF)}, only ${sensRatio.toFixed(2)}× pickup; target is ${sens.toFixed(2)}×.`});
+  if(ctp>=reqLoad)checks.push({cls:"pass",text:`R${n}: CT primary ${ctp.toFixed(0)} A covers stated load ${load.toFixed(0)} A.`});else checks.push({cls:"warn",text:`R${n}: CT primary ${ctp.toFixed(0)} A is below stated load ${load.toFixed(0)} A; verify actual CT loading and class.`});
+  const downstreamMax=maximumStrongDownstreamFault(n,st),inst=num(`r${n}inst`),breakerRating=num(`br${n}int`),breakerDuty=brkDuty(st.strong,zoneStart(n),breakerRating),shortDuty=currentAtPct(st.strong,zoneStart(n))/1000,shortRating=num(`br${n}st`);
+  if(breakerDuty<=breakerRating)checks.push({cls:"pass",text:`R${n}: strong-source 3-phase fault at breaker location = ${breakerDuty.toFixed(2)} kA (X/R-adjusted), below ${breakerRating.toFixed(2)} kA interrupting rating.`});else checks.push({cls:"fail",text:`R${n}: strong-source 3-phase fault at breaker location = ${breakerDuty.toFixed(2)} kA (X/R-adjusted), above ${breakerRating.toFixed(2)} kA interrupting rating.`});
+  if(shortRating>0){if(shortDuty<=shortRating)checks.push({cls:"pass",text:`R${n}: calculated symmetrical fault ${shortDuty.toFixed(2)} kA is within entered ${shortRating.toFixed(2)} kA short-time withstand.`});else checks.push({cls:"fail",text:`R${n}: calculated symmetrical fault ${shortDuty.toFixed(2)} kA exceeds entered ${shortRating.toFixed(2)} kA short-time withstand.`});}
+  if(inst>0){if(n<3){if(inst>=1.25*downstreamMax)checks.push({cls:"pass",text:`R${n}: high-set ${inst.toFixed(0)} A is at least 1.25× the maximum strong-source downstream fault ${fmtA(downstreamMax)}.`});else checks.push({cls:"fail",text:`R${n}: high-set ${inst.toFixed(0)} A is below 1.25× the downstream strong-source fault of ${fmtA(downstreamMax)}; upstream instantaneous selectivity is at risk.`})}else{if(inst<=minF)checks.push({cls:"pass",text:`R3: high-set ${inst.toFixed(0)} A is within the minimum weak-source fault ${fmtA(minF)} of its own zone.`});else checks.push({cls:"warn",text:`R3: high-set ${inst.toFixed(0)} A exceeds the minimum weak-source fault ${fmtA(minF)} in its zone; R3 may not operate instantaneously for all local faults.`})}}
+  const maxF=currentAtPct(st.strong,zoneStart(n)),Kx=1+xrAt(st.strong,zoneStart(n)),faultSec=Kx*maxF/ratio, burdenZ=num(`ct${n}burden`)/(cts*cts), burdenV=faultSec*(num(`ct${n}r`)+num(`ct${n}lead`)+burdenZ);
+  if(num(`ct${n}knee`)>0){if(num(`ct${n}knee`)>=burdenV*1.2)checks.push({cls:"pass",text:`R${n}: CT knee point ${num(`ct${n}knee`).toFixed(0)} V exceeds the required saturation voltage ${burdenV.toFixed(1)} V (max fault × (1+X/R)) with 20% margin.`});else checks.push({cls:"warn",text:`R${n}: CT knee point ${num(`ct${n}knee`).toFixed(0)} V is below the required ${(burdenV*1.2).toFixed(0)} V (max fault × (1+X/R) + 20%); perform a manufacturer CT saturation study.`})}else checks.push({cls:"warn",text:`R${n}: CT knee point not entered; required Vk ≈ ${(burdenV*1.2).toFixed(0)} V (max fault × (1+X/R) + 20%). Confirm CT class, burden, lead resistance and saturation performance from manufacturer data.`});
+  {const m=(el(`ct${n}class`).value||"").match(/^\s*\d+P(\d+)/i);if(m){const alf=+m[1],mult=maxF/ctp;checks.push({cls:mult<=alf?"pass":"fail",text:`R${n}: max fault ${fmtA(maxF)} = ${mult.toFixed(1)}× CT primary vs accuracy limit factor ${alf}.`})}}
+  checks.push({cls:"warn",text:`R${n}: relay pickup at CT secondary = ${(Is/ratio).toFixed(3)} A. Actual relay setting range, tap units, CT class and burden must be confirmed.`});
+ }
+ if(!(num("r1is")>=num("r2is")&&num("r2is")>=num("r3is")))checks.push({cls:"warn",text:"Pickup ordering: upstream pickup should not be below downstream pickup (Is1 ≥ Is2 ≥ Is3)."});
+ const cS=num("cableS");if(cS>0){let worst=Infinity,at="";for(const p of st.strong.points){if(p.pct===0)continue;const t=trip(p.I,p.primary)+num("breaker");if(!isFinite(t))continue;const q=Math.pow(num("cablek")*cS,2)/(p.I*p.I)/t;if(q<worst){worst=q;at=p.pct+"%"}}checks.push({cls:worst>=1?"pass":"fail",text:`Cable I²t: allowable time / clearing time = ${worst.toFixed(2)}× at worst fault (${at}, strong source, primary relay + breaker); need ≥ 1.`})}
+ checks.push({cls:"warn",text:`Coordination security basis = CTI ${num("cti").toFixed(2)} s + downstream breaker clearing ${num("breaker").toFixed(2)} s + relay/CT allowance ${num("relaytol").toFixed(2)} s = ${allow.toFixed(2)} s. This compares upstream relay operating time against downstream relay operating time plus the downstream clearing/security allowance.`});
+ el("studyChecks").innerHTML=checks.map(c=>`<div class="check ${c.cls}">${c.text}</div>`).join("");
+ return errors;
+}
+function coordinationCheck(st){
+ const req=num("cti")+num("breaker")+num("relaytol"), rows=[];let allPass=true;
+ for(const source of ["weak","strong"]){
+  const study=st[source];
+  for(const [idx,p] of study.points.entries()){
+   const t=[null,trip(p.I,1),trip(p.I,2),trip(p.I,3)];
+   const primary=p.primary;
+   let status="PASS";
+   if(!isFinite(t[primary])){status=`NO R${primary} TRIP`;allPass=false}
+   const m23=primary===3&&isFinite(t[2])&&isFinite(t[3])?t[2]-t[3]:NaN;
+   const m12=primary>=2&&isFinite(t[1])&&isFinite(t[2])?t[1]-t[2]:NaN;
+   if(primary===3&&(!isFinite(m23)||m23<req)){status="FAIL";allPass=false}
+   if(primary>=2&&(!isFinite(m12)||m12<req)){status="FAIL";allPass=false}
+   rows.push({source,idx,p,t,m23,m12,status});
+  }
+ }
+ return {req,rows,allPass};
+}
+function calculate(){
+ const st=estimateFaults(),inputErrors=practicalChecks(st); currentStudy=st; updatePrintMeta();
+ if(inputErrors.length){el("tbody").innerHTML=`<tr><td colspan="11" class="fail">Correct the highlighted input errors before relying on the coordination result.</td></tr>`;el("overall").innerHTML=`<b>Study result:</b> Input validation failed. Fault currents may still be mathematically displayed, but no protection conclusion should be relied upon until the errors are corrected.`;buildSettings(st);plot(st);return}
+ const cc=coordinationCheck(st),req=cc.req;
+ let body="";
+ cc.rows.forEach(r=>{
+  const f=r.p,primary=`R${r.p.primary}`,cls=x=>!isFinite(x)?"—":x.toFixed(3)+" s";
+  const m23=r.m23,m12=r.m12;
+  const c=x=>!isFinite(x)?"":(x>=req?"pass":x>=0?"marginal":"fail");
+  const totalPrimary=isFinite(r.t[r.p.primary])?r.t[r.p.primary]+num("breaker"):NaN;
+  body+=`<tr><td>${r.source.toUpperCase()}</td><td>F${r.idx+1} — ${f.pct}%</td><td>${fmtA(f.I)}</td><td>${primary}</td><td>${cls(r.t[3])}</td><td>${cls(r.t[2])}</td><td>${cls(r.t[1])}</td><td>${cls(totalPrimary)}</td><td class="${c(m23)}">${isFinite(m23)?cls(m23):"—"}</td><td class="${c(m12)}">${isFinite(m12)?cls(m12):"—"}</td><td class="${r.status==="PASS"?"pass":"fail"}">${r.status}</td></tr>`;
+ });
+ el("tbody").innerHTML=body;
+ el("overall").innerHTML=`<b>MODEL CHECK:</b> ${cc.allPass?"All evaluated primary/backup relationships meet the entered coordination criterion for the modeled source cases and fault points.":"One or more evaluated primary/backup relationships do not meet the entered coordination criterion."}<br><span class="small">Required upstream separation = CTI ${num("cti").toFixed(2)} s + downstream breaker clearing ${num("breaker").toFixed(2)} s + relay/CT allowance ${num("relaytol").toFixed(2)} s = ${req.toFixed(2)} s. This is a study-model check, not final setting approval. The primary relay at each fault is the nearest upstream relay (highest-numbered relay whose zone contains the fault); lower-numbered relays act as backup.</span>`;
+ buildSettings(st);plot(st);
+}
+function buildSettings(st){
+ let ct="",settings="";
+ for(let n=1;n<=3;n++){
+  const cp=num(`ct${n}p`),cs=num(`ct${n}s`),ratio=cp/cs,Is=num(`r${n}is`),inst=num(`r${n}inst`),sec=Is/ratio,instSec=inst?inst/ratio:0,minF=minimumWeakFault(n,st),maxDown=maximumStrongDownstreamFault(n,st),sens=minF/Is;
+  const zone=n===1?"0–100%":`${zoneStart(n).toFixed(0)}–100%`;
+  const curve=el(`r${n}std`).value.toUpperCase()+" — "+(el(`r${n}std`).value==="iec"?IEC[el(`r${n}curve`).value].name:IEEE[el(`r${n}curve`).value].name); const model=el(`r${n}model`).value||"Not entered";
+  const breakerRating=num(`br${n}int`),breakerDuty=brkDuty(st.strong,zoneStart(n),breakerRating);
+  ct+=`<tr><td>R${n}</td><td>${zone}</td><td>${fmtA(minF)}</td><td>${fmtA(Is)}</td><td>${sens.toFixed(2)}×</td><td>${fmtA(maxDown)}</td><td>${inst?fmtA(inst):"Disabled"}</td><td>${(num(`r${n}load`)/ratio).toFixed(3)} A</td><td>${breakerDuty.toFixed(2)} / ${breakerRating.toFixed(2)} kA</td><td>${sens>=num("sensmult")&&breakerDuty<=breakerRating?"PASS":"FAIL"}</td></tr>`;
+  settings+=`<tr><td><b>R${n}</b></td><td>${zone}</td><td>${cp}/${cs}</td><td>${curve}</td><td>${Is.toLocaleString()} A</td><td>${sec.toFixed(3)} A</td><td>${num(`r${n}tms`).toFixed(3)}</td><td>${inst?inst.toLocaleString()+" A":"Disabled"}</td><td>${inst?instSec.toFixed(3)+" A":"—"}</td><td>${model}</td></tr>`;
+  el(`r${n}info`).innerHTML=`<b>Device:</b> ${model} • <b>Zone:</b> ${zone} • <b>Weak minimum fault:</b> ${fmtA(minF)} • <b>Sensitivity:</b> ${sens.toFixed(2)}× • <b>Strong downstream max:</b> ${fmtA(maxDown)}`;
+ }
+ el("ctbody").innerHTML=ct;el("setting-body").innerHTML=settings;
+}
+function relayCandidateValues(n,lo,hi){
+ const step=Math.max(1,num(`r${n}step`));const out=[];let x=Math.ceil(lo/step)*step;for(let i=0;x<=hi+1e-9&&i<500;i++,x+=step)out.push(x);return out;
+}
+function requiredTmsForCoordination(I,n,target){
+ const base=curveTime(I,num(`r${n}is`),1,el(`r${n}std`).value,el(`r${n}curve`).value);
+ if(!isFinite(base)||base<=0)return NaN;return target/base;
+}
+function chooseTms(n,targets){
+ const tmin=num(`r${n}tmsMin`),tmax=num(`r${n}tmsMax`),step=Math.max(.001,Number(el(`r${n}tms`).step)||.01);
+ let need=tmin;
+ for(const target of targets){if(!isFinite(target))return null;need=Math.max(need,target)}
+ const snapped=Math.ceil(need/step)*step;return snapped<=tmax?Math.max(tmin,snapped):null;
+}
+function autoCoordinate(){
+ const st=studies();const errors=validateInputs();if(errors.length){alert("Correct the input errors before using Auto-coordinate.");return}
+ const sens=num("sensmult"),loadMargin=num("loadmargin");
+ const minF=[1,2,3].map(n=>minimumWeakFault(n,st));
+ const maxPickup=[1,2,3].map(n=>minF[n-1]/sens);
+ const minPickup=[1,2,3].map(n=>num(`r${n}load`)*loadMargin);
+ if(minPickup.some((x,i)=>!(x<maxPickup[i]))){alert("No feasible pickup range exists: load-margin requirement overlaps the weak-source sensitivity limit for at least one relay.");return}
+ const old={};for(let n=1;n<=3;n++){old[n]={is:num(`r${n}is`),tms:num(`r${n}tms`),inst:num(`r${n}inst`)}}
+ let best=null;
+ const c3=relayCandidateValues(3,minPickup[2],maxPickup[2]), c2=relayCandidateValues(2,minPickup[1],maxPickup[1]), c1=relayCandidateValues(1,minPickup[0],maxPickup[0]);
+ for(const is3 of c3){
+  el("r3is").value=is3;
+  el("r3tms").value=num("r3tmsMin");
+  const inst3=num("r3inst");
+  const r3times={weak:zonePoints(3,st.weak).map(p=>trip(p.I,3)),strong:zonePoints(3,st.strong).map(p=>trip(p.I,3))};
+  if(r3times.weak.concat(r3times.strong).some(t=>!isFinite(t)))continue;
+  for(const is2 of c2){
+   if(is2<is3)continue;
+   el("r2is").value=is2;
+   const targets2=[];
+   for(const src of ["weak","strong"]){const study=st[src];for(const p of zonePoints(3,study)){const t3=trip(p.I,3);const reqT=t3+num("cti")+num("breaker")+num("relaytol");targets2.push(requiredTmsForCoordination(p.I,2,reqT))}}
+   const t2=chooseTms(2,targets2);if(t2===null)continue;el("r2tms").value=t2;
+   if(zonePoints(2,st.weak).some(p=>!isFinite(trip(p.I,2))))continue;
+   for(const is1 of c1){
+    if(is1<is2)continue;
+    el("r1is").value=is1;
+    const targets1=[];
+    for(const src of ["weak","strong"]){const study=st[src];
+      for(const p of zonePoints(2,study)){const t2=trip(p.I,2);targets1.push(requiredTmsForCoordination(p.I,1,t2+num("cti")+num("breaker")+num("relaytol")))}
+      for(const p of zonePoints(3,study)){const t2=trip(p.I,2);targets1.push(requiredTmsForCoordination(p.I,1,t2+num("cti")+num("breaker")+num("relaytol")))}
+    }
+    const t1=chooseTms(1,targets1);if(t1===null)continue;el("r1tms").value=t1;
+    const cc=coordinationCheck(st);if(!cc.allPass)continue;
+    const speed=trip(st.weak.points[st.weak.points.length-1].I,3)+trip(st.weak.points[st.weak.points.length-1].I,2)+trip(st.weak.points[st.weak.points.length-1].I,1);
+    const candidate={is1,t1,is2,t2,is3,t3:num("r3tmsMin"),speed};if(!best||candidate.speed<best.speed)best=candidate;
+   }
+  }
+ }
+ if(!best){for(let n=1;n<=3;n++){el(`r${n}is`).value=old[n].is;el(`r${n}tms`).value=old[n].tms;el(`r${n}inst`).value=old[n].inst}calculate();alert("No feasible candidate was found within the load, sensitivity, TMS and coordination limits. Review curve family, pickup ranges, fault levels, CT ratios and instantaneous settings.");return}
+ el("r1is").value=best.is1;el("r1tms").value=best.t1;el("r2is").value=best.is2;el("r2tms").value=best.t2;el("r3is").value=best.is3;el("r3tms").value=best.t3;
+ calculate();alert("A zone-aware candidate was found using weak-source sensitivity and both-source coordination constraints. Verify the final values against the actual relay, CT and breaker data before use.");
+}
+let currentStudy=null;
+function studyMetadata(){return {projectName:el("projectName").value,studyRef:el("studyRef").value,preparedBy:el("preparedBy").value,revision:el("revision").value}};
+function collectStudy(){
+ const data={version:2,savedAt:new Date().toISOString(),fields:{}};
+ document.querySelectorAll('input[id],select[id]').forEach(x=>{data.fields[x.id]=x.type==="checkbox"?x.checked:x.value});
+ return data;
+}
+function updatePrintMeta(){const m=studyMetadata();el("printMeta").textContent=`${m.projectName||"Unnamed study"} • Ref ${m.studyRef||"—"} • ${m.revision||"—"} • Prepared by ${m.preparedBy||"—"}`}
+window.addEventListener("beforeprint",()=>{updatePrintMeta();if(currentStudy)plot(currentStudy,true)});
+window.addEventListener("afterprint",()=>{if(currentStudy)plot(currentStudy,false)});
+function populate(){
+ for(let n=1;n<=3;n++){
+  const std=el(`r${n}std`).value,sel=el(`r${n}curve`),db=std==="iec"?IEC:IEEE,old=sel.value;
+  sel.innerHTML="";Object.entries(db).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;sel.appendChild(o)});
+  const fallback=std==="iec"?(n===1?"vi":n===2?"vi":"si"):"mi";sel.value=db[old]?old:fallback;
+ }
+ calculate();
+}
+for(let n=1;n<=3;n++)el(`r${n}std`).addEventListener("change",populate);
+function plot(st,printMode=false){
+ const c=el("tcc"),ctx=c.getContext("2d"),W=c.width,H=c.height,m={l:75,r:25,t:28,b:55},pw=W-m.l-m.r,ph=H-m.t-m.b,xmin=10,xmax=100000,ymin=.01,ymax=1000;
+ const xs=x=>m.l+(Math.log10(x)-Math.log10(xmin))/(Math.log10(xmax)-Math.log10(xmin))*pw,ys=y=>m.t+ph-(Math.log10(y)-Math.log10(ymin))/(Math.log10(ymax)-Math.log10(ymin))*ph;
+ ctx.clearRect(0,0,W,H);ctx.fillStyle=printMode?"#ffffff":"#07101b";ctx.fillRect(0,0,W,H);ctx.strokeStyle=printMode?"#b7b7b7":"#203047";ctx.fillStyle=printMode?"#444444":"#8394a8";ctx.font="11px monospace";
+ [10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000].forEach(v=>{const x=xs(v);ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,m.t+ph);ctx.stroke();ctx.textAlign="center";ctx.fillText(v>=1000?(v/1000)+"k":v,x,H-28)});
+ [.01,.02,.05,.1,.2,.5,1,2,5,10,20,50,100,200,500,1000].forEach(v=>{const y=ys(v);ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(m.l+pw,y);ctx.stroke();ctx.textAlign="right";ctx.fillText(v<1?v.toFixed(2):v,m.l-7,y+4)});
+ ctx.fillStyle=printMode?"#222222":"#b8c8da";ctx.textAlign="center";ctx.font="13px system-ui";ctx.fillText("Primary current (A) — log scale",m.l+pw/2,H-8);ctx.save();ctx.translate(17,m.t+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText("Operating time (s) — log scale",0,0);ctx.restore();
+ const colors=["#58a6ff","#52c788","#f5b942"];
+ for(let n=1;n<=3;n++){
+  const Is=num(`r${n}is`),tms=num(`r${n}tms`),std=el(`r${n}std`).value,key=el(`r${n}curve`).value,inst=num(`r${n}inst`);
+  ctx.strokeStyle=colors[n-1];ctx.lineWidth=2.5;ctx.beginPath();let started=false;const lo=Math.max(Is*1.0001,xmin);
+  for(let j=0;j<=700;j++){const I=lo*Math.pow(xmax/lo,j/700),t=inst>0&&I>=inst?instTime():curveTime(I,Is,tms,std,key);if(t>=ymin&&t<=ymax){const x=xs(I),y=ys(t);if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y)}else started=false}
+  ctx.stroke();ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(xs(Math.max(Is,xmin)),m.t);ctx.lineTo(xs(Math.max(Is,xmin)),m.t+ph);ctx.stroke();if(inst>0&&inst<xmax){ctx.beginPath();ctx.moveTo(xs(inst),m.t);ctx.lineTo(xs(inst),m.t+ph);ctx.stroke()}ctx.setLineDash([]);
+ }
+ st.strong.points.forEach((p,i)=>{if(p.I>=xmin&&p.I<=xmax){ctx.strokeStyle="#d96b7d";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(xs(p.I),m.t);ctx.lineTo(xs(p.I),m.t+ph);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#ff9aaa";ctx.font="bold 10px system-ui";ctx.textAlign="center";ctx.fillText(`F${i+1} max`,xs(p.I),m.t-8)}});
+ st.weak.points.forEach((p,i)=>{if(p.I>=xmin&&p.I<=xmax){ctx.strokeStyle="#9aa9bb";ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(xs(p.I),m.t);ctx.lineTo(xs(p.I),m.t+ph);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#c5cfda";ctx.font="10px system-ui";ctx.textAlign="center";ctx.fillText(`F${i+1} min`,xs(p.I),H-40)}});
+ ctx.fillStyle="#b8c8da";ctx.font="11px system-ui";ctx.textAlign="left";["R1","R2","R3"].forEach((x,i)=>{ctx.fillStyle=colors[i];ctx.fillRect(80+i*75,9,18,3);ctx.fillText(x,102+i*75,13)});ctx.fillStyle="#ff9aaa";ctx.setLineDash([3,3]);ctx.strokeStyle="#d96b7d";ctx.beginPath();ctx.moveTo(310,11);ctx.lineTo(328,11);ctx.stroke();ctx.setLineDash([]);ctx.fillText("Strong-source faults",333,14);ctx.fillStyle="#c5cfda";ctx.setLineDash([2,4]);ctx.strokeStyle="#9aa9bb";ctx.beginPath();ctx.moveTo(455,11);ctx.lineTo(473,11);ctx.stroke();ctx.setLineDash([]);ctx.fillText("Weak-source faults",478,14);
+}
+function resetDefaults(){
+ const d={projectName:"Protection Coordination Study",studyRef:"EPSA-PCS-001",preparedBy:"",revision:"Rev 0",loadpf:.90,cableS:0,cablek:143,feederAmp:1600,ct1class:"5P20",ct1r:.15,ct1lead:.10,ct1burden:10,ct1knee:0,br1st:0,r1model:"Generic",ct2class:"5P20",ct2r:.15,ct2lead:.10,ct2burden:10,ct2knee:0,br2st:0,r2model:"Generic",ct3class:"5P20",ct3r:.15,ct3lead:.10,ct3burden:10,ct3knee:0,br3st:0,r3model:"Generic",vhv:13.8,vlv:.48,kva:1000,tz:6,tfrpct:.60,freq:50,scmvaMin:250,scmvaMax:500,srcxr:10,len:1,rkm:.08,xkm:.10,r2loc:25,r3loc:60,ct1p:1600,ct1s:1,ct2p:1000,ct2s:1,ct3p:500,ct3s:1,cti:.30,breaker:.08,relaytol:.05,loadmargin:1.20,sensmult:1.50,instcycles:1,r1std:"iec",r1curve:"vi",r1is:1200,r1load:1000,r1tms:.19,r1inst:0,r1step:10,r1tmsMin:.05,r1tmsMax:3,br1int:25,r2std:"iec",r2curve:"vi",r2is:1000,r2load:650,r2tms:.07,r2inst:0,r2step:10,r2tmsMin:.05,r2tmsMax:3,br2int:25,r3std:"iec",r3curve:"si",r3is:360,r3load:300,r3tms:.05,r3inst:0,r3step:10,r3tmsMin:.05,r3tmsMax:3,br3int:25};
+ Object.entries(d).forEach(([k,v])=>{if(el(k))el(k).value=v});populate();
+}
+populate();
+</script>
+</body>
+</html>

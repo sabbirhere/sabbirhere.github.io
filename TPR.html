@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TPR — Transformer Protection Relay Settings (11 / 33 kV)</title>
+<style>
+:root{--bg:#0b1220;--card:#121c2b;--line:#26364d;--text:#e7edf5;--muted:#9aa9bb;--blue:#58a6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1200px;margin:auto;padding:16px}
+.hero,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+h1{margin:0;color:var(--blue);font-size:1.5rem}h2{margin:0 0 10px;color:#b9d9ff;font-size:1.05rem}
+.sub,.note,.small{color:var(--muted);font-size:.75rem}.sub{margin-top:4px;font-size:.82rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.grid .card{margin:0}
+label{display:block;color:#aebaca;font-size:.78rem;margin:9px 0 4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);background:#09111d;color:var(--text);border-radius:7px;font-size:.9rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px}
+.kpi{background:#0b1625;border:1px solid var(--line);border-radius:8px;padding:10px}.kpi b{display:block;font-size:1.05rem;color:#d9ecff}
+table{width:100%;border-collapse:collapse;font-size:.82rem}th{background:#18263a;color:#b8d7fa;text-align:left;padding:8px}td{padding:8px;border-bottom:1px solid #1d2a3d}.tw{overflow-x:auto}.tw table{min-width:640px}
+.check{padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#0b1625;font-size:.8rem;margin-top:6px}
+.pass{border-color:#235d43}.warn{border-color:#725821}.fail{border-color:#743a40}
+.info{background:#0b1626;border:1px solid #725821;border-radius:8px;padding:10px;color:#e5c36b;font-size:.78rem;margin-top:10px}
+.btn{border:0;border-radius:8px;padding:9px 14px;background:#344356;color:#fff;font-weight:700;cursor:pointer;margin-bottom:10px}
+.footer{color:#718197;font-size:.72rem;margin-top:14px;text-align:center}
+.btns{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.btns .btn{margin:0}.blue{background:#1769aa}.green{background:#217a56}.printhead{display:none}#stale{display:none;color:#e5c36b;font-size:.78rem;margin-bottom:8px}
+@media print{body{background:#fff;color:#111}.card,.kpi,.check{background:#fff;color:#111;border-color:#999;break-inside:avoid}.hero,#form,.btns,.basis,.footer,#stale{display:none!important}.printhead{display:block!important;margin-bottom:10px}th{background:#eee!important;color:#111!important}h1,h2{color:#111}.tw table{min-width:0}.small{color:#444}@page{size:A4;margin:12mm}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<button class="btn" onclick="window.location.href='Advanced.html'">← Back to Toolbox</button>
+<h1>TPR — HT Transformer Protection Relay Settings</h1>
+<div class="sub">11 kV / 33 kV indoor substation • HT panel incomer relay • 50/51 phase and 51N earth-fault settings with automatic checks</div>
+<div class="info"><b>Study aid only.</b> Verify every value against the utility's requirements, the relay manufacturer's curves and setting ranges, transformer test data and CT data. Final settings must be reviewed and approved by a qualified protection engineer.</div>
+</header>
+
+<div id="form" class="grid"></div>
+<div class="btns"><button class="btn blue" onclick="run()">Calculate</button><button class="btn" onclick="clearAll()">Clear inputs</button><button class="btn" onclick="resetAll()">Reset defaults</button><button class="btn green" onclick="printResults()">Print / Save results as PDF</button></div>
+<div id="stale">Inputs changed — press Calculate to update the results.</div>
+<div class="printhead"><h1>Transformer Protection Relay Settings</h1><div id="ph" class="small"></div></div>
+
+<div class="card" style="margin-top:14px"><h2>Transformer & fault quantities</h2><div id="kpis" class="kpis"></div></div>
+<div class="card"><h2>Recommended relay settings</h2><div class="tw"><table><thead><tr><th>Element</th><th>Curve / type</th><th>Primary</th><th>Relay secondary</th><th>TMS / time</th></tr></thead><tbody id="set"></tbody></table></div></div>
+<div class="card"><h2>Checks</h2><div id="chk"></div></div>
+<div class="card basis"><h2>Basis & limitations</h2>
+<div class="small">Rated current = kVA / (√3·kV). Through-fault current at the HT side for an LV bus fault = rated current / (Zt + Zsource) in per-unit on the transformer base (Dyn transformer assumed; Zt −7.5% for maximum and +7.5% for minimum). 51 pickup = multiple of rated current, rounded up to 0.05×In. 51 TMS is the smallest value giving (LV main clearing time + CTI) at the maximum through-fault. 50 = margin × maximum through-fault, also checked against inrush and the minimum HT bus fault. 51N = fraction of the maximum earth-fault current (residual CT floor 10% of CT primary). IEC 60255 IDMT curves: t = TMS·k/((I/Is)^α − 1). Not covered: 87T/REF differential, thermal (49), Buchholz/OTI/WTI trips, LV-side protection settings, motor starting, CT saturation study, arc flash. For a Dyn transformer, LV earth faults are not seen by HT earth-fault protection.</div></div>
+<div class="footer">⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid. Verify against manufacturer nameplate data and local codes before installation.</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id),n=id=>Number($(id).value);
+const CV={si:{k:.14,a:.02,name:"IEC Standard Inverse"},vi:{k:13.5,a:1,name:"IEC Very Inverse"},ei:{k:80,a:2,name:"IEC Extremely Inverse"}};
+const base=(I,Is,c)=>I>Is?CV[c].k/(Math.pow(I/Is,CV[c].a)-1):Infinity;
+const up=(x,s)=>Math.ceil(x/s-1e-9)*s;
+const f=(x,d=1)=>Number.isFinite(x)?x.toLocaleString(undefined,{maximumFractionDigits:d}):"—";
+const STD=[10,15,20,25,30,40,50,60,75,100,150,200,250,300,400,500,600,800,1000,1200,1500,2000];
+const F=[
+["System & transformer",[
+ ["kv","HT system voltage",[[11,"11 kV"],[33,"33 kV"]]],
+ ["kvlv","LV voltage (kV, line-line)",.415],
+ ["kva","Transformer rating (kVA)",1000],
+ ["z","Transformer impedance Z (%)",5],
+ ["mvamax","Utility maximum fault level at HT (MVA)",250,"From the utility; sets maximum through-fault."],
+ ["mvamin","Utility minimum fault level at HT (MVA)",150,"Weak-source case for sensitivity."],
+ ["panel","HT panel short-circuit rating (kA; 0 = skip)",25],
+ ["tup","Utility relay time at max HT fault (s; 0 = skip)",0,"If given, HT relay must be faster by the CTI."]]],
+["CT & phase relay",[
+ ["ctp","Phase CT primary (A)",75],
+ ["cts","CT secondary (A)",1],
+ ["alf","CT accuracy limit factor (5P10 = 10)",10],
+ ["curve","IDMT curve",[["si","Standard Inverse"],["vi","Very Inverse"],["ei","Extremely Inverse"]]],
+ ["k51","51 pickup (× rated current)",1.2,"Usually 1.1–1.5."],
+ ["tmin","Relay TMS minimum",.025],
+ ["tmax","Relay TMS maximum",1.2]]],
+["Grading & inrush",[
+ ["cti","Grading margin CTI (s)",.3,"Total: breaker time + relay tolerance + safety margin."],
+ ["tlv","LV main breaker max clearing time at LV fault (s)",.3,"About 0.05–0.1 s instantaneous, 0.3 s with short-time delay."],
+ ["k50","50 margin over max LV through-fault (×)",1.3,"Typically 1.25–1.5."],
+ ["inr","Inrush current (× rated current)",10,"Typically 8–12."],
+ ["inrt","Inrush duration (s)",.1]]],
+["Earth fault (51N)",[
+ ["ief","Max HT earth-fault current (A; 0 = skip)",300,"NER limit or from earthing study."],
+ ["efk","51N pickup (fraction of max earth-fault)",.15,"Typically 0.1–0.2."],
+ ["eftime","51N target time at max earth-fault (s)",.3],
+ ["eftype","Earth-fault CT connection",[["res","Residual (3 phase CTs)"],["cb","Core-balance CT"]]],
+ ["efctp","Core-balance CT primary (A)",100],
+ ["efcts","Core-balance CT secondary (A)",1]]]
+];
+const N={
+kv:"Select the incoming HT voltage of the substation.",
+kvlv:"Transformer secondary line-to-line voltage, e.g. 0.415 or 0.433 kV.",
+kva:"Transformer nameplate rating in kVA.",
+z:"Percentage impedance from the nameplate or test report.",
+mvamax:"Utility 3-phase fault level at the HT point, maximum (strong-source) case. Ask the utility.",
+mvamin:"Minimum (weak-source) fault level; must not exceed the maximum. Used for sensitivity checks.",
+panel:"Short-circuit rating of the HT panel breaker (kA). 0 skips the check.",
+tup:"Operating time of the utility's upstream relay at the maximum HT fault. 0 skips the check.",
+ctp:"Phase CT primary rating; choose at least 1.2× transformer rated current.",
+cts:"1 A or 5 A; must match the relay input.",
+alf:"Accuracy limit factor of the protection CT, e.g. 10 for 5P10, 20 for 5P20.",
+curve:"IEC inverse curve used for 51 and 51N; match the relay and utility practice.",
+k51:"51 pickup as a multiple of transformer rated current; usually 1.1–1.5.",
+tmin:"Lowest time multiplier setting your relay allows.",
+tmax:"Highest time multiplier setting your relay allows.",
+cti:"Total grading margin between devices, including breaker time and relay tolerance; typically 0.3 s.",
+tlv:"Clearing time of the LV main breaker at an LV bus fault: about 0.05–0.1 s instantaneous, 0.3 s with short-time delay.",
+k50:"50 pickup = this × maximum LV through-fault, so it does not trip for LV faults; typically 1.25–1.5.",
+inr:"Magnetising inrush as a multiple of rated current; typically 8–12.",
+inrt:"Inrush duration; typically 0.1 s.",
+ief:"Maximum HT earth-fault current (NER limit or earthing study). 0 skips 51N.",
+efk:"51N pickup as a fraction of the maximum earth-fault current; typically 0.1–0.2.",
+eftime:"Desired 51N operating time at maximum earth-fault current; grade with the utility earth-fault relay.",
+eftype:"Residual uses the phase CTs; core-balance uses the separate CT entered below.",
+efctp:"Core-balance CT primary (A); used only if core-balance is selected.",
+efcts:"Core-balance CT secondary (A); used only if core-balance is selected."};
+$("form").innerHTML=F.map(([t,fs])=>`<div class="card"><h2>${t}</h2>${fs.map(([id,l,v,nt])=>`<label for="${id}">${l}</label>`+(Array.isArray(v)?`<select id="${id}">${v.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("")}</select>`:`<input id="${id}" type="number" step="any" value="${v}">`)+(N[id]?`<div class="note">${N[id]}</div>`:"")).join("")}</div>`).join("");
+
+function calc(){
+ const V=n("kv"),vl=n("kvlv"),S=n("kva"),Z=n("z")/100,Mx=n("mvamax"),Mn=n("mvamin"),ctp=n("ctp"),cts=n("cts"),alf=n("alf"),k=n("k51"),c=$("curve").value,tmin=n("tmin"),tmax=n("tmax"),cti=n("cti"),tlv=n("tlv"),k50=n("k50"),inr=n("inr"),inrT=n("inrt"),tu=n("tup"),rate=n("panel"),ief=n("ief"),fr=n("efk"),eft=n("eftime"),cb=$("eftype").value==="cb";
+ const pos=[V,vl,S,Z,Mx,Mn,ctp,cts,k,tmin,tmax,cti,k50,inr];
+ const nn=[tlv,tu,rate,ief,fr,eft,alf,inrT];
+ if(!pos.every(x=>x>0)||!nn.every(x=>x>=0)||Mn>Mx||tmax<tmin||(cb&&!(n("efctp")>0&&n("efcts")>0))){
+  $("kpis").innerHTML="";$("set").innerHTML="";
+  $("chk").innerHTML='<div class="check fail">Enter valid values: positive numbers where required, minimum fault MVA ≤ maximum fault MVA, TMS max ≥ TMS min.</div>';return}
+ const r3=Math.sqrt(3),fla=S/(r3*V),flv=S/(r3*vl),sb=S/1000;
+ const itMax=fla/(.925*Z+sb/Mx),itMin=fla/(1.075*Z+sb/Mn);
+ const bMax=Mx*1000/(r3*V),bMin=Mn*1000/(r3*V),iinr=inr*fla;
+ const rec=STD.find(x=>x>=fla*1.2)||"—";
+ $("ph").textContent=`${V} kV / ${vl} kV • ${S} kVA • Z ${n("z")}% • Source ${Mn}–${Mx} MVA • CT ${ctp}/${cts} A • ${CV[c].name} • ${new Date().toLocaleDateString()}`;
+ // 51 phase overcurrent
+ const ps=up(k*fla/ctp,.05),is=ps*ctp;
+ const tms=Math.max(tmin,up((tlv+cti)/base(itMax,is,c),.01));
+ const t51=I=>tms*base(I,is,c);
+ const px=up(k50*itMax/ctp,.5),i50=px*ctp;
+ const tr=I=>I>=i50?.02:t51(I);
+ const C=[],add=(ok,t,w)=>C.push(`<div class="check ${ok?"pass":w?"warn":"fail"}">${ok?"PASS":w?"WARN":"FAIL"} — ${t}</div>`);
+ add(is>=1.05*fla,`51 pickup ${f(is)} A vs rated current ${f(fla)} A (must be ≥ 1.05×).`);
+ add(is<=1.5*fla,`51 pickup is ${f(is/fla,2)}× rated current (above 1.5× gives weak overload protection).`,1);
+ add(ps>=.5&&ps<=2.5,`51 pickup = ${f(ps,2)}×In; typical relay range is 0.5–2.5×In — confirm with the relay manual.`,1);
+ add(itMin/is>=1.5,`Minimum LV-bus fault seen on HT side ${f(itMin)} A = ${f(itMin/is,1)}× pickup (≥ 1.5× needed for backup of LV faults).`);
+ add(tms<=tmax+1e-9,`51 TMS ${f(tms,3)} within relay maximum ${f(tmax,3)}.`);
+ add(t51(itMax)-tlv>=cti-1e-6,`Grading with LV main: 51 trips in ${f(t51(itMax),3)} s at ${f(itMax)} A vs LV clearing ${f(tlv,2)} s + CTI ${f(cti,2)} s.`);
+ add(t51(itMax)<=2,`Transformer through-fault withstand: 51 trip time ${f(t51(itMax),3)} s at maximum through-fault must be ≤ 2 s (IEC 60076-5).`);
+ add(t51(iinr)>=1.5*inrT&&i50>=1.5*iinr,`Inrush ${f(iinr)} A for ${f(inrT,2)} s: 51 time at inrush ${f(t51(iinr),3)} s, 50 pickup ${f(i50/iinr,1)}× inrush (need ≥ 1.5×).`);
+ add(bMin/i50>=1.5,`50 sensitivity: minimum HT bus fault ${f(bMin)} A = ${f(bMin/i50,1)}× 50 pickup (≥ 1.5× needed).`);
+ add(px<=40,`50 setting ${f(px,1)}×In; typical relay maximum about 40×In.`,1);
+ if(tu>0)add(tr(bMax)+cti<=tu,`Utility grading: HT relay ${f(tr(bMax),3)} s + CTI ${f(cti,2)} s vs utility relay ${f(tu,2)} s at ${f(bMax)} A.`);
+ if(rate>0)add(bMax/1000<=rate,`Maximum HT fault ${f(bMax/1000,2)} kA vs HT panel rating ${f(rate,1)} kA.`);
+ add(ctp>=fla,`CT primary ${f(ctp)} A vs rated current ${f(fla)} A (suggested standard CT ≥ 1.2× rated: ${rec} A).`);
+ add(itMax/ctp<=alf,`Through-fault ${f(itMax)} A = ${f(itMax/ctp,1)}× CT primary vs accuracy limit factor ${f(alf)}; CT may saturate — check CT class and burden.`,1);
+ // 51N earth fault
+ let efRow="";
+ if(ief>0){
+  const eP=cb?n("efctp"):ctp,eS=cb?n("efcts"):cts;
+  const pxN=up(Math.max(fr*ief,cb?0:.1*ctp)/eP,.01),ipn=pxN*eP,tN=Math.max(tmin,up(eft/base(ief,ipn,c),.01));
+  efRow=`<tr><td><b>51N earth fault</b></td><td>${CV[c].name}</td><td>${f(ipn)} A</td><td>${f(pxN,2)}×In (${f(pxN*eS,3)} A)</td><td>TMS ${f(tN,3)} (${f(tN*base(ief,ipn,c),3)} s at ${f(ief)} A)</td></tr>`;
+  add(ief/ipn>=1.5,`51N pickup ${f(ipn)} A; maximum earth-fault ${f(ief)} A = ${f(ief/ipn,1)}× pickup (≥ 1.5× needed).`);
+  add(tN<=tmax+1e-9,`51N TMS ${f(tN,3)} within relay maximum ${f(tmax,3)}.`);
+ }
+ $("kpis").innerHTML=[["Rated current HT",f(fla,1)+" A"],["Rated current LV",f(flv,0)+" A"],["Max through-fault (HT side)",f(itMax,0)+" A ("+f(itMax/fla,1)+"×)"],["Min through-fault (HT side)",f(itMin,0)+" A"],["Max HT bus fault",f(bMax/1000,2)+" kA"],["Inrush",f(iinr,0)+" A"],["Suggested CT primary",rec+" A"]].map(([a,b])=>`<div class="kpi"><span class="small">${a}</span><b>${b}</b></div>`).join("");
+ $("set").innerHTML=`<tr><td><b>51 phase overcurrent</b></td><td>${CV[c].name}</td><td>${f(is)} A</td><td>${f(ps,2)}×In (${f(ps*cts,3)} A)</td><td>TMS ${f(tms,3)} (${f(t51(itMax),3)} s at ${f(itMax)} A)</td></tr><tr><td><b>50 instantaneous</b></td><td>Definite time</td><td>${f(i50)} A</td><td>${f(px,1)}×In (${f(px*cts,2)} A)</td><td>Instantaneous (no intentional delay)</td></tr>${efRow}`;
+ $("chk").innerHTML=C.join("");
+}
+const DEF={};document.querySelectorAll("#form input,#form select").forEach(e=>DEF[e.id]=e.value);
+const stale=()=>$("stale").style.display="block";document.addEventListener("input",stale);document.addEventListener("change",stale);
+function run(){$("stale").style.display="none";calc()}
+function clearAll(){document.querySelectorAll("#form input").forEach(i=>i.value="");["kpis","set","ph"].forEach(i=>$(i).innerHTML="");$("chk").innerHTML='<div class="small">Inputs cleared. Enter values and press Calculate.</div>';$("stale").style.display="none"}
+function resetAll(){Object.entries(DEF).forEach(([k,v])=>$(k).value=v);run()}
+function printResults(){run();if($("set").innerHTML)window.print()}
+run();
+</script>
+</body>
+</html>

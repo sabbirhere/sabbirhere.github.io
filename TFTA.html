@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformer Field Testing Analyzer</title>
+<style>
+/* Base Theme Variables */
+:root, :root[data-theme="dark"] {
+  --bg: #0a111d;
+  --panel: #111b2c;
+  --panel2: #0d1727;
+  --input: #09121f;
+  --text: #eef7ff;
+  --muted: #9fb2c8;
+  --line: #2a3c54;
+  --accent: #4cc9f0;
+  --cyan-soft: #83e7ff;
+  --amber: #f2b84b;
+  --amber-soft: #f7d48a;
+  --good: #34d399;
+  --warn: #fbbf24;
+  --bad: #fb7185;
+  --info: #93c5fd;
+  --border: #1e293b;
+  --card: #131c31;
+  --card2: #10182a;
+}
+
+:root[data-theme="light"] {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --panel2: #f1f5f9;
+  --input: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --line: #cbd5e1;
+  --accent: #0284c7;
+  --cyan-soft: #0369a1;
+  --amber: #d97706;
+  --amber-soft: #b45309;
+  --good: #059669;
+  --warn: #d97706;
+  --bad: #dc2626;
+  --info: #2563eb;
+  --border: #cbd5e1;
+  --card: #ffffff;
+  --card2: #f8fafc;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.container { max-width: 1180px; margin: auto; padding: 22px; position: relative; }
+
+/* Top Header Bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.top-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+.top-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+header { padding: 0 0 18px; }
+h1 { margin: 0; color: var(--accent); font-size: clamp(24px, 4vw, 34px); transition: color 0.3s ease; }
+h2 { margin: 0 0 8px; font-size: 20px; }
+h3 { margin: 0; font-size: 17px; }
+p { margin: 7px 0; }
+.muted { color: var(--muted); transition: color 0.3s ease; }
+.notice { padding: 8px 11px; border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; color: var(--muted); margin: 10px 0; font-size: 12px; transition: all 0.3s ease; }
+.notice strong { color: var(--text); }
+.step-note { font-size: 12px; color: var(--info); margin: -6px 0 12px; }
+.auth-box { border: 2px solid var(--line); background: var(--card2); }
+
+.procedure-tab {
+  position: relative;
+  margin: 0 0 14px 0;
+  padding: 13px 15px 13px 17px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+.procedure-label {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin: -16px 0 6px 0;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.procedure-tab strong { color: var(--text); }
+.procedure-tab p, .procedure-tab ol, .procedure-tab ul { margin: 5px 0 0 17px; padding: 0; color: var(--muted); font-size: 12px; }
+.procedure-tab li { margin: 4px 0; }
+
+.report-header {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 16px;
+}
+.report-brand { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
+.report-title { font-size: 26px; font-weight: 900; margin: 3px 0; color: var(--text); }
+.report-meta { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.report-meta strong { color: var(--text); }
+.signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+.sign-box { border-top: 1px solid var(--line); padding-top: 6px; font-size: 11px; color: var(--muted); min-height: 48px; }
+.report-section-title {
+  margin: 18px 0 7px; font-size: 13px; font-weight: 900; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 4px;
+}
+.print-summary { border: 1px solid var(--border); padding: 12px; border-radius: 6px; background: var(--panel2); color: var(--text); }
+
+.auth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.checkline { display: flex; gap: 9px; align-items: flex-start; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--input); font-size: 13px; transition: background-color 0.3s ease; }
+.checkline input { width: auto; margin-top: 3px; }
+.gate { margin-top: 14px; padding: 14px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel2); }
+.gate.ready { border-color: var(--good); background: rgba(52, 211, 153, 0.08); }
+.gate.hold { border-color: var(--bad); background: rgba(251, 113, 133, 0.08); }
+.top-grid, .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.ir-grid { display: grid; grid-template-columns: repeat(3, minmax(190px, 1fr)); gap: 12px; margin-top: 4px; }
+@media(max-width: 900px) { .ir-grid { grid-template-columns: repeat(2, minmax(190px, 1fr)); } }
+@media(max-width: 600px) { .ir-grid { grid-template-columns: 1fr; } }
+
+.card, .module { background: var(--card); border: 1px solid var(--border); border-radius: 13px; padding: 18px; margin: 14px 0; transition: background-color 0.3s ease, border-color 0.3s ease; }
+.module-head { display: flex; gap: 10px; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.tag { font-size: 11px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); white-space: nowrap; }
+.field { background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 11px; transition: background-color 0.3s ease, border-color 0.3s ease; }
+label { display: block; font-weight: 700; font-size: 12px; color: var(--text); margin-bottom: 6px; }
+.help { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+input, select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel2);
+  color: var(--text);
+  padding: 9px 10px;
+  font: inherit;
+  outline: none;
+  transition: all 0.3s ease;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.12); }
+input.invalid, select.invalid { border-color: var(--bad); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+button, a.btn-link { border: 0; border-radius: 9px; padding: 12px 17px; font-weight: 800; cursor: pointer; color: white; text-decoration: none; display: inline-block; font-size: 13px; text-align: center; }
+.primary { background: #087ea4; }
+.secondary { background: #26364e; }
+.danger { background: #8f2940; }
+.info-btn { background: #2563eb; }
+button:hover, a.btn-link:hover { filter: brightness(1.1); }
+
+.result { display: none; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
+.kpi { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--panel2); }
+.kpi .value { font-size: 24px; font-weight: 800; color: var(--text); }
+.kpi .label { font-size: 11px; color: var(--muted); }
+.result-key-table { width:100%; border-collapse:collapse; margin:12px 0; border:1px solid var(--border); }
+.result-key-table th, .result-key-table td { padding:10px; border-bottom:1px solid var(--line); text-align:left; font-size:13px; color:var(--text); }
+.result-key-table th { background:var(--panel2); color:var(--muted); }
+.result-key-table td:nth-child(2), .result-key-table td:nth-child(4) { font-weight:800; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 12px; border: 1px solid var(--border); }
+th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 13px; color: var(--text); }
+th { background: var(--panel2); color: var(--muted); }
+
+.badge { display: inline-block; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+.pass { background: rgba(52, 211, 153, 0.14); color: var(--good); }
+.warn { background: rgba(251, 191, 36, 0.14); color: var(--warn); }
+.fail { background: rgba(251, 113, 133, 0.14); color: var(--bad); }
+.info { background: rgba(147, 197, 253, 0.14); color: var(--info); }
+
+.summary { border-left: 5px solid var(--accent); background: var(--panel2); padding: 15px; border-radius: 8px; }
+.small { font-size: 12px; }
+.footer-note { color: var(--muted); font-size: 12px; margin-top: 16px; text-align: center; padding: 12px 0; border-top: 1px solid var(--border); }
+svg { width: 100%; height: auto; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
+
+/* Print Specific Rules */
+@media print {
+  body { background: white !important; color: #111 !important; }
+  .container { max-width: none; padding: 0; }
+  header, .top-bar, .notice, .procedure-tab, .step-note, .actions, .help, #authorizationGate, .card:not(.result), .module { display: none !important; }
+  .result { display: block !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+  .result .report-header { padding: 10px 0; border-bottom: 2px solid #111; }
+  .result .summary { background: #f8fafc !important; border-left: 4px solid #111 !important; color: #111 !important; }
+  .kpi { background: #f8fafc !important; border: 1px solid #ccc !important; }
+  .kpi .value, .kpi .label { color: #111 !important; }
+  table { border: 1px solid #ccc !important; }
+  th { background: #f1f5f9 !important; color: #111 !important; }
+  td { border-bottom: 1px solid #ccc !important; color: #111 !important; }
+  .print-summary { background: #f8fafc !important; border: 1px solid #ccc !important; color: #111 !important; }
+  .signature-grid .sign-box { border-top: 1px solid #111 !important; color: #111 !important; }
+  svg { background: white !important; border: 1px solid #ccc !important; }
+  .footer-note { color: #555 !important; border-top: 1px solid #ccc !important; }
+  .result .report-section-title { color: #111 !important; border-bottom: 1px solid #999 !important; break-after: avoid; }
+  .result table { width: 100% !important; table-layout: fixed; font-size: 11px; }
+  .result th, .result td { color: #111 !important; background: #fff !important; }
+  .result tr { break-inside: avoid; }
+  .result .kpis { grid-template-columns: repeat(4, 1fr); }
+  .result .kpi { break-inside: avoid; }
+  .result-key-table { width:100% !important; table-layout:fixed; font-size:11px; }
+  .result-key-table th, .result-key-table td { color:#111 !important; background:#fff !important; border-bottom:1px solid #ccc !important; }
+  #sfraArea { break-inside: avoid; }
+  #sfraArea svg { max-height: 240px; }
+  .signature-grid { break-inside: avoid; }
+}
+
+@media(max-width: 800px) {
+  .container { padding: 12px; }
+  .card, .module { padding: 14px; }
+  .module-head { display: block; }
+  .tag { display: inline-block; margin-top: 7px; }
+  th:nth-child(3), td:nth-child(3) { display: none; }
+}
+</style>
+
+<style id="elx-addons-style">
+/* ElectraLab Add-On Pack: additive only. Existing calculator styles are untouched. */
+.elx-addon-wrap{margin:18px 0 0}
+.elx-addon-banner{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.elx-addon-banner h2{margin:0 0 6px;color:var(--accent)}
+.elx-addon-banner p{margin:4px 0;color:var(--muted);font-size:12px}
+.elx-section{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:18px;margin:14px 0}
+.elx-section h3{margin:0 0 8px}
+.elx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.elx-field{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:11px}
+.elx-field label{display:block;font-weight:700;font-size:12px;color:var(--text);margin-bottom:6px}
+.elx-field input,.elx-field select,.elx-field textarea{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--text);padding:9px 10px;font:inherit;outline:none}
+.elx-field textarea{min-height:72px;resize:vertical}
+.elx-help{font-size:11px;color:var(--muted);margin-top:5px}
+.elx-subhead{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px}
+.elx-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.elx-btn{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer;color:#fff;background:#087ea4}
+.elx-btn.secondary{background:#26364e}.elx-btn.warn{background:#9b6b12}.elx-btn.danger{background:#8f2940}
+.elx-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px}
+.elx-table{width:100%;border-collapse:collapse;min-width:760px}
+.elx-table th,.elx-table td{padding:8px;border-bottom:1px solid var(--line);font-size:12px;text-align:left;vertical-align:top}
+.elx-table th{background:var(--panel2);color:var(--muted);position:sticky;top:0}
+.elx-table input,.elx-table select{width:100%;min-width:88px;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text);padding:6px 7px}
+.elx-badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:900}
+.elx-pass{background:rgba(52,211,153,.14);color:var(--good)} .elx-attn{background:rgba(251,191,36,.14);color:var(--warn)} .elx-fail{background:rgba(251,113,133,.14);color:var(--bad)} .elx-info{background:rgba(147,197,253,.14);color:var(--info)} .elx-na{background:rgba(148,163,184,.14);color:var(--muted)}
+.elx-report{display:block;border:1px solid var(--border);background:var(--card);border-radius:13px;padding:18px;margin:14px 0}
+.elx-report h2,.elx-report h3{color:var(--text)}
+.elx-report-section{margin:18px 0}.elx-report-section h3{border-bottom:1px solid var(--line);padding-bottom:5px}
+.elx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.elx-kpi{padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+.elx-kpi .v{font-size:22px;font-weight:900}.elx-kpi .l{font-size:10px;color:var(--muted);text-transform:uppercase}
+.elx-note{font-size:11px;color:var(--muted)}
+.elx-checkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.elx-check{display:flex;gap:8px;align-items:flex-start;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--input);font-size:12px}
+.elx-check input{margin-top:3px}
+@media(max-width:700px){.elx-section,.elx-addon-banner,.elx-report{padding:14px}}
+@media print{
+  .elx-add-form,.elx-addon-banner{display:none !important}
+  .elx-report{display:block !important;border:0!important;box-shadow:none!important;padding:0!important;margin:18px 0!important;background:#fff!important;color:#111!important}
+  .elx-report *{color:#111!important}
+  .elx-report .elx-table-wrap{overflow:visible;border:1px solid #bbb}
+  .elx-table{min-width:0!important}
+  .elx-table th,.elx-table td{border-bottom:1px solid #ccc!important}
+  .elx-table th{background:#f1f5f9!important}
+  .elx-kpi{background:#f8fafc!important;border:1px solid #ccc!important}
+}
+</style>
+
+</head>
+<body>
+<div class="container">
+
+<!-- Top Bar with Back to Toolbox on Top-Left -->
+<div class="top-bar">
+  <a href="Advanced.html" class="top-btn">⬅ Back to Toolbox</a>
+  <button class="top-btn" type="button" onclick="toggleTheme()" id="themeBtn" aria-label="Switch theme">☀️ Light Theme</button>
+</div>
+
+<header>
+  <h1>Transformer Field Testing Analyzer</h1>
+  <p class="muted">Field test record, calculation and pre-energization review aid — use current approved standards and OEM/project criteria.</p>
+  <p class="small" style="color:var(--cyan-soft)">Cyan tabs = field procedure &nbsp;•&nbsp; Amber text = critical verification point</p>
+</header>
+
+<div class="notice"><strong>Use approved OEM/project limits and procedure.</strong> Final energization decision requires designated authority sign-off.</div>
+
+<section class="card">
+  <h2>Test / Asset Information</h2>
+  <div class="top-grid">
+    <div class="field"><label>Transformer ID</label><input id="assetId" placeholder="e.g. TR-01"><div class="help">Enter the exact asset/tag ID.</div></div>
+    <div class="field"><label>Manufacturer</label><input id="manufacturer" placeholder="Optional"><div class="help">Use the nameplate/OEM name.</div></div>
+    <div class="field"><label>Rating / Voltage</label><input id="rating" placeholder="e.g. 10 MVA, 132/33 kV"><div class="help">Copy the nameplate rating.</div></div>
+    <div class="field"><label>Test Date</label><input id="testDate" type="date"><div class="help">Use the actual test date.</div></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>Ambient / Oil Temperature</h3><div class="step-note">Step: Enter the verified temperature used for the relevant measurement.</div></div><span class="tag">Input used for temperature correction</span></div>
+  <div class="grid">
+    <div class="field"><label>Oil temperature (°C)</label><input id="testTemp" type="number" step="0.1" value="28">
+      <div class="help">Use the temperature recorded at the relevant resistance test.</div></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>1. Insulation Resistance & PI</h3></div><span class="tag">HT-Earth • LT-Earth • HT-LT</span></div>
+
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & WIRING</div>
+    <strong>Isolation & Safety:</strong>
+    <ul>
+      <li>Disconnect all incoming HV and LV cables/busbars from transformer bushings. Apply working earths.</li>
+      <li>Clean and wipe down all bushing porcelains to prevent surface leakage current.</li>
+      <li><strong>Test 1: HT Winding to Earth (HT → Earth)</strong>
+        <ul>
+          <li><strong>Shorting:</strong> Using bare copper wire, short together all HT bushings (H1, H2, H3, H0 if applicable).</li>
+          <li><strong>Shorting:</strong> Short together all LT bushings (X1, X2, X3, X0) and connect this shorted bundle directly to Main Tank Earth (Ground).</li>
+          <li><strong>Instrument Connections:</strong> Connect <strong>LINE (High) Lead</strong> to the shorted HT bushings. Connect <strong>EARTH (Low) Lead</strong> to Tank Earth. Connect <strong>GUARD Lead</strong> to shorted LT bushings (or bushing guard rings) if present.</li>
+          <li><strong>Execution:</strong> Apply 5000 V DC. Record R30, R60 (1 min), and R600 (10 min).</li>
+          <li><strong>Discharge:</strong> Stop instrument and ground the HT shorted group for at least 4 minutes using a discharge rod before touching.</li>
+        </ul>
+      </li>
+      <li><strong>Test 2: LT Winding to Earth (LT → Earth)</strong>
+        <ul>
+          <li><strong>Shorting:</strong> Keep LT bushings (X1, X2, X3, X0) shorted together. Un-ground them from tank earth.</li>
+          <li><strong>Shorting:</strong> Short together all HT bushings (H1, H2, H3, H0) and connect the HT bundle to Main Tank Earth.</li>
+          <li><strong>Instrument Connections:</strong> Connect <strong>LINE Lead</strong> to shorted LT bushings. Connect <strong>EARTH Lead</strong> to Tank Earth. Connect <strong>GUARD Lead</strong> to shorted HT bushings.</li>
+          <li><strong>Execution:</strong> Apply 1000 V DC (or 2500 V DC per spec). Record R30, R60, and R600.</li>
+          <li><strong>Discharge:</strong> Stop instrument and ground LT shorted group for at least 4 minutes using a discharge rod.</li>
+        </ul>
+      </li>
+      <li><strong>Test 3: HT Winding to LT Winding (HT → LT)</strong>
+        <ul>
+          <li><strong>Shorting:</strong> Keep HT bushings (H1, H2, H3, H0) shorted together. Keep LT bushings (X1, X2, X3, X0) shorted together. Neither bundle is connected to tank earth.</li>
+          <li><strong>Instrument Connections:</strong> Connect <strong>LINE Lead</strong> to shorted HT bushings. Connect <strong>EARTH Lead</strong> to shorted LT bushings. Connect <strong>GUARD Lead</strong> directly to Main Tank Earth.</li>
+          <li><strong>Execution:</strong> Apply 5000 V DC. Record R30, R60, and R600.</li>
+          <li><strong>Discharge:</strong> Stop instrument and ground BOTH HT and LT shorted groups for at least 4 minutes.</li>
+        </ul>
+      </li>
+    </ul>
+    <p style="color:var(--amber-soft)"><strong>Important:</strong> Always verify zero voltage with an approved multimeter before removing or reconfiguring leads.</p>
+  </div>
+
+  <div class="ir-grid">
+    <div class="field">
+      <label>HT → Earth — Test voltage (V DC)</label>
+      <input id="irHtEarthV" type="number" min="0" step="1" value="5000">
+      <div class="help">Enter the actual DC test voltage used.</div>
+    </div>
+    <div class="field">
+      <label>HT → Earth — R60 (MΩ)</label>
+      <input id="irHtEarthR60" type="number" min="0" step="0.1" value="1200">
+      <div class="help">60-second insulation resistance.</div>
+    </div>
+    <div class="field">
+      <label>HT → Earth — R600 (MΩ)</label>
+      <input id="irHtEarthR600" type="number" min="0" step="0.1" value="2500">
+      <div class="help">10-minute insulation resistance.</div>
+    </div>
+
+    <div class="field">
+      <label>LT → Earth — Test voltage (V DC)</label>
+      <input id="irLtEarthV" type="number" min="0" step="1" value="1000">
+      <div class="help">Enter the actual DC test voltage used.</div>
+    </div>
+    <div class="field">
+      <label>LT → Earth — R60 (MΩ)</label>
+      <input id="irLtEarthR60" type="number" min="0" step="0.1" value="900">
+      <div class="help">60-second insulation resistance.</div>
+    </div>
+    <div class="field">
+      <label>LT → Earth — R600 (MΩ)</label>
+      <input id="irLtEarthR600" type="number" min="0" step="0.1" value="1800">
+      <div class="help">10-minute insulation resistance.</div>
+    </div>
+
+    <div class="field">
+      <label>HT → LT — Test voltage (V DC)</label>
+      <input id="irHtLtV" type="number" min="0" step="1" value="5000">
+      <div class="help">Enter the actual DC test voltage used.</div>
+    </div>
+    <div class="field">
+      <label>HT → LT — R60 (MΩ)</label>
+      <input id="irHtLtR60" type="number" min="0" step="0.1" value="1500">
+      <div class="help">60-second insulation resistance.</div>
+    </div>
+    <div class="field">
+      <label>HT → LT — R600 (MΩ)</label>
+      <input id="irHtLtR600" type="number" min="0" step="0.1" value="3000">
+      <div class="help">10-minute insulation resistance.</div>
+    </div>
+
+    <div class="field">
+      <label>PI minimum</label>
+      <input id="piLimit" type="number" min="0" step="0.1" value="2.0">
+      <div class="help">Use the approved OEM/project acceptance criterion.</div>
+    </div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>2. Transformer Turns Ratio (TTR)</h3></div><span class="tag">Nameplate comparison</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & WIRING</div>
+    <strong>Preparation & Connections:</strong>
+    <ul>
+      <li>Remove all shorting wires from previous IR tests. Do NOT short terminals during TTR testing.</li>
+      <li>Ground the TTR test set chassis directly to Main Tank Earth.</li>
+      <li><strong>HV Cable Connections (Primary Side):</strong>
+        <ul>
+          <li>Connect <strong>H1 (Red)</strong> lead to Transformer Bushing <strong>H1</strong>.</li>
+          <li>Connect <strong>H2 (Yellow)</strong> lead to Transformer Bushing <strong>H2</strong>.</li>
+          <li>Connect <strong>H3 (Blue)</strong> lead to Transformer Bushing <strong>H3</strong>.</li>
+          <li>Connect <strong>H0 (Black)</strong> lead to Transformer Bushing <strong>H0</strong> (Neutral, if present).</li>
+        </ul>
+      </li>
+      <li><strong>LV Cable Connections (Secondary Side):</strong>
+        <ul>
+          <li>Connect <strong>X1 (Red)</strong> lead to Transformer Bushing <strong>X1</strong>.</li>
+          <li>Connect <strong>X2 (Yellow)</strong> lead to Transformer Bushing <strong>X2</strong>.</li>
+          <li>Connect <strong>X3 (Blue)</strong> lead to Transformer Bushing <strong>X3</strong>.</li>
+          <li>Connect <strong>X0 (Black)</strong> lead to Transformer Bushing <strong>X0</strong> (Neutral, if present).</li>
+        </ul>
+      </li>
+      <li><strong>Instrument Setup:</strong> Select Vector Group on TTR instrument (e.g., Dyn11, Ynd11) and input nominal primary/secondary voltages.</li>
+      <li><strong>Execution:</strong> Set On-Load Tap Changer (OLTC) / Off-Circuit Tap Changer (OCTC) to Tap 1. Inject low AC excitation voltage (e.g., 80 V or 100 V AC). Run measurement on all 3 phases.</li>
+      <li><strong>Tap Sequence:</strong> Step through all tap positions (e.g., Tap 1 to Tap N). Record measured ratio, phase deviation, and percentage error for every phase on every tap.</li>
+    </ul>
+    <p style="color:var(--amber-soft)"><strong>Caution:</strong> Ensure high voltage leads are strictly connected to HV bushings and low voltage leads to LV bushings to prevent instrument damage and step-up hazards.</p>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Nameplate ratio</label><input id="nominalRatio" type="number" min="0" step="0.001" value="132"></div>
+    <div class="field"><label>Measured ratio</label><input id="measuredRatio" type="number" min="0" step="0.001" value="132.2"></div>
+    <div class="field"><label>Allowed ratio error (%)</label><input id="ttrLimit" type="number" min="0" step="0.01" value="0.5">
+      <div class="help">Use the approved test specification or manufacturer requirement.</div></div>
+    <div class="field"><label>Equipment</label>
+      <select id="ttrEquip"><option>Generic TTR tester</option><option selected>OMICRON CPC 100 / compatible setup</option><option>Megger TTR</option><option>Doble TTR</option></select>
+    </div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>3. Winding Resistance</h3></div><span class="tag">Compare all available phases</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & WIRING</div>
+    <strong>Four-Wire (Kelvin) Setup:</strong>
+    <ul>
+      <li>Use a 4-wire DC micro-ohmmeter/winding resistance meter. Connect Current leads (C+, C-) and Potential leads (P+, P-) directly to bushing metal terminals.</li>
+      <li><strong>HV Winding Measurement (Delta Connection Example: H1-H2, H2-H3, H3-H1):</strong>
+        <ul>
+          <li><strong>Phase A (H1-H2):</strong> Connect C+ and P+ to Bushing <strong>H1</strong>. Connect C- and P- to Bushing <strong>H2</strong>.</li>
+          <li><strong>Phase B (H2-H3):</strong> Connect C+ and P+ to Bushing <strong>H2</strong>. Connect C- and P- to Bushing <strong>H3</strong>.</li>
+          <li><strong>Phase C (H3-H1):</strong> Connect C+ and P+ to Bushing <strong>H3</strong>. Connect C- and P- to Bushing <strong>H1</strong>.</li>
+        </ul>
+      </li>
+      <li><strong>LV Winding Measurement (Star/Wye Connection Example: X1-X0, X2-X0, X3-X0):</strong>
+        <ul>
+          <li>Connect C- and P- to Neutral Bushing <strong>X0</strong>.</li>
+          <li>Connect C+ and P+ sequentially to <strong>X1</strong>, <strong>X2</strong>, and <strong>X3</strong>.</li>
+        </ul>
+      </li>
+      <li><strong>Execution:</strong> Inject DC current (typically 1% to 10% of rated winding current; do not exceed 15%). Wait for core saturation until resistance reading stabilizes completely.</li>
+      <li><strong>De-energization:</strong> Initiate instrument's <strong>AUTOMATIC DISCHARGE / DE-FLUX</strong> cycle. Wait for discharge indicator to show zero current before disconnecting!</li>
+    </ul>
+    <p style="color:var(--amber-soft)"><strong>Warning:</strong> High inductive energy stored in windings. Disconnecting live leads will cause severe electrical arcing!</p>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Phase A (mΩ)</label><input id="rA" type="number" min="0" step="0.01" value="145.2"></div>
+    <div class="field"><label>Phase B (mΩ)</label><input id="rB" type="number" min="0" step="0.01" value="145.8"></div>
+    <div class="field"><label>Phase C (mΩ)</label><input id="rC" type="number" min="0" step="0.01" placeholder="Optional"></div>
+    <div class="field"><label>Allowed phase deviation (%)</label><input id="rLimit" type="number" min="0" step="0.1" value="2.0">
+      <div class="help">Use the approved specification. The tool reports spread around the phase average.</div></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>4. Oil Breakdown Voltage (BDV)</h3></div><span class="tag">IEC 60156 method</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & SAMPLING</div>
+    <strong>Sampling & Testing Procedure (per IEC 60156):</strong>
+    <ul>
+      <li>Drain at least 2–3 liters of oil from bottom sampling valve to flush line contaminants.</li>
+      <li>Collect fresh oil sample using a clean, dry glass bottle. Cap tightly immediately.</li>
+      <li>Set electrode gap to exactly <strong>2.50 mm (±0.05 mm)</strong> using a precision gauge block.</li>
+      <li>Gently pour sample oil into test cell. Allow cell to sit undisturbed for 10 minutes for air bubbles to escape.</li>
+      <li>Run 6 consecutive breakdowns with automated magnetic stirring between shots.</li>
+    </ul>
+    <p style="color:var(--amber-soft)"><strong>Record:</strong> Sample ID, oil temperature, electrode gap, 6 breakdown values, and average kV.</p>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Measured BDV (kV)</label><input id="bdv" type="number" min="0" step="0.1" value="65"></div>
+    <div class="field"><label>Acceptance minimum (kV)</label><input id="bdvLimit" type="number" min="0" step="0.1" value="60">
+      <div class="help">Configurable acceptance criterion.</div></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>5. Bushing / Winding Tan Delta</h3></div><span class="tag">Temperature dependent</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & WIRING</div>
+    <strong>Power Factor / Tan δ Configurations:</strong>
+    <ul>
+      <li>Ensure transformer tank, core, and test-set ground leads are tied firmly to main substation earth grid.</li>
+      <li><strong>C1 Main Bushing Test (GST-Guard Mode):</strong> Connect HV Output to Main Bushing Top Stud, MEASURE Lead to Bushing Test Tap, GUARD to Tank Earth. Apply 10 kV AC.</li>
+      <li><strong>C2 Bushing Tap Test (UST Mode):</strong> Connect HV Output to Bushing Test Tap, MEASURE Lead to Main Bushing Top Stud. Apply 500 V – 2 kV AC.</li>
+    </ul>
+    <p style="color:var(--amber-soft)"><strong>Warning:</strong> Always ground bushing test taps before leaving unit. Operating with an open test tap destroys the bushing!</p>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Measured Tan δ (%)</label><input id="tanDelta" type="number" min="0" step="0.01" value="0.38"></div>
+    <div class="field"><label>Project / manufacturer maximum (%)</label><input id="tdLimit" type="number" min="0" step="0.01" value="0.50"></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>6. DGA — Acetylene</h3></div><span class="tag">Diagnostic input</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & SAMPLING</div>
+    <strong>Dissolved Gas Analysis Sampling (per ASTM D3613 / IEC 60567):</strong>
+    <ul>
+      <li>Use a 50 mL or 100 mL gas-tight glass syringe with a 3-way stopcock.</li>
+      <li>Flush line, collect sample without pulling forcefully on plunger to prevent vacuum air bubbles.</li>
+      <li>Store syringe in dark transport box and send to laboratory for Gas Chromatography analysis.</li>
+    </ul>
+  </div>
+  <div class="grid">
+    <div class="field"><label>C₂H₂ acetylene (ppm)</label><input id="c2h2" type="number" min="0" step="0.1" value="0"></div>
+    <div class="field"><label>Previous C₂H₂ (ppm)</label><input id="prevC2h2" type="number" min="0" step="0.1" placeholder="Optional"></div>
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head"><div><h3>7. SFRA / FRA Recording</h3></div><span class="tag">Comparison required</span></div>
+  <div class="procedure-tab">
+    <div class="procedure-label">DETAILED FIELD PROCEDURE & WIRING</div>
+    <strong>Sweep Frequency Response Analysis Wiring Setup:</strong>
+    <ul>
+      <li>All ground leads MUST use shortest path high-frequency flat copper grounding straps screwed directly to bushing base flange.</li>
+      <li>Connect SOURCE + REFERENCE to Input Bushing. Connect MEASUREMENT to Output Bushing. Run frequency sweep (20 Hz to 2 MHz).</li>
+    </ul>
+  </div>
+  <div class="grid">
+    <div class="field"><label>100 Hz (dB)</label><input id="sfra1" type="number" step="0.1" value="-44"></div>
+    <div class="field"><label>10 kHz (dB)</label><input id="sfra2" type="number" step="0.1" value="-26"></div>
+    <div class="field"><label>500 kHz (dB)</label><input id="sfra3" type="number" step="0.1" value="-35"></div>
+    <div class="field"><label>5 MHz (dB)</label><input id="sfra4" type="number" step="0.1" value="-49"></div>
+  </div>
+</section>
+
+<div class="elx-addon-wrap">
+  <div class="elx-addon-banner">
+    <h2>ElectraLab Extended Transformer Test Pack</h2>
+    <p>Additional field-record modules added without changing the original calculator modules above.</p>
+    <p class="elx-note">Use project/OEM acceptance criteria for tests that are not automatically evaluated.</p>
+  </div>
+
+  <section class="elx-section elx-add-form">
+    <h3>8. TTR — Tap-by-Tap / Phase Record</h3>
+    <div class="elx-grid">
+      <div class="elx-field"><label>Vector group used for test</label><input id="ext_ttr_vector"></div>
+      <div class="elx-field"><label>Nominal HV / LV basis</label><input id="ext_ttr_basis" placeholder="e.g. 132 / 33 kV"></div>
+      <div class="elx-field"><label>Acceptance error (%)</label><input id="ext_ttr_limit" type="number" min="0" step="0.01" value="0.5"></div>
+    </div>
+    <div class="elx-actions"><button class="elx-btn" type="button" onclick="extAddTtrRow()">Add Tap Row</button><button class="elx-btn secondary" type="button" onclick="extClearTtrRows()">Clear Rows</button></div>
+    <div class="elx-table-wrap"><table class="elx-table"><thead><tr><th>Tap</th><th>Nameplate ratio</th><th>Phase A</th><th>Phase B</th><th>Phase C</th><th>Max error %</th><th>Status</th><th>Note</th></tr></thead><tbody id="ext_ttr_body"></tbody></table></div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>9. Winding Resistance — Winding / Tap Record</h3>
+    <div class="elx-grid">
+      <div class="elx-field"><label>Acceptance spread (%)</label><input id="ext_wr_limit" type="number" min="0" step="0.1" value="2"></div>
+      <div class="elx-field"><label>Reference temperature (°C)</label><input id="ext_wr_ref_temp" type="number" step="0.1" value="75"></div>
+      <div class="elx-field"><label>Correction constant</label><input id="ext_wr_const" type="number" step="0.1" value="234.5"></div>
+      <div class="elx-field"><label>Test current (A)</label><input id="ext_wr_current" type="number" min="0" step="0.1"></div>
+    </div>
+    <div class="elx-actions"><button class="elx-btn" type="button" onclick="extAddWrRow()">Add Measurement Row</button><button class="elx-btn secondary" type="button" onclick="extClearWrRows()">Clear Rows</button></div>
+    <div class="elx-table-wrap"><table class="elx-table"><thead><tr><th>Winding</th><th>Tap</th><th>Phase A mΩ</th><th>Phase B mΩ</th><th>Phase C mΩ</th><th>Temp °C</th><th>Spread %</th><th>Status</th></tr></thead><tbody id="ext_wr_body"></tbody></table></div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>10. Tan Delta / Capacitance — Detailed Record</h3>
+    <div class="elx-actions"><button class="elx-btn" type="button" onclick="extAddTdRow()">Add Measurement</button></div>
+    <div class="elx-table-wrap"><table class="elx-table"><thead><tr><th>Test point</th><th>Mode</th><th>Voltage kV</th><th>Frequency Hz</th><th>Capacitance pF</th><th>Tan δ %</th><th>Temperature °C</th><th>Limit %</th><th>Status</th></tr></thead><tbody id="ext_td_body"></tbody></table></div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>11. Core / Tank / Grounding Record</h3>
+    <div class="elx-grid">
+      <div class="elx-field"><label>Core insulation resistance</label><input id="ext_core_ir" placeholder="e.g. MΩ"></div>
+      <div class="elx-field"><label>Core-to-tank observation</label><select id="ext_core_obs"><option>Normal</option><option>Attention</option><option>Abnormal</option><option>Not tested</option></select></div>
+      <div class="elx-field"><label>Tank earth verified</label><select id="ext_tank_earth"><option>Yes</option><option>No</option><option>Not verified</option></select></div>
+      <div class="elx-field"><label>Core ground lead condition</label><select id="ext_core_ground"><option>Normal</option><option>Attention</option><option>Abnormal</option><option>Not applicable</option></select></div>
+      <div class="elx-field"><label>Grounding / bonding notes</label><textarea id="ext_ground_notes"></textarea></div>
+    </div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>12. Excitation / No-Load Test Record</h3>
+    <div class="elx-actions"><button class="elx-btn" type="button" onclick="extAddExcRow()">Add Phase / Tap</button></div>
+    <div class="elx-table-wrap"><table class="elx-table"><thead><tr><th>Tap</th><th>Phase</th><th>Applied V</th><th>Current A</th><th>Power W</th><th>PF</th><th>Reference</th><th>Status</th></tr></thead><tbody id="ext_exc_body"></tbody></table></div>
+  </section>
+
+  
+
+  <section class="elx-section elx-add-form">
+    <h3>13. Capacitance Record</h3>
+    <div class="elx-actions"><button class="elx-btn" type="button" onclick="extAddCapRow()">Add Capacitance Point</button></div>
+    <div class="elx-table-wrap"><table class="elx-table"><thead><tr><th>Point</th><th>Capacitance pF</th><th>Reference pF</th><th>Deviation %</th><th>Limit %</th><th>Status</th></tr></thead><tbody id="ext_cap_body"></tbody></table></div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>14. OLTC / Tap-Changer Record</h3>
+    <div class="elx-grid">
+      <div class="elx-field"><label>Tap changer type</label><input id="ext_oltc_type"></div>
+      <div class="elx-field"><label>Operation count</label><input id="ext_oltc_count" type="number" min="0"></div>
+      <div class="elx-field"><label>Motor / drive status</label><select id="ext_oltc_motor"><option>Normal</option><option>Attention</option><option>Abnormal</option><option>Not tested</option></select></div>
+      <div class="elx-field"><label>Limit / indication status</label><select id="ext_oltc_ind"><option>Normal</option><option>Attention</option><option>Abnormal</option><option>Not tested</option></select></div>
+      <div class="elx-field"><label>OLTC oil / compartment record</label><textarea id="ext_oltc_oil"></textarea></div>
+    </div>
+  </section>
+
+  <section class="elx-section elx-add-form">
+    <h3>15. Oil Condition — Additional Tests</h3>
+    <div class="elx-grid">
+      <div class="elx-field"><label>Moisture ppm</label><input id="ext_oil_moist" type="number" min="0" step="0.1"></div>
+      <div class="elx-field"><label>Acidity mg KOH/g</label><input id="ext_oil_acid" type="number" min="0" step="0.001"></div>
+      <div class="elx-field"><label>Interfacial tension mN/m</label><input id="ext_oil_ift" type="number" step="0.1"></div>
+      <div class="elx-field"><label>Visual appearance</label><select id="ext_oil_visual"><option>Clear / normal</option><option>Attention</option><option>Contaminated</option><option>Not tested</option></select></div>
+      <div class="elx-field"><label>Oil resistivity / other result</label><input id="ext_oil_other"></div>
+    </div>
+  </section>
+
+  
+
+  
+
+  
+</div>
+
+
+
+
+<div class="actions">
+  <button class="primary" onclick="requestEvaluation()">Run Evaluation</button>
+  <button class="secondary" type="button" onclick="printReport()">Print / Save PDF</button>
+  <a href="Advanced.html" class="btn-link info-btn">Back to Toolbox</a>
+  <button class="danger" onclick="resetForm()">Reset</button>
+</div>
+
+<section class="card auth-box" id="authorizationGate">
+  <h2>Pre-Energization Review Gate</h2>
+  <div class="step-note">Complete after testing: enter who performed the tests, who reviewed them, and the applicable reference/permit.</div>
+  <div class="auth-grid">
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckProcedure"> Approved test procedure and criteria are identified.</label>
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckRecords"> Test records and calculations reviewed.</label>
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckNoOpen"> No unresolved test failure or hold point remains.</label>
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckProtection"> Protection and control checks complete.</label>
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckMechanical"> Visual inspection complete.</label>
+    <label class="checkline"><input type="checkbox" class="gate-check" id="ckSwitching"> Approved switching plan reviewed.</label>
+  </div>
+  <div class="auth-grid" style="margin-top:12px">
+    <div class="field"><label>Tested by</label><input id="testedBy" placeholder="Technician / engineer name"></div>
+    <div class="field"><label>Authorized reviewer name</label><input id="reviewerName" placeholder="Enter name"></div>
+    <div class="field"><label>Role / designation</label><input id="reviewerRole" placeholder="e.g. Commissioning Engineer"></div>
+    <div class="field"><label>Review date / time</label><input id="reviewDateTime" type="datetime-local"></div>
+    <div class="field"><label>Reference / permit / report no.</label><input id="reviewRef" placeholder="Optional"></div>
+  </div>
+  <div class="actions" style="margin-bottom:0">
+    <button class="secondary" type="button" onclick="updateGate()">Update Review Status</button>
+  </div>
+  <div class="gate hold" id="gateStatus"><strong>HOLD — AUTHORIZATION REVIEW INCOMPLETE.</strong><br>Complete review items and resolve findings before energization.</div>
+</section>
+
+<section class="result card" id="result">
+  <div class="report-header">
+    <div>
+      <div class="report-brand">Transformer Commissioning / Field Test Record</div>
+      <div class="report-title">Test Result & Pre-Energization Review</div>
+      <div class="report-meta">Generated from field measurements and acceptance criteria.</div>
+    </div>
+    <div class="report-meta">
+      <strong>Transformer ID:</strong> <span id="printAsset">—</span><br>
+      <strong>Manufacturer:</strong> <span id="printManufacturer">—</span><br>
+      <strong>Rating / Voltage:</strong> <span id="printRating">—</span><br>
+      <strong>Test date:</strong> <span id="printTestDate">—</span><br>
+      <strong>Tested by:</strong> <span id="printTestedBy">—</span>
+    </div>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="report-section-title">Recorded Test Data</div>
+  <table>
+    <thead><tr><th>Test / Parameter</th><th>Recorded value</th><th>Reference / note</th></tr></thead>
+    <tbody id="recordedDataRows"></tbody>
+  </table>
+  <div class="report-section-title">Evaluation Results</div>
+  <table>
+    <thead><tr><th>Test</th><th>Result</th><th>Criterion / Interpretation</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="sfraArea"></div>
+  <div class="report-section-title">Authorization & Sign-Off</div>
+  <div class="print-summary" id="printSignoffSummary"></div>
+  <div class="signature-grid">
+    <div class="sign-box">Tested by / Technician<br><strong id="printSignatureTestedBy">____________________________</strong></div>
+    <div class="sign-box">Reviewed by / Engineer<br><strong id="printSignatureReviewer">____________________________</strong></div>
+    <div class="sign-box">Role / Designation<br><strong id="printSignatureRole">____________________________</strong></div>
+    <div class="sign-box">Reference / Permit / Report No.<br><strong id="printSignatureRef">____________________________</strong></div>
+  </div>
+</section>
+
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value);
+const finite = v => Number.isFinite(v);
+
+// Dark / Light theme switching
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const safeTheme = theme === 'light' ? 'light' : 'dark';
+  root.setAttribute('data-theme', safeTheme);
+  const btn = $('themeBtn');
+  if (btn) {
+    btn.textContent = safeTheme === 'light' ? '🌙 Dark Theme' : '☀️ Light Theme';
+    btn.setAttribute('aria-label', safeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  }
+  try { localStorage.setItem('electraLabTheme', safeTheme); } catch (e) {}
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+  let saved = 'dark';
+  try {
+    const stored = localStorage.getItem('electraLabTheme');
+    if (stored === 'light' || stored === 'dark') saved = stored;
+  } catch (e) {}
+  applyTheme(saved);
+}
+
+function setInvalid(id, bad){
+  $(id).classList.toggle('invalid', bad);
+}
+
+function requiredNumbers(ids){
+  let ok = true;
+  ids.forEach(id=>{
+    const v = num(id);
+    const bad = !finite(v) || v < 0;
+    setInvalid(id,bad); if(bad) ok=false;
+  });
+  return ok;
+}
+
+function statusBadge(status){
+  const cls = status==='PASS'?'pass':status==='ATTENTION'?'warn':status==='FAIL'?'fail':'info';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function addRow(name,result,criterion,status){
+  return `<tr><td><strong>${name}</strong></td><td>${result}</td><td>${criterion}</td><td>${statusBadge(status)}</td></tr>`;
+}
+
+function numericalFails(){
+  return $('rows').querySelectorAll('.badge.fail').length;
+}
+function attentionItems(){
+  return $('rows').querySelectorAll('.badge.warn').length;
+}
+function updateGate(){
+  const checks=[...document.querySelectorAll('.gate-check')];
+  const allChecked=checks.length>0 && checks.every(c=>c.checked);
+  const fails=numericalFails();
+  const attention=attentionItems();
+  const gate=$('gateStatus');
+  if(!allChecked){
+    gate.className='gate hold';
+    gate.innerHTML='<strong>HOLD — REVIEW CHECKLIST INCOMPLETE.</strong><br>Complete the required review items before final authorization.';
+  }else if(fails>0 || attention>0){
+    gate.className='gate hold';
+    gate.innerHTML='<strong>HOLD — OPEN FINDING.</strong><br>One or more evaluation items require resolution and documented review.';
+  }else{
+    gate.className='gate ready';
+    gate.innerHTML='<strong>READY FOR AUTHORIZED ENERGIZATION REVIEW.</strong><br>Configured numerical checks are within limits and checklist is complete.';
+  }
+}
+
+function textValue(id, fallback='—'){
+  const v=$(id)?.value;
+  return v && v.trim() ? v.trim() : fallback;
+}
+function formatDateValue(value){
+  if(!value) return '—';
+  const d=new Date(value+'T00:00:00');
+  if(Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
+}
+
+function safeNumText(id, decimals=2, unit='') {
+  const el = $(id);
+  if (!el || el.value === '') return '—';
+  const v = parseFloat(el.value);
+  if (!Number.isFinite(v)) return '—';
+  return `${v.toFixed(decimals)}${unit ? ' ' + unit : ''}`;
+}
+
+function safeValue(id, fallback='—') {
+  const el = $(id);
+  if (!el) return fallback;
+  const value = (el.value ?? '').toString().trim();
+  return value || fallback;
+}
+
+function checkedText(id) {
+  const el = $(id);
+  return el ? (el.checked ? 'Complete / checked' : 'Incomplete / not checked') : '—';
+}
+
+function populatePrintReport(){
+  $('printAsset').textContent=textValue('assetId');
+  $('printManufacturer').textContent=textValue('manufacturer');
+  $('printRating').textContent=textValue('rating');
+  $('printTestDate').textContent=formatDateValue(textValue('testDate',''));
+
+  const testedBy=textValue('testedBy');
+  const reviewer=textValue('reviewerName');
+  const role=textValue('reviewerRole');
+  const ref=textValue('reviewRef');
+
+  $('printTestedBy').textContent=testedBy;
+  $('printSignatureTestedBy').textContent=testedBy || '____________________________';
+  $('printSignatureReviewer').textContent=reviewer || '____________________________';
+  $('printSignatureRole').textContent=role || '____________________________';
+  $('printSignatureRef').textContent=ref || '____________________________';
+
+  const htEarthPI = (()=>{ const r60=num('irHtEarthR60'), r600=num('irHtEarthR600'); return finite(r60)&&r60>0&&finite(r600) ? r600/r60 : NaN; })();
+  const ltEarthPI = (()=>{ const r60=num('irLtEarthR60'), r600=num('irLtEarthR600'); return finite(r60)&&r60>0&&finite(r600) ? r600/r60 : NaN; })();
+  const htLtPI = (()=>{ const r60=num('irHtLtR60'), r600=num('irHtLtR600'); return finite(r60)&&r60>0&&finite(r600) ? r600/r60 : NaN; })();
+
+  const rec=[
+    ['Ambient / Oil temperature', safeNumText('testTemp',1,'°C'), 'Temperature recorded for the test set / relevant measurement.'],
+    ['IR — HT → Earth — test voltage', safeNumText('irHtEarthV',0,'V DC'), 'Actual DC test voltage entered.'],
+    ['IR — HT → Earth — R60', safeNumText('irHtEarthR60',1,'MΩ'), '60-second insulation resistance.'],
+    ['IR — HT → Earth — R600', safeNumText('irHtEarthR600',1,'MΩ'), '10-minute insulation resistance.'],
+    ['IR — HT → Earth — PI', finite(htEarthPI) ? htEarthPI.toFixed(2) : '—', `Minimum ≥ ${safeNumText('piLimit',2)}`],
+    ['IR — LT → Earth — test voltage', safeNumText('irLtEarthV',0,'V DC'), 'Actual DC test voltage entered.'],
+    ['IR — LT → Earth — R60', safeNumText('irLtEarthR60',1,'MΩ'), '60-second insulation resistance.'],
+    ['IR — LT → Earth — R600', safeNumText('irLtEarthR600',1,'MΩ'), '10-minute insulation resistance.'],
+    ['IR — LT → Earth — PI', finite(ltEarthPI) ? ltEarthPI.toFixed(2) : '—', `Minimum ≥ ${safeNumText('piLimit',2)}`],
+    ['IR — HT → LT — test voltage', safeNumText('irHtLtV',0,'V DC'), 'Actual DC test voltage entered.'],
+    ['IR — HT → LT — R60', safeNumText('irHtLtR60',1,'MΩ'), '60-second insulation resistance.'],
+    ['IR — HT → LT — R600', safeNumText('irHtLtR600',1,'MΩ'), '10-minute insulation resistance.'],
+    ['IR — HT → LT — PI', finite(htLtPI) ? htLtPI.toFixed(2) : '—', `Minimum ≥ ${safeNumText('piLimit',2)}`],
+    ['TTR — nameplate ratio', safeNumText('nominalRatio',3), 'Nameplate / reference ratio.'],
+    ['TTR — measured ratio', safeNumText('measuredRatio',3), safeValue('ttrEquip')],
+    ['TTR — allowed error', safeNumText('ttrLimit',3,'%'), 'Configured maximum ratio error.'],
+    ['Winding resistance — Phase A', safeNumText('rA',2,'mΩ'), 'Measured winding resistance.'],
+    ['Winding resistance — Phase B', safeNumText('rB',2,'mΩ'), 'Measured winding resistance.'],
+    ['Winding resistance — Phase C', safeNumText('rC',2,'mΩ'), 'Optional measured winding resistance.'],
+    ['Winding resistance — allowed deviation', safeNumText('rLimit',2,'%'), 'Configured maximum deviation around phase average.'],
+    ['Oil BDV — measured', safeNumText('bdv',1,'kV'), 'Measured breakdown voltage.'],
+    ['Oil BDV — minimum', safeNumText('bdvLimit',1,'kV'), 'Configured acceptance minimum.'],
+    ['Tan δ — measured', safeNumText('tanDelta',2,'%'), 'Measured bushing / winding dissipation factor.'],
+    ['Tan δ — maximum', safeNumText('tdLimit',2,'%'), 'Configured maximum.'],
+    ['DGA — C₂H₂ acetylene', safeNumText('c2h2',1,'ppm'), 'Current diagnostic input.'],
+    ['DGA — previous C₂H₂', safeNumText('prevC2h2',1,'ppm'), 'Previous value, when entered.'],
+    ['SFRA — 100 Hz', safeNumText('sfra1',1,'dB'), 'Recorded point.'],
+    ['SFRA — 10 kHz', safeNumText('sfra2',1,'dB'), 'Recorded point.'],
+    ['SFRA — 500 kHz', safeNumText('sfra3',1,'dB'), 'Recorded point.'],
+    ['SFRA — 5 MHz', safeNumText('sfra4',1,'dB'), 'Recorded point.'],
+    ['PI acceptance minimum', safeNumText('piLimit',2), 'Configured minimum for all three PI checks.'],
+    ['TTR equipment', safeValue('ttrEquip'), 'Selected test equipment.']
+  ];
+  $('recordedDataRows').innerHTML=rec.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+
+  const checks=[...document.querySelectorAll('.gate-check')];
+  const allChecked=checks.length>0 && checks.every(c=>c.checked);
+  const fails=numericalFails();
+  const attention=attentionItems();
+  let gateText = (!allChecked) ? 'HOLD — review checklist incomplete.' :
+                 (fails>0 || attention>0) ? 'HOLD — open findings require resolution.' :
+                 'READY FOR AUTHORIZED ENERGIZATION REVIEW.';
+
+  const reviewDate = safeValue('reviewDateTime');
+  $('printSignoffSummary').innerHTML=`
+    <div><strong>${gateText}</strong></div>
+    <div style="margin-top:8px"><strong>Procedure / criteria:</strong> ${checkedText('ckProcedure')}</div>
+    <div><strong>Records / calculations:</strong> ${checkedText('ckRecords')}</div>
+    <div><strong>No unresolved failure / hold:</strong> ${checkedText('ckNoOpen')}</div>
+    <div><strong>Protection & control:</strong> ${checkedText('ckProtection')}</div>
+    <div><strong>Visual inspection:</strong> ${checkedText('ckMechanical')}</div>
+    <div><strong>Switching plan:</strong> ${checkedText('ckSwitching')}</div>
+    <div style="margin-top:8px"><strong>Reviewer:</strong> ${reviewer || '—'} &nbsp; <strong>Role:</strong> ${role || '—'} &nbsp; <strong>Review date/time:</strong> ${reviewDate || '—'} &nbsp; <strong>Reference:</strong> ${ref || '—'}</div>`;
+}
+
+function printReport(){
+  populatePrintReport();
+  if (typeof window.elxUpdateAddOnReport === 'function') { try { window.elxUpdateAddOnReport(); } catch (e) {} }
+  window.print();
+}
+
+function requestEvaluation(){
+  window.__userRequestedEvaluation = true;
+  runAnalysis();
+}
+
+function runAnalysis(){
+  if(!window.__userRequestedEvaluation) return;
+  const ids=['testTemp','irHtEarthV','irHtEarthR60','irHtEarthR600',
+             'irLtEarthV','irLtEarthR60','irLtEarthR600',
+             'irHtLtV','irHtLtR60','irHtLtR600','piLimit',
+             'nominalRatio','measuredRatio','ttrLimit',
+             'rA','rB','rLimit','bdv','bdvLimit','tanDelta','tdLimit',
+             'c2h2','sfra1','sfra2','sfra3','sfra4'];
+  if(!requiredNumbers(ids)){
+    alert('Please correct highlighted fields.');
+    return;
+  }
+
+  const temp=num('testTemp');
+  const ir = {
+    htEarth:{v:num('irHtEarthV'), r60:num('irHtEarthR60'), r600:num('irHtEarthR600')},
+    ltEarth:{v:num('irLtEarthV'), r60:num('irLtEarthR60'), r600:num('irLtEarthR600')},
+    htLt:{v:num('irHtLtV'), r60:num('irHtLtR60'), r600:num('irHtLtR600')}
+  };
+  const piLimit=num('piLimit');
+  const nominal=num('nominalRatio'), measured=num('measuredRatio'), ttrLimit=num('ttrLimit');
+  const rA=num('rA'), rB=num('rB'), rC=num('rC'), rLimit=num('rLimit');
+  const bdv=num('bdv'), bdvLimit=num('bdvLimit');
+  const td=num('tanDelta'), tdLimit=num('tdLimit');
+  const c2h2=num('c2h2');
+  const sfra=[num('sfra1'),num('sfra2'),num('sfra3'),num('sfra4')];
+
+  const piResults = {
+    htEarth: ir.htEarth.r600 / ir.htEarth.r60,
+    ltEarth: ir.ltEarth.r600 / ir.ltEarth.r60,
+    htLt: ir.htLt.r600 / ir.htLt.r60
+  };
+  const ttrErr=Math.abs(measured-nominal)/nominal*100;
+
+  const phases=[rA,rB];
+  if(finite(rC) && rC>0) phases.push(rC);
+  const avg=phases.reduce((a,b)=>a+b,0)/phases.length;
+  const spread=Math.max(...phases.map(v=>Math.abs(v-avg)/avg*100));
+
+  const piStatuses = {
+    htEarth: piResults.htEarth>=piLimit?'PASS':'FAIL',
+    ltEarth: piResults.ltEarth>=piLimit?'PASS':'FAIL',
+    htLt: piResults.htLt>=piLimit?'PASS':'FAIL'
+  };
+  const ttrStatus=ttrErr<=ttrLimit?'PASS':'FAIL';
+  const rStatus=spread<=rLimit?'PASS':'ATTENTION';
+  const bdvStatus=bdv>=bdvLimit?'PASS':'FAIL';
+  const tdStatus=td<=tdLimit?'PASS':'FAIL';
+  const dgaStatus = c2h2===0 ? 'PASS' : 'ATTENTION';
+
+  const rows =
+    addRow('IR — HT to Earth', `PI ${piResults.htEarth.toFixed(2)}`, `Limit ≥ ${piLimit.toFixed(2)}`, piStatuses.htEarth)+
+    addRow('IR — LT to Earth', `PI ${piResults.ltEarth.toFixed(2)}`, `Limit ≥ ${piLimit.toFixed(2)}`, piStatuses.ltEarth)+
+    addRow('IR — HT to LT', `PI ${piResults.htLt.toFixed(2)}`, `Limit ≥ ${piLimit.toFixed(2)}`, piStatuses.htLt)+
+    addRow('TTR error', ttrErr.toFixed(3)+' %', `Limit ≤ ${ttrLimit.toFixed(3)} %`, ttrStatus)+
+    addRow('Winding resistance spread', spread.toFixed(2)+' %', `Limit ≤ ${rLimit.toFixed(2)} %`, rStatus)+
+    addRow('Oil BDV', bdv.toFixed(1)+' kV', `Limit ≥ ${bdvLimit.toFixed(1)} kV`, bdvStatus)+
+    addRow('Tan δ', td.toFixed(2)+' %', `Limit ≤ ${tdLimit.toFixed(2)} %`, tdStatus)+
+    addRow('DGA C₂H₂', c2h2.toFixed(1)+' ppm', 'Diagnostic parameter', dgaStatus);
+
+  $('rows').innerHTML=rows;
+
+  const hardFails=[piStatuses.htEarth,piStatuses.ltEarth,piStatuses.htLt,ttrStatus,bdvStatus,tdStatus].filter(s=>s==='FAIL').length;
+  let summaryText = hardFails>0 ? '<strong>Review required.</strong> Out of limit tests found.' : '<strong>All limits within range.</strong>';
+  
+  $('summary').innerHTML=summaryText;
+  $('kpis').innerHTML=`
+    <table class="result-key-table">
+      <thead><tr><th>Key Result</th><th>Value</th><th>Key Result</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>PI — HT / Earth</td><td>${piResults.htEarth.toFixed(2)}</td><td>TTR Error</td><td>${ttrErr.toFixed(3)}%</td></tr>
+        <tr><td>Resistance Spread</td><td>${spread.toFixed(2)}%</td><td>Oil BDV</td><td>${bdv.toFixed(1)} kV</td></tr>
+      </tbody>
+    </table>`;
+
+  drawSFRA(sfra);
+  $('result').style.display='block';
+  updateGate();
+  populatePrintReport();
+  $('result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function drawSFRA(data){
+  const w=900,h=300,p=55, minY=Math.min(...data)-5,maxY=Math.max(...data)+5;
+  const x=i=>p+i*(w-2*p)/(data.length-1);
+  const y=v=>h-p-(v-minY)*(h-2*p)/(maxY-minY || 1);
+  const pts=data.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  const labels=['100 Hz','10 kHz','500 kHz','5 MHz'];
+  
+  let points=data.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="var(--accent)"/><text x="${x(i)}" y="${y(v)-10}" text-anchor="middle" fill="var(--text)" font-size="11">${v.toFixed(1)}</text>`).join('');
+  let xlabels=labels.map((t,i)=>`<text x="${x(i)}" y="${h-18}" text-anchor="middle" fill="var(--muted)" font-size="11">${t}</text>`).join('');
+  
+  $('sfraArea').innerHTML=`<h3 style="margin-top:20px">SFRA recorded points</h3>
+    <svg viewBox="0 0 ${w} ${h}">
+      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="3"/>${points}${xlabels}
+    </svg>`;
+}
+
+function resetForm(){
+  if(!confirm('Reset form?')) return;
+  document.querySelectorAll('input').forEach(el=>{
+    if(el.type==='number') el.value=el.defaultValue;
+    else el.value='';
+  });
+  $('result').style.display='none';
+}
+
+(function init(){
+  initTheme();
+  const now=new Date();
+  $('testDate').value=now.toISOString().slice(0,10);$('reviewDateTime').value=now.toISOString().slice(0,16);
+  document.querySelectorAll('.gate-check').forEach(c=>c.addEventListener('change',updateGate));
+  // Do not run validation automatically on page load.
+  // The user should click Run Evaluation after entering/reviewing test data.
+  updateGate();
+})();
+</script>
+
+<script id="elx-addons-script">
+(function(){
+  const q=id=>document.getElementById(id);
+  const val=id=>{const e=q(id); return e?e.value:''};
+  const n=id=>{const v=parseFloat(val(id)); return Number.isFinite(v)?v:null};
+  const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const badge=s=>{const cls=s==='PASS'?'elx-pass':s==='ATTENTION'?'elx-attn':s==='FAIL'?'elx-fail':s==='NOT APPLICABLE'?'elx-na':'elx-info'; return `<span class="elx-badge ${cls}">${esc(s)}</span>`};
+
+  function addTtr(tap='1'){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="ext-ttr-tap" value="${tap}"></td><td><input class="ext-ttr-nom" type="number" step="0.001"></td><td><input class="ext-ttr-a" type="number" step="0.001"></td><td><input class="ext-ttr-b" type="number" step="0.001"></td><td><input class="ext-ttr-c" type="number" step="0.001"></td><td class="ext-ttr-err">—</td><td class="ext-ttr-status">${badge('INFO')}</td><td><button type="button" class="elx-btn danger" onclick="this.closest('tr').remove()">Remove</button></td>`;
+    q('ext_ttr_body')?.appendChild(tr);
+  }
+  window.extAddTtrRow=()=>addTtr(String(q('ext_ttr_body')?.children.length+1||1));
+  window.extClearTtrRows=()=>q('ext_ttr_body')?.replaceChildren();
+
+  function addWr(){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><select class="ext-wr-w"><option>HV</option><option>LV</option><option>Tertiary</option></select></td><td><input class="ext-wr-tap"></td><td><input class="ext-wr-a" type="number" step="0.01"></td><td><input class="ext-wr-b" type="number" step="0.01"></td><td><input class="ext-wr-c" type="number" step="0.01"></td><td><input class="ext-wr-t" type="number" step="0.1"></td><td class="ext-wr-spread">—</td><td class="ext-wr-status">${badge('INFO')}</td>`;
+    q('ext_wr_body')?.appendChild(tr);
+  }
+  window.extAddWrRow=addWr; window.extClearWrRows=()=>q('ext_wr_body')?.replaceChildren();
+  function addTd(){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="ext-td-point"></td><td><select class="ext-td-mode"><option>UST</option><option>GST</option><option>GST-Guard</option><option>Other</option></select></td><td><input class="ext-td-v" type="number" step="0.1"></td><td><input class="ext-td-f" type="number" step="1" value="50"></td><td><input class="ext-td-cap" type="number" step="0.1"></td><td><input class="ext-td-val" type="number" step="0.01"></td><td><input class="ext-td-temp" type="number" step="0.1"></td><td><input class="ext-td-limit" type="number" step="0.01"></td><td class="ext-td-status">${badge('INFO')}</td>`;
+    q('ext_td_body')?.appendChild(tr);
+  }
+  window.extAddTdRow=addTd;
+  function addExc(){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="ext-exc-tap"></td><td><input class="ext-exc-phase"></td><td><input class="ext-exc-v" type="number"></td><td><input class="ext-exc-i" type="number" step="0.001"></td><td><input class="ext-exc-p" type="number"></td><td><input class="ext-exc-pf" type="number" step="0.001"></td><td><input class="ext-exc-ref"></td><td><select class="ext-exc-status"><option>PASS</option><option>ATTENTION</option><option>REFERENCE ONLY</option><option>NOT TESTED</option></select></td>`;
+    q('ext_exc_body')?.appendChild(tr);
+  }
+  window.extAddExcRow=addExc;
+
+  function addCap(){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input class="ext-cap-point"></td><td><input class="ext-cap-v" type="number" step="0.1"></td><td><input class="ext-cap-ref" type="number" step="0.1"></td><td class="ext-cap-dev">—</td><td><input class="ext-cap-lim" type="number" step="0.01"></td><td class="ext-cap-status">${badge('INFO')}</td>`;
+    q('ext_cap_body')?.appendChild(tr);
+  }
+  window.extAddCapRow=addCap;
+  function percentageSpread(arr){const a=arr.filter(Number.isFinite); if(a.length<2)return null; const avg=a.reduce((x,y)=>x+y,0)/a.length; if(avg===0)return null; return Math.max(...a.map(v=>Math.abs(v-avg)/avg*100));}
+  function nEl(root,sel){const v=parseFloat(root.querySelector(sel)?.value);return Number.isFinite(v)?v:null}
+
+  function evaluate(){
+    const tlim=n('ext_ttr_limit');
+    document.querySelectorAll('#ext_ttr_body tr').forEach(tr=>{
+      const nom=parseFloat(tr.querySelector('.ext-ttr-nom')?.value), vs=[...tr.querySelectorAll('.ext-ttr-a,.ext-ttr-b,.ext-ttr-c')].map(e=>parseFloat(e.value)).filter(Number.isFinite);
+      const err=Number.isFinite(nom)&&nom!==0&&vs.length?Math.max(...vs.map(v=>Math.abs(v-nom)/Math.abs(nom)*100)):null;
+      tr.querySelector('.ext-ttr-err').textContent=err===null?'—':err.toFixed(3)+' %';
+      const st=err===null?'INFO':tlim!==null?(err<=tlim?'PASS':'FAIL'):'REFERENCE ONLY'; tr.querySelector('.ext-ttr-status').innerHTML=badge(st);
+    });
+    const wlim=n('ext_wr_limit');
+    document.querySelectorAll('#ext_wr_body tr').forEach(tr=>{
+      const vals=[...tr.querySelectorAll('.ext-wr-a,.ext-wr-b,.ext-wr-c')].map(e=>parseFloat(e.value)).filter(Number.isFinite);
+      const sp=percentageSpread(vals); tr.querySelector('.ext-wr-spread').textContent=sp===null?'—':sp.toFixed(2)+' %';
+      const st=sp===null?'INFO':wlim!==null?(sp<=wlim?'PASS':'ATTENTION'):'REFERENCE ONLY'; tr.querySelector('.ext-wr-status').innerHTML=badge(st);
+    });
+    document.querySelectorAll('#ext_td_body tr').forEach(tr=>{const x=nEl(tr,'.ext-td-val'), lim=nEl(tr,'.ext-td-limit'); tr.querySelector('.ext-td-status').innerHTML=badge(x===null?'INFO':lim===null?'REFERENCE ONLY':x<=lim?'PASS':'FAIL')});
+    document.querySelectorAll('#ext_cap_body tr').forEach(tr=>{const v=nEl(tr,'.ext-cap-v'),r=nEl(tr,'.ext-cap-ref'),lim=nEl(tr,'.ext-cap-lim'); const d=v!==null&&r!==null&&r!==0?Math.abs(v-r)/Math.abs(r)*100:null; tr.querySelector('.ext-cap-dev').textContent=d===null?'—':d.toFixed(2)+' %'; tr.querySelector('.ext-cap-status').innerHTML=badge(d===null?'INFO':lim===null?'REFERENCE ONLY':d<=lim?'PASS':'ATTENTION')});
+  }
+  window.elxEvaluateAddOns=evaluate;
+
+  window.addEventListener('load',()=>{
+    addTtr('1'); addWr(); addTd(); addExc(); addCap();
+    evaluate();
+  });
+  document.addEventListener('input',()=>{try{evaluate()}catch(e){}});
+  document.addEventListener('change',()=>{try{evaluate()}catch(e){}});
+})();
+</script>
+
+<div class="footer-note">
+  ⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid.
+</div>
+</body>
+</html>

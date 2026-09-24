@@ -2448,7 +2448,7 @@ function connectElectraAgent() {
     electraAISocket = new WebSocket(getElectraSocketUrl());
   } catch (error) {
     console.error("Electra AI WebSocket:", error);
-    appendElectraMessage("I’m unable to connect to Electra AI right now. Please contact Mr. Sabbir Ahamed.", "bot");
+    appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again later.", "bot");
     return;
   }
 
@@ -2463,7 +2463,7 @@ function connectElectraAgent() {
   electraAISocket.addEventListener("error", () => {
     if (!electraAISessionEnded) {
       hideElectraThinking();
-      appendElectraMessage("I’m unable to connect to Electra AI right now. Please contact Mr. Sabbir.", "bot");
+      appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again.", "bot");
     }
   });
 
@@ -2628,8 +2628,8 @@ function sendElectraAI() {
     electraAIAbuseCount++;
     appendElectraMessage(
       electraAIAbuseCount > 1
-        ? "Kaner niche ekta khaba???."
-        : "So you are an asshole...",
+        ? "Please keep the language respectful."
+        : "Please keep the language respectful.",
       "bot"
     );
     return;

@@ -794,6 +794,46 @@
                         <div class="card-arrow">Open module →</div>
                 </div>
 
+                <!-- Tile: Transformer Field Test Analyzer -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='TFTA.html'" onkeydown="cardLink(event,'TFTA.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon">🧪</div>
+                        <h3>Transformer Field Test Analyzer</h3>
+                    </div>
+                    <p>Analyze transformer field test results such as insulation resistance, turns ratio, winding resistance and oil tests against acceptance limits.</p>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile: ABB REF615 Feeder Protection Relay -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='REF615.html'" onkeydown="cardLink(event,'REF615.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon blue">🛡️</div>
+                        <h3>ABB REF615 Feeder Protection Relay</h3>
+                    </div>
+                    <p>Settings and reference support for the ABB REF615 feeder protection and control relay.</p>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile: Power System Protection Coordination -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='PSPC.html'" onkeydown="cardLink(event,'PSPC.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon">📈</div>
+                        <h3>Power System Protection Coordination</h3>
+                    </div>
+                    <p>Fault-current study, IEC/IEEE inverse curves, time-current plot and relay coordination checks for radial feeders.</p>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile: HT Transformer Protection Relay Settings -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='TPR.html'" onkeydown="cardLink(event,'TPR.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon blue">⚙️</div>
+                        <h3>HT Transformer Protection Relay Settings</h3>
+                    </div>
+                    <p>50/51 and 51N settings for 11 kV / 33 kV distribution transformers, with grading, inrush, CT and panel checks.</p>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
                 <!-- TEMPLATE FOR FUTURE TILES: Copy paste block below and change ID -->
                 <!-- 
                 <div class="tool-card" onclick="switchView('your-new-tool')">
@@ -1340,6 +1380,13 @@
             }
         }
 
+        function cardLink(e, url) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.location.href = url;
+            }
+        }
+
         function switchView(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             const target = document.getElementById('view-' + viewName);
@@ -1872,6 +1919,7 @@
         // Explicit global API for browsers that restrict inline-handler name resolution.
         window.switchView = switchView;
         window.cardKey = cardKey;
+        window.cardLink = cardLink;
         window.updateEstimator = updateEstimator;
         window.useEstimate = useEstimate;
         window.calculateCompressor = calculateCompressor;
