@@ -2524,7 +2524,7 @@ function connectElectraAgent() {
     electraAISocket = new WebSocket(getElectraSocketUrl());
   } catch (error) {
     console.error("Electra AI WebSocket:", error);
-    appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again later.", "bot");
+    appendElectraMessage("I’m unable to connect to Electra AI right now. Please contact Mr. Sabbir Ahamed.", "bot");
     return;
   }
 
@@ -2539,7 +2539,7 @@ function connectElectraAgent() {
   electraAISocket.addEventListener("error", () => {
     if (!electraAISessionEnded) {
       hideElectraThinking();
-      appendElectraMessage("I’m unable to connect to Electra AI right now. Please try again.", "bot");
+      appendElectraMessage("I’m unable to connect to Electra AI right now. Please contact Mr. Sabbir Ahamed.", "bot");
     }
   });
 
@@ -2614,7 +2614,7 @@ function finishElectraResponse(hasError) {
   if (hasError || !electraAIResponseText.trim()) {
     if (electraAIResponseMessage) electraAIResponseMessage.remove();
     appendElectraMessage(
-      "I’m unable to process that request at the moment. Please try again.",
+      "I’m unable to process that request at the moment. Try again.",
       "bot"
     );
   } else {
@@ -2651,7 +2651,7 @@ function sendElectraToAgent(question) {
   }
 
   if (!electraAISocket || electraAISocket.readyState !== WebSocket.OPEN) {
-    appendElectraMessage("Electra AI is connecting. Please try again in a moment.", "bot");
+    appendElectraMessage("Electra AI is connecting. Try again in a moment.", "bot");
     return;
   }
 
@@ -2704,8 +2704,8 @@ function sendElectraAI() {
     electraAIAbuseCount++;
     appendElectraMessage(
       electraAIAbuseCount > 1
-        ? "Please keep the language respectful."
-        : "Please keep the language respectful.",
+        ? "Are you an asshole?? ."
+        : "So.. You're an asshole.",
       "bot"
     );
     return;
