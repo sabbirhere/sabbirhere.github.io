@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LadderSim — PLC Ladder Logic Simulator</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#111820; --panel2:#161f29; --elevated:#1c2732;
+  --border:#263340; --border-soft:#1e2933;
+  --amber:#f2a93b; --amber-dim:#5c451c; --amber-glow:rgba(242,169,59,.35);
+  --green:#37d98a; --green-dim:#134430; --green-glow:rgba(55,217,138,.45);
+  --red:#ef5f68; --red-dim:#4a1f22;
+  --blue:#5aa9e6; --blue-dim:#1c3550;
+  --text:#e8eef3; --text-dim:#93a4b3; --text-faint:#57697a;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --radius:8px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; font-size:14px;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+button{font-family:var(--sans); cursor:pointer;}
+select,input{font-family:var(--sans);}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:#324150;}
+
+/* ---------- Header ---------- */
+header{
+  height:56px; display:flex; align-items:center; gap:14px; padding:0 16px;
+  background:var(--panel); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:40;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.brand{display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; letter-spacing:.1px; white-space:nowrap;}
+.brand .logo{width:26px; height:26px; flex:none;}
+.brand .logo .rung{transition:stroke .3s;}
+.brand small{display:block; font-weight:500; color:var(--text-faint); font-size:10px; letter-spacing:.4px;}
+.brand-text{display:flex; flex-direction:column; line-height:1.15;}
+
+.mode-toggle{display:flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; flex:none;}
+.mode-toggle button{
+  border:none; background:transparent; color:var(--text-dim); padding:7px 16px; font-weight:600;
+  font-size:12.5px; letter-spacing:.3px;
+}
+.mode-toggle button.active.edit{background:var(--amber-dim); color:var(--amber);}
+.mode-toggle button.active.run{background:var(--green-dim); color:var(--green);}
+
+.hdr-controls{display:flex; align-items:center; gap:10px; flex:1; overflow:hidden;}
+.hdr-controls .proj-name{
+  background:transparent; border:1px solid transparent; color:var(--text); font-weight:600;
+  font-size:13.5px; padding:6px 8px; border-radius:6px; min-width:0; flex:1; max-width:280px;
+}
+.hdr-controls .proj-name:hover, .hdr-controls .proj-name:focus{border-color:var(--border); background:var(--elevated);}
+
+.step-btn, .speed-select{
+  background:var(--elevated); border:1px solid var(--border); color:var(--text-dim);
+  padding:6px 10px; border-radius:6px; font-size:12px;
+}
+.step-btn:hover{color:var(--text); border-color:#3a4a5a;}
+.speed-select{color:var(--text);}
+
+.hdr-actions{display:flex; gap:6px; flex:none;}
+.icon-btn{
+  background:var(--elevated); border:1px solid var(--border); color:var(--text-dim);
+  width:34px; height:34px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+}
+.icon-btn:hover{color:var(--text); border-color:#3a4a5a;}
+.icon-btn svg{width:16px; height:16px;}
+.hamburger{display:none;}
+
+@media (max-width:900px){
+  .hdr-controls .proj-name{max-width:120px;}
+  .speed-select{display:none;}
+  .hamburger{display:flex;}
+}
+
+/* ---------- App shell ---------- */
+.app{display:grid; grid-template-columns:200px 1fr 230px; height:calc(100vh - 56px); min-height:0;}
+.sidebar{background:var(--panel); overflow-y:auto; min-height:0;}
+.sidebar-left{border-right:1px solid var(--border);}
+.sidebar-right{border-left:1px solid var(--border);}
+.ladder-area{overflow-y:auto; min-height:0; background:
+  radial-gradient(circle at 1px 1px, #17202a 1px, transparent 0) 0 0/22px 22px, var(--bg);
+}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr; height:auto;}
+  .sidebar-left, .sidebar-right{
+    display:none; border:none; border-bottom:1px solid var(--border); max-height:60vh;
+  }
+  .sidebar-left.open, .sidebar-right.open{display:block;}
+  .ladder-area{height:70vh;}
+}
+
+.panel-section{padding:12px 10px 14px; border-bottom:1px solid var(--border-soft);}
+.panel-section h3{
+  margin:0 0 10px; font-size:11px; text-transform:none; letter-spacing:.3px; color:var(--text-faint);
+  font-weight:700; display:flex; align-items:center; justify-content:space-between;
+}
+.panel-section h3 .add{
+  background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:5px;
+  width:20px; height:20px; font-size:14px; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.panel-section h3 .add:hover{color:var(--green); border-color:var(--green-dim);}
+
+.btn{
+  background:var(--elevated); border:1px solid var(--border); color:var(--text);
+  padding:8px 10px; border-radius:6px; font-size:12.5px; font-weight:500; width:100%;
+  text-align:left; margin-bottom:6px; display:flex; align-items:center; gap:8px;
+}
+.btn:hover{border-color:#3a4a5a; background:#20303e;}
+.btn.small{width:auto; margin:0;}
+.btn.primary{background:var(--green-dim); border-color:#1e5c40; color:var(--green);}
+.btn.primary:hover{background:#175537;}
+.btn.danger-outline{color:var(--red);}
+.row-btns{display:flex; gap:6px;}
+.row-btns .btn{margin-bottom:0;}
+
+.example-card{
+  border:1px solid var(--border); border-radius:7px; padding:8px 9px; margin-bottom:7px; cursor:pointer;
+  background:var(--panel2);
+}
+.example-card:hover{border-color:var(--amber-dim); background:var(--elevated);}
+.example-card .t{font-weight:600; font-size:12.5px; margin-bottom:3px;}
+.example-card .d{color:var(--text-dim); font-size:11px; line-height:1.4;}
+
+.taggroup{margin-bottom:10px;}
+.taggroup-h{font-size:10px; color:var(--text-faint); font-family:var(--mono); letter-spacing:.5px; margin:8px 0 4px;}
+.tagrow{
+  display:flex; align-items:center; gap:7px; padding:5px 6px; border-radius:5px; font-size:12px;
+}
+.tagrow:hover{background:var(--elevated);}
+.tagrow .dot{width:8px; height:8px; border-radius:50%; background:var(--border); flex:none;}
+.tagrow .dot.on{background:var(--green); box-shadow:0 0 6px var(--green-glow);}
+.tagrow .nm{font-family:var(--mono); font-size:11.5px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.tagrow .rm{background:none; border:none; color:var(--text-faint); font-size:14px; padding:0 2px; flex:none;}
+.tagrow .rm:hover{color:var(--red);}
+.tagrow .meta{font-size:10px; color:var(--text-faint); font-family:var(--mono); flex:none;}
+
+.learn-box{color:var(--text-dim); font-size:12px; line-height:1.6;}
+.learn-box p{margin:0 0 8px;}
+.legend-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.legend-sym{width:44px; height:22px; flex:none; position:relative;}
+.legend-txt b{color:var(--text); display:block; font-size:12px;}
+.legend-txt span{font-size:11px; color:var(--text-faint);}
+
+details.collapse summary{cursor:pointer; color:var(--text-dim); font-size:11px; padding:6px 0; list-style:none;}
+details.collapse summary::-webkit-details-marker{display:none;}
+details.collapse summary:before{content:'▸ '; color:var(--text-faint);}
+details.collapse[open] summary:before{content:'▾ ';}
+
+/* ---------- Ladder ---------- */
+.ladder-frame{padding:18px 10px 60px;}
+.project-desc{
+  margin:0 10px 18px; padding:10px 12px; background:var(--panel2); border:1px solid var(--border);
+  border-radius:7px; font-size:12.5px; color:var(--text-dim); line-height:1.5;
+}
+.rung-card{
+  display:flex; margin:0 8px 4px; background:var(--panel); border:1px solid var(--border-soft);
+  border-radius:7px; overflow:hidden;
+}
+.rung-index{
+  flex:none; width:34px; display:flex; align-items:center; justify-content:center;
+  background:var(--panel2); color:var(--text-faint); font-family:var(--mono); font-size:11px;
+  border-right:1px solid var(--border-soft);
+}
+.rung-body{flex:1; min-width:0; padding:10px 4px 6px;}
+.rung-toprow{display:flex; align-items:center; gap:8px; padding:0 10px 8px; flex-wrap:wrap;}
+.rung-comment{
+  flex:1; min-width:120px; background:transparent; border:none; border-bottom:1px dashed transparent;
+  color:var(--text-dim); font-size:12px; padding:2px 2px;
+}
+.rung-comment:hover, .rung-comment:focus{border-bottom-color:var(--border);}
+.rung-actions{display:flex; gap:5px; flex:none;}
+.mini-btn{
+  background:var(--elevated); border:1px solid var(--border); color:var(--text-faint);
+  font-size:10.5px; padding:4px 8px; border-radius:5px; white-space:nowrap;
+}
+.mini-btn:hover{color:var(--text); border-color:#3a4a5a;}
+.mini-btn.del:hover{color:var(--red); border-color:var(--red-dim);}
+
+.rail-wrap{display:flex; align-items:stretch; overflow-x:auto; padding-bottom:4px;}
+.rail{width:5px; flex:none; border-radius:3px; background:linear-gradient(var(--amber),var(--amber-dim)); margin:2px 0;}
+.rail.dim{background:linear-gradient(var(--border),var(--border-soft));}
+.branches-col{flex:1; min-width:max-content; position:relative; padding:0 6px;}
+.branch-row{display:flex; align-items:center; height:56px; position:relative;}
+.merge{position:absolute; width:2px; background:var(--border); z-index:0;}
+.merge.live{background:var(--green); box-shadow:0 0 5px var(--green-glow);}
+
+.slot{position:relative; flex:0 0 56px; height:56px; display:flex; align-items:center; justify-content:center;}
+.slot .wireline{position:absolute; left:0; right:0; top:50%; height:2px; background:var(--border); transform:translateY(-1px);}
+.slot.live .wireline{background:var(--green); box-shadow:0 0 5px var(--green-glow);}
+.slot.empty-btn{cursor:pointer;}
+.slot.empty-btn:hover .wireline{background:#3a4a5a;}
+.slot.empty-btn .plus{
+  position:relative; z-index:1; width:18px; height:18px; border-radius:50%; border:1px dashed var(--border);
+  color:var(--text-faint); font-size:12px; display:flex; align-items:center; justify-content:center;
+  background:var(--panel); opacity:0; transition:opacity .15s;
+}
+.slot.empty-btn:hover .plus{opacity:1; color:var(--text-dim); border-color:var(--text-faint);}
+
+.contact{
+  position:relative; z-index:1; width:36px; height:30px; display:flex; align-items:center; justify-content:center;
+  background:var(--bg); border:none; padding:0;
+}
+.contact .bar{position:absolute; width:2px; height:20px; background:var(--text-dim); top:5px;}
+.contact .bar.l{left:12px;} .contact .bar.r{left:22px;}
+.contact.live .bar{background:var(--green); box-shadow:0 0 5px var(--green-glow);}
+.contact .diag{position:absolute; width:2px; height:28px; background:var(--text-dim); left:17px; top:1px; transform:rotate(24deg); transform-origin:center;}
+.contact.live .diag{background:var(--green); box-shadow:0 0 5px var(--green-glow);}
+.contact .lbl{
+  position:absolute; top:-17px; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:9.5px;
+  color:var(--text-dim); white-space:nowrap; max-width:80px; overflow:hidden; text-overflow:ellipsis;
+}
+.contact .klabel{
+  position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); font-size:8.5px; color:var(--text-faint);
+  letter-spacing:.3px;
+}
+
+.branch-del{
+  flex:none; width:20px; height:20px; align-self:center; margin-right:2px; background:none; border:none;
+  color:var(--text-faint); font-size:13px; opacity:.5;
+}
+.branch-del:hover{color:var(--red); opacity:1;}
+
+.coil-wrap{display:flex; align-items:center; flex:none; position:relative; height:100%; padding-left:2px;}
+.coil{
+  position:relative; z-index:1; width:42px; height:42px; border-radius:50%; border:2px solid var(--text-dim);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg);
+  font-family:var(--mono); color:var(--text-dim); gap:0;
+}
+.coil.live{border-color:var(--green); box-shadow:0 0 9px var(--green-glow);}
+.coil.timing{border-color:var(--amber); box-shadow:0 0 9px var(--amber-glow);}
+.coil .ktag{font-size:9px; font-weight:700;}
+.coil .statedot{
+  position:absolute; bottom:-3px; right:-3px; width:9px; height:9px; border-radius:50%; background:var(--border);
+  border:2px solid var(--panel);
+}
+.coil .statedot.on{background:var(--green);}
+.coil .lbl{
+  position:absolute; top:-17px; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:9.5px;
+  color:var(--text-dim); white-space:nowrap;
+}
+.coil .preset{
+  position:absolute; bottom:-15px; left:50%; transform:translateX(-50%); font-size:8.5px; color:var(--text-faint);
+  white-space:nowrap;
+}
+
+.add-branch-row{padding:2px 10px 8px 16px;}
+.add-rung-wrap{margin:14px 8px 0; display:flex; justify-content:center;}
+.add-rung-wrap .btn{width:auto; padding:9px 22px;}
+
+.empty-ladder{margin:40px 20px; text-align:center; color:var(--text-faint); font-size:13px;}
+
+/* ---------- Modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(4,7,10,.6); display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:20px;
+}
+.modal{
+  background:var(--panel2); border:1px solid var(--border); border-radius:10px; width:100%; max-width:380px;
+  padding:18px; max-height:88vh; overflow-y:auto;
+}
+.modal h4{margin:0 0 14px; font-size:14px;}
+.field{margin-bottom:13px;}
+.field label{display:block; font-size:11px; color:var(--text-faint); margin-bottom:5px; letter-spacing:.2px;}
+.field select, .field input[type=text], .field input[type=number]{
+  width:100%; background:var(--elevated); border:1px solid var(--border); color:var(--text);
+  padding:8px 9px; border-radius:6px; font-size:13px;
+}
+.field .hint{font-size:10.5px; color:var(--text-faint); margin-top:4px;}
+.seg{display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden;}
+.seg button{flex:1; background:var(--elevated); border:none; color:var(--text-dim); padding:8px 4px; font-size:12px;}
+.seg button.active{background:var(--blue-dim); color:var(--blue);}
+.modal-actions{display:flex; gap:8px; margin-top:16px;}
+.modal-actions .btn{margin:0;}
+
+/* ---------- Right panel: I/O & equipment ---------- */
+.io-item{
+  border:1px solid var(--border); background:var(--panel2); border-radius:8px; padding:10px; margin-bottom:10px;
+}
+.io-item .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+.io-item .name{font-size:11.5px; font-weight:600; color:var(--text-dim);}
+.io-item .val{font-family:var(--mono); font-size:10px; color:var(--text-faint);}
+
+.pushbtn{
+  width:100%; padding:14px 0; border-radius:7px; border:1px solid var(--border); background:var(--elevated);
+  color:var(--text); font-weight:700; font-size:12px; letter-spacing:.4px; user-select:none;
+  transition:transform .05s, background .1s, border-color .1s;
+}
+.pushbtn.pressed{background:var(--amber-dim); border-color:var(--amber); color:var(--amber); transform:scale(.97);}
+.pushbtn:disabled{opacity:.4;}
+
+.toggle-row{display:flex; align-items:center; justify-content:space-between;}
+.toggle-sw{width:44px; height:24px; border-radius:999px; background:var(--elevated); border:1px solid var(--border); position:relative; flex:none;}
+.toggle-sw .knob{position:absolute; width:18px; height:18px; border-radius:50%; background:var(--text-faint); top:2px; left:2px; transition:left .15s, background .15s;}
+.toggle-sw.on{background:var(--green-dim); border-color:var(--green);}
+.toggle-sw.on .knob{left:23px; background:var(--green);}
+.toggle-sw.danger.on{background:var(--red-dim); border-color:var(--red);}
+.toggle-sw.danger.on .knob{background:var(--red);}
+.toggle-sw:disabled{opacity:.4;}
+
+.sensor-led{width:100%; padding:10px; border-radius:7px; border:1px solid var(--border); background:var(--elevated); display:flex; align-items:center; gap:9px;}
+.sensor-led .led{width:11px; height:11px; border-radius:50%; background:var(--border); flex:none; border:1px solid var(--border-soft);}
+.sensor-led.on .led{background:var(--green); box-shadow:0 0 7px var(--green-glow);}
+.sensor-led span{font-size:11.5px; color:var(--text-dim);}
+.sensor-led:disabled{opacity:.5;}
+
+.motor-box{display:flex; flex-direction:column; align-items:center; gap:8px; padding:6px 0;}
+.motor-ring{
+  width:64px; height:64px; border-radius:50%; border:3px solid var(--border); position:relative;
+  display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 35% 30%, #1e2a35, #0d1319);
+}
+.motor-ring:before{content:''; position:absolute; width:6px; height:22px; background:var(--text-faint); border-radius:2px; top:6px;}
+.motor-ring.run{border-color:var(--green); box-shadow:0 0 14px var(--green-glow);}
+.motor-ring.run:before{background:var(--green);}
+.motor-ring.run{animation:spin 1.1s linear infinite;}
+@keyframes spin{from{transform:rotate(0)} to{transform:rotate(360deg)}}
+.motor-status{font-size:10.5px; color:var(--text-faint); font-family:var(--mono);}
+.motor-status.on{color:var(--green);}
+
+.conveyor-track{
+  width:100%; height:30px; border-radius:6px; border:1px solid var(--border); background:var(--elevated);
+  overflow:hidden; position:relative;
+}
+.conveyor-track .belt{
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(115deg, #2a3846 0 10px, #202c37 10px 20px);
+  background-size:200% 100%;
+}
+.conveyor-track.run .belt{animation:beltmove .6s linear infinite;}
+@keyframes beltmove{from{background-position:0 0;} to{background-position:-28px 0;}}
+
+.lamp-box{display:flex; align-items:center; gap:10px;}
+.lamp{width:26px; height:26px; border-radius:50%; background:#2a1414; border:2px solid var(--red-dim); flex:none;}
+.lamp.on{background:var(--red); box-shadow:0 0 12px rgba(239,95,104,.7); border-color:var(--red);}
+.lamp.green{background:#12261c; border-color:var(--green-dim);}
+.lamp.green.on{background:var(--green); box-shadow:0 0 12px var(--green-glow); border-color:var(--green);}
+
+.cyl-track{
+  width:100%; height:34px; border:2px solid var(--border); border-radius:6px; background:var(--elevated);
+  position:relative; overflow:hidden;
+}
+.cyl-rod{
+  position:absolute; top:50%; left:2px; height:6px; width:0; background:linear-gradient(90deg,var(--text-faint),var(--text-dim));
+  transform:translateY(-50%); border-radius:3px; transition:width .05s linear;
+}
+.cyl-head{
+  position:absolute; top:4px; height:26px; width:14px; background:var(--amber); border-radius:3px;
+  transform:translateY(0); transition:left .05s linear; box-shadow:0 0 6px var(--amber-glow);
+}
+.cyl-labels{display:flex; justify-content:space-between; font-size:9px; color:var(--text-faint); font-family:var(--mono); margin-top:4px;}
+
+.tank-box{display:flex; align-items:flex-end; gap:12px;}
+.tank-shell{
+  width:52px; height:90px; border:2px solid var(--border); border-radius:6px 6px 3px 3px; position:relative;
+  overflow:hidden; background:var(--elevated); flex:none;
+}
+.tank-fill{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(var(--blue),#2c6394); transition:height .1s linear;}
+.tank-mark{position:absolute; left:0; right:0; height:1px; background:var(--red-dim); border-top:1px dashed var(--red);}
+.tank-mark.hi{}
+.tank-readout{font-family:var(--mono); font-size:20px; font-weight:700;}
+.tank-readout small{font-size:10px; color:var(--text-faint); font-weight:400;}
+
+.counter-box{text-align:center;}
+.counter-num{font-family:var(--mono); font-size:26px; font-weight:700; letter-spacing:1px;}
+.counter-num small{font-size:13px; color:var(--text-faint); font-weight:400;}
+.counter-bar{height:5px; background:var(--elevated); border-radius:3px; overflow:hidden; margin-top:6px; border:1px solid var(--border);}
+.counter-bar i{display:block; height:100%; background:var(--green); transition:width .1s;}
+
+.legend-note{font-size:10.5px; color:var(--text-faint); line-height:1.5; padding:2px 2px 0;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
+
+/* ---------- ElectraLab shell additions: visual only ---------- */
+html,body{min-height:100%;}
+body{display:flex;flex-direction:column;}
+header{position:relative;flex:none;}
+.el-toolbox{
+  display:flex;align-items:center;gap:7px;flex:none;
+  background:var(--elevated);border:1px solid var(--border);color:var(--text-dim);
+  text-decoration:none;padding:7px 11px;border-radius:6px;font-size:12px;font-weight:600;
+  letter-spacing:.2px;transition:background .12s,border-color .12s,color .12s;
+}
+.el-toolbox:hover{color:var(--text);border-color:#3a4a5a;background:#20303e;}
+.el-toolbox svg{width:15px;height:15px;flex:none;}
+.el-brand-mark{
+  color:var(--amber);font-size:9px;font-weight:800;letter-spacing:1.2px;
+  margin-left:-5px;padding-left:5px;border-left:1px solid var(--border);
+}
+.app{flex:1;height:auto;min-height:0;}
+.el-footer{
+  flex:none;min-height:34px;display:flex;align-items:center;justify-content:center;
+  gap:7px;padding:7px 16px;background:var(--panel);border-top:1px solid var(--border);
+  color:var(--text-faint);font-size:10.5px;letter-spacing:.15px;
+}
+.el-footer strong{color:var(--text-dim);font-weight:700;}
+@media (max-width:900px){
+  .el-toolbox{padding:7px 9px;}
+  .el-brand-mark{display:none;}
+  .el-footer{font-size:10px;padding:7px 10px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="el-toolbox" href="Advanced.html" title="Back to ElectraLab Toolbox" aria-label="Back to ElectraLab Toolbox">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M14.5 5L7.5 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    Toolbox
+  </a>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 24 24" fill="none">
+      <path d="M4 2v20" stroke="#f2a93b" stroke-width="2" stroke-linecap="round"/>
+      <path d="M20 2v20" stroke="#f2a93b" stroke-width="2" stroke-linecap="round"/>
+      <path class="rung" id="logoRung1" d="M4 8h16" stroke="#57697a" stroke-width="2"/>
+      <path class="rung" id="logoRung2" d="M4 16h16" stroke="#57697a" stroke-width="2"/>
+    </svg>
+    <div class="brand-text">LadderSim<small>PLC LOGIC TRAINER</small></div>
+    <span class="el-brand-mark">ELECTRALAB</span>
+  </div>
+
+  <button class="icon-btn hamburger" id="btnLeftPanel" title="Panels" aria-label="Toggle left panel">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+
+  <div class="hdr-controls">
+    <input class="proj-name" id="projName" value="Untitled Project" spellcheck="false">
+    <div class="mode-toggle">
+      <button id="btnEdit" class="active edit">EDIT</button>
+      <button id="btnRun">RUN</button>
+    </div>
+    <button class="step-btn" id="btnStep" title="Advance one scan cycle">Step ▸</button>
+    <select class="speed-select" id="speedSel" title="Simulation speed">
+      <option value="1">1×</option>
+      <option value="2">2×</option>
+      <option value="5" selected>5×</option>
+      <option value="10">10×</option>
+    </select>
+  </div>
+
+  <div class="hdr-actions">
+    <button class="icon-btn" id="btnNew" title="New project">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <button class="icon-btn" id="btnSave" title="Save project">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5V4z" stroke="currentColor" stroke-width="1.6"/><path d="M8 4v5h7V4M8 14h8v6H8z" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <button class="icon-btn" id="btnOpen" title="Open saved project">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 7h6l2 2h10v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <button class="icon-btn" id="btnExport" title="Export as JSON file">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <button class="icon-btn" id="btnImport" title="Import JSON file">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15V3m0 0L8 7m4-4l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <input type="file" id="fileImport" accept="application/json" style="display:none">
+  </div>
+  <button class="icon-btn hamburger" id="btnRightPanel" title="I/O panel" aria-label="Toggle right panel">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4z" stroke="currentColor" stroke-width="1.6"/><path d="M9 5v14" stroke="currentColor" stroke-width="1.6"/></svg>
+  </button>
+</header>
+
+<div class="app">
+  <aside class="sidebar sidebar-left" id="leftPanel">
+
+    <div class="panel-section">
+      <h3>Project</h3>
+      <button class="btn" id="btnNew2">＋ New project</button>
+      <div class="row-btns">
+        <button class="btn small" style="flex:1" id="btnSave2">Save</button>
+        <button class="btn small" style="flex:1" id="btnOpen2">Open</button>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <h3>Example projects</h3>
+      <div id="examplesList"></div>
+    </div>
+
+    <div class="panel-section">
+      <h3>Tags <button class="add" id="btnAddTag" title="Add tag">+</button></h3>
+      <div id="tagsList"></div>
+    </div>
+
+    <div class="panel-section" style="border-bottom:none;">
+      <h3>Learn</h3>
+      <details class="collapse" open>
+        <summary>How a scan cycle works</summary>
+        <div class="learn-box">
+          <p>A PLC repeats three steps, very fast, forever: <b>read inputs</b>, <b>evaluate the ladder logic top to bottom</b>, <b>write outputs</b>. Press <b>RUN</b> to start scanning, then operate the switches on the right — the ladder lights up to show where power is flowing.</p>
+        </div>
+      </details>
+      <details class="collapse">
+        <summary>Symbol legend</summary>
+        <div class="learn-box">
+          <div class="legend-row"><svg class="legend-sym" viewBox="0 0 44 22"><line x1="0" y1="11" x2="14" y2="11" stroke="#93a4b3" stroke-width="2"/><line x1="16" y1="4" x2="16" y2="18" stroke="#93a4b3" stroke-width="2"/><line x1="24" y1="4" x2="24" y2="18" stroke="#93a4b3" stroke-width="2"/><line x1="26" y1="11" x2="44" y2="11" stroke="#93a4b3" stroke-width="2"/></svg><div class="legend-txt"><b>—| |— Normally Open</b><span>Conducts when the tag is TRUE</span></div></div>
+          <div class="legend-row"><svg class="legend-sym" viewBox="0 0 44 22"><line x1="0" y1="11" x2="14" y2="11" stroke="#93a4b3" stroke-width="2"/><line x1="16" y1="4" x2="16" y2="18" stroke="#93a4b3" stroke-width="2"/><line x1="24" y1="4" x2="24" y2="18" stroke="#93a4b3" stroke-width="2"/><line x1="26" y1="11" x2="44" y2="11" stroke="#93a4b3" stroke-width="2"/><line x1="14" y1="19" x2="26" y2="3" stroke="#93a4b3" stroke-width="2"/></svg><div class="legend-txt"><b>—|/|— Normally Closed</b><span>Conducts when the tag is FALSE</span></div></div>
+          <div class="legend-row"><svg class="legend-sym" viewBox="0 0 44 22"><line x1="0" y1="11" x2="12" y2="11" stroke="#93a4b3" stroke-width="2"/><circle cx="22" cy="11" r="9" fill="none" stroke="#93a4b3" stroke-width="2"/><line x1="32" y1="11" x2="44" y2="11" stroke="#93a4b3" stroke-width="2"/></svg><div class="legend-txt"><b>—( )— Coil</b><span>OUT / SET / RESET / TON / CTU</span></div></div>
+          <p style="margin-top:2px;">Parallel branches = <b>OR</b>. Contacts in one branch = <b>AND</b>.</p>
+        </div>
+      </details>
+      <details class="collapse">
+        <summary>Coil types</summary>
+        <div class="learn-box">
+          <p><b>OUT</b> — output follows rung power directly.<br>
+          <b>SET / RST</b> — latches an output on/off; stays after power is removed.<br>
+          <b>TON</b> — on-delay timer; done bit goes true after the preset time, resets when power is removed.<br>
+          <b>CTU</b> — counts rising edges up to a preset; use a <b>RES</b> coil to reset it.</p>
+        </div>
+      </details>
+    </div>
+  </aside>
+
+  <main class="ladder-area" id="ladderArea"></main>
+
+  <aside class="sidebar sidebar-right" id="rightPanel">
+    <div class="panel-section" id="ioInputsSection">
+      <h3>Inputs</h3>
+      <div id="inputsList"></div>
+    </div>
+    <div class="panel-section" style="border-bottom:none;" id="ioOutputsSection">
+      <h3>Outputs &amp; equipment</h3>
+      <div id="outputsList"></div>
+    </div>
+  </aside>
+</div>
+
+<div id="modalRoot"></div>
+
+<footer class="el-footer">
+  <strong>ElectraLab</strong>
+  <span>•</span>
+  <span>PLC Logic Trainer</span>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   STATE
+   ========================================================= */
+var state = {
+  projectName: 'Untitled Project',
+  description: '',
+  tags: {},      // name -> {type:'I'|'Q'|'M'|'T'|'C', value:bool}
+  timers: {},    // tagName -> {preset:ms, acc:ms}
+  counters: {},  // tagName -> {preset:int, count:int, _prevPower:bool}
+  rungs: [],     // [{comment, branches:[[{kind:'NO'|'NC',tag}]], coil:{kind,tag,preset}}]
+  visuals: []    // [{type, tag/...}]
+};
+var visualRuntime = {}; // index -> runtime data (cylinder pos, tank level, pulse timers)
+var mode = 'edit'; // 'edit' | 'run'
+var scanTimer = null;
+var lastTickAt = 0;
+var uidCounter = 1;
+
+function uid(){ return 'x' + (uidCounter++) + Math.random().toString(36).slice(2,6); }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function el(tag, cls, html){
+  var d = document.createElement(tag);
+  if (cls) d.className = cls;
+  if (html !== undefined) d.innerHTML = html;
+  return d;
+}
+
+/* =========================================================
+   TAG HELPERS
+   ========================================================= */
+function ensureTag(name, type){
+  if (!name) return null;
+  if (!state.tags[name]) state.tags[name] = { type: type || 'M', value:false };
+  return state.tags[name];
+}
+function deleteTagUsageCount(name){
+  var n = 0;
+  state.rungs.forEach(function(r){
+    r.branches.forEach(function(b){ b.forEach(function(c){ if (c.tag===name) n++; }); });
+    if (r.coil && r.coil.tag===name) n++;
+  });
+  return n;
+}
+function tagsByType(type){
+  return Object.keys(state.tags).filter(function(k){ return state.tags[k].type===type; }).sort();
+}
+
+/* =========================================================
+   RUNG / BRANCH / ELEMENT EDITING
+   ========================================================= */
+function newRung(){
+  return { comment:'', branches:[[]], coil:{ kind:'OUT', tag:'' } };
+}
+function addRung(){
+  state.rungs.push(newRung());
+  markDirty(); renderLadder();
+}
+function deleteRung(ri){
+  if (!confirm('Delete this rung?')) return;
+  state.rungs.splice(ri,1);
+  markDirty(); renderLadder();
+}
+function addBranch(ri){
+  state.rungs[ri].branches.push([]);
+  markDirty(); renderLadder();
+}
+function deleteBranch(ri,bi){
+  var r = state.rungs[ri];
+  if (r.branches.length<=1) return;
+  r.branches.splice(bi,1);
+  markDirty(); renderLadder();
+}
+function addContact(ri,bi,kind,tag){
+  state.rungs[ri].branches[bi].push({kind:kind, tag:tag});
+  markDirty(); renderLadder();
+}
+function updateContact(ri,bi,ei,kind,tag){
+  state.rungs[ri].branches[bi][ei] = {kind:kind, tag:tag};
+  markDirty(); renderLadder();
+}
+function deleteContact(ri,bi,ei){
+  state.rungs[ri].branches[bi].splice(ei,1);
+  markDirty(); renderLadder();
+}
+function setCoil(ri,kind,tag,preset){
+  var coil = { kind:kind, tag:tag };
+  if (kind==='TON') coil.preset = preset;
+  if (kind==='CTU') coil.preset = preset;
+  state.rungs[ri].coil = coil;
+  if (kind==='TON') state.timers[tag] = state.timers[tag] || {preset:preset, acc:0};
+  if (state.timers[tag]) state.timers[tag].preset = (kind==='TON') ? preset : state.timers[tag].preset;
+  if (kind==='CTU'){ state.counters[tag] = state.counters[tag] || {preset:preset, count:0, _prevPower:false}; state.counters[tag].preset = preset; }
+  markDirty(); renderLadder();
+}
+
+/* =========================================================
+   EVALUATION ENGINE
+   ========================================================= */
+function evalContact(c){
+  var t = state.tags[c.tag];
+  if (!t) return false;
+  return c.kind==='NO' ? !!t.value : !t.value;
+}
+// returns {segPowers:[bool,len+1], branchPower:bool}
+function evalBranch(branch){
+  var seg = [true];
+  for (var i=0;i<branch.length;i++){
+    seg.push(seg[i] && evalContact(branch[i]));
+  }
+  return { segPowers: seg, branchPower: seg[seg.length-1] };
+}
+function applyCoil(coil, power, dtMs){
+  if (!coil || !coil.tag) return;
+  var tag = state.tags[coil.tag];
+  if (!tag) return;
+  switch(coil.kind){
+    case 'OUT': tag.value = power; break;
+    case 'SET': if (power) tag.value = true; break;
+    case 'RST': if (power) tag.value = false; break;
+    case 'TON': {
+      var m = state.timers[coil.tag] || (state.timers[coil.tag] = {preset: coil.preset||3000, acc:0});
+      m.preset = coil.preset || m.preset;
+      if (power) m.acc = Math.min(m.preset, m.acc + dtMs); else m.acc = 0;
+      tag.value = m.acc >= m.preset;
+      coil._timing = power && !tag.value;
+      break;
+    }
+    case 'CTU': {
+      var mc = state.counters[coil.tag] || (state.counters[coil.tag] = {preset: coil.preset||5, count:0, _prevPower:false});
+      mc.preset = coil.preset || mc.preset;
+      if (power && !mc._prevPower) mc.count = Math.min(mc.preset, mc.count+1);
+      mc._prevPower = power;
+      tag.value = mc.count >= mc.preset;
+      coil._timing = power;
+      break;
+    }
+    case 'CTR': {
+      var mc2 = state.counters[coil.tag];
+      if (power && mc2){ mc2.count = 0; }
+      break;
+    }
+  }
+}
+function scanCycle(dtMs){
+  state.rungs.forEach(function(r){
+    var branchResults = r.branches.map(evalBranch);
+    var power = branchResults.some(function(b){ return b.branchPower; });
+    r._eval = { branchResults:branchResults, power:power };
+    applyCoil(r.coil, power, dtMs);
+  });
+}
+
+/* =========================================================
+   VISUAL PHYSICS (cylinder / tank / auto-pulse sensors)
+   ========================================================= */
+function runPhysics(dtMs){
+  state.visuals.forEach(function(v, idx){
+    var rt = visualRuntime[idx] || (visualRuntime[idx] = {});
+    if (v.type==='cylinder'){
+      if (rt.pos===undefined) rt.pos = 0;
+      var adv = v.advanceTag ? !!(state.tags[v.advanceTag]&&state.tags[v.advanceTag].value) : false;
+      var ret = v.retractTag ? !!(state.tags[v.retractTag]&&state.tags[v.retractTag].value) : false;
+      var travel = v.travelMs || 1200;
+      if (adv && !ret) rt.pos = clamp(rt.pos + dtMs/travel, 0, 1);
+      else if (ret && !adv) rt.pos = clamp(rt.pos - dtMs/travel, 0, 1);
+      if (v.extendLSTag) ensureTag(v.extendLSTag,'I').value = rt.pos >= 0.999;
+      if (v.retractLSTag) ensureTag(v.retractLSTag,'I').value = rt.pos <= 0.001;
+    }
+    if (v.type==='tank'){
+      if (rt.level===undefined) rt.level = 45;
+      var fillOn = v.fillTag ? !!(state.tags[v.fillTag]&&state.tags[v.fillTag].value) : false;
+      var drainOn = v.drainTag ? !!(state.tags[v.drainTag]&&state.tags[v.drainTag].value) : false;
+      var fillRate = (v.fillRatePct!==undefined? v.fillRatePct : 8);   // % per second
+      var drainRate = (v.drainRatePct!==undefined? v.drainRatePct : 4);
+      var delta = ((fillOn?fillRate:0) - (drainOn?drainRate:0)) * (dtMs/1000);
+      rt.level = clamp(rt.level + delta, 0, 100);
+      if (v.lowTag) ensureTag(v.lowTag,'I').value = rt.level <= (v.lowPct!==undefined?v.lowPct:15);
+      if (v.highTag) ensureTag(v.highTag,'I').value = rt.level >= (v.highPct!==undefined?v.highPct:90);
+    }
+    if (v.type==='sensor' && v.autoPulse){
+      var en = v.autoPulse.enableTag ? !!(state.tags[v.autoPulse.enableTag]&&state.tags[v.autoPulse.enableTag].value) : false;
+      var tag = ensureTag(v.tag,'I');
+      if (rt.pulseTimer===undefined) rt.pulseTimer = 0;
+      if (rt.acc===undefined) rt.acc = 0;
+      if (rt.pulseTimer > 0){
+        rt.pulseTimer -= dtMs;
+        if (rt.pulseTimer <= 0){ rt.pulseTimer = 0; tag.value = false; }
+      } else if (en){
+        rt.acc += dtMs;
+        if (rt.acc >= (v.autoPulse.intervalMs||1500)){
+          rt.acc = 0; tag.value = true; rt.pulseTimer = v.autoPulse.pulseMs || 150;
+        }
+      } else {
+        rt.acc = 0;
+      }
+    }
+  });
+}
+
+/* =========================================================
+   RUN / STOP / STEP
+   ========================================================= */
+function tick(){
+  var now = performance.now();
+  var dt = now - lastTickAt;
+  lastTickAt = now;
+  var speed = parseFloat(document.getElementById('speedSel').value) || 1;
+  var dtMs = dt * speed;
+  runPhysics(dtMs);
+  scanCycle(dtMs);
+  renderLadder(true);
+  renderIO();
+}
+function startRun(){
+  mode = 'run';
+  document.getElementById('btnEdit').classList.remove('active');
+  document.getElementById('btnRun').classList.add('active');
+  document.getElementById('btnStep').disabled = false;
+  lastTickAt = performance.now();
+  if (scanTimer) clearInterval(scanTimer);
+  scanTimer = setInterval(tick, 100);
+  renderLadder(); renderIO();
+}
+function stopRun(){
+  mode = 'edit';
+  document.getElementById('btnEdit').classList.add('active');
+  document.getElementById('btnRun').classList.remove('active');
+  if (scanTimer){ clearInterval(scanTimer); scanTimer = null; }
+  renderLadder(); renderIO();
+}
+function stepOnce(){
+  if (mode!=='run') startRun();
+  var speed = parseFloat(document.getElementById('speedSel').value) || 1;
+  runPhysics(100*speed);
+  scanCycle(100*speed);
+  renderLadder(true); renderIO();
+}
+
+/* =========================================================
+   RENDER: LADDER
+   ========================================================= */
+function svgLine(){ return ''; }
+
+function renderContactEl(ri,bi,ei,c,live){
+  var wrap = el('div','contact'+(live?' live':'')+(c.kind==='NC'?' nc':''));
+  var barL = el('div','bar l'); var barR = el('div','bar r');
+  wrap.appendChild(barL); wrap.appendChild(barR);
+  if (c.kind==='NC'){ wrap.appendChild(el('div','diag')); }
+  var lbl = el('div','lbl', escapeHtml(c.tag||'?'));
+  wrap.appendChild(lbl);
+  wrap.appendChild(el('div','klabel', c.kind));
+  wrap.title = c.tag + ' — ' + (c.kind==='NO'?'Normally Open':'Normally Closed');
+  wrap.addEventListener('click', function(){
+    if (mode==='run') return;
+    openContactModal(ri,bi,ei,c);
+  });
+  return wrap;
+}
+
+function coilKindLabel(k){
+  return {OUT:'OUT',SET:'S',RST:'R',TON:'TON',CTU:'CTU',CTR:'RES'}[k]||k;
+}
+
+function renderRung(ri, rung){
+  var card = el('div','rung-card');
+  card.appendChild(el('div','rung-index','R'+(ri+1)));
+  var body = el('div','rung-body');
+
+  var top = el('div','rung-toprow');
+  var comment = document.createElement('input');
+  comment.className='rung-comment'; comment.value = rung.comment||''; comment.placeholder='Rung comment…';
+  comment.disabled = mode==='run';
+  comment.addEventListener('change', function(){ rung.comment = comment.value; markDirty(); });
+  top.appendChild(comment);
+  var actions = el('div','rung-actions');
+  if (mode==='edit'){
+    var bBtn = el('button','mini-btn','+ OR branch'); bBtn.addEventListener('click', function(){ addBranch(ri); });
+    var dBtn = el('button','mini-btn del','Delete rung'); dBtn.addEventListener('click', function(){ deleteRung(ri); });
+    actions.appendChild(bBtn); actions.appendChild(dBtn);
+  }
+  top.appendChild(actions);
+  body.appendChild(top);
+
+  var railWrap = el('div','rail-wrap');
+  railWrap.appendChild(el('div','rail'+(mode==='run'?'':' dim')));
+
+  var branchesCol = el('div','branches-col');
+  var maxLen = 1;
+  rung.branches.forEach(function(b){ if (b.length>maxLen) maxLen=b.length; });
+
+  var evalData = rung._eval;
+  var anyLive = evalData ? evalData.power : false;
+
+  rung.branches.forEach(function(branch, bi){
+    var row = el('div','branch-row');
+    if (rung.branches.length>1 && mode==='edit'){
+      var delB = el('button','branch-del','×');
+      delB.title='Remove branch';
+      delB.addEventListener('click', function(){ deleteBranch(ri,bi); });
+      row.appendChild(delB);
+    }
+    var segPowers = (evalData && evalData.branchResults[bi]) ? evalData.branchResults[bi].segPowers : null;
+
+    for (var i=0;i<maxLen;i++){
+      var slot = el('div','slot');
+      var wireLive = segPowers ? segPowers[i] : false;
+      if (wireLive) slot.classList.add('live');
+      slot.appendChild(el('div','wireline'));
+      if (i < branch.length){
+        var c = branch[i];
+        var live = segPowers ? segPowers[i+1] : false;
+        slot.appendChild(renderContactEl(ri,bi,i,c,live));
+      } else if (mode==='edit'){
+        slot.classList.add('empty-btn');
+        var plus = el('div','plus','+');
+        slot.appendChild(plus);
+        slot.title = 'Add contact';
+        slot.addEventListener('click', function(bIdx){ return function(){ openContactModal(ri,bIdx,null,null); }; }(bi));
+      }
+      row.appendChild(slot);
+    }
+    branchesCol.appendChild(row);
+  });
+
+  // merge bars if >1 branch
+  if (rung.branches.length>1){
+    var rowH = 56;
+    var mergeH = (rung.branches.length-1)*rowH;
+    var leftMerge = el('div','merge'+((mode==='run')?' live':''));
+    leftMerge.style.left='0px'; leftMerge.style.top=(rowH/2)+'px'; leftMerge.style.height=mergeH+'px';
+    var rightMerge = el('div','merge'+(anyLive?' live':''));
+    var rightX = 6 + maxLen*56;
+    rightMerge.style.left=rightX+'px'; rightMerge.style.top=(rowH/2)+'px'; rightMerge.style.height=mergeH+'px';
+    branchesCol.appendChild(leftMerge);
+    branchesCol.appendChild(rightMerge);
+  }
+
+  railWrap.appendChild(branchesCol);
+
+  // coil
+  var coilWrap = el('div','coil-wrap');
+  var coil = rung.coil || {kind:'OUT',tag:''};
+  var coilLive = anyLive;
+  var isTiming = coil._timing;
+  var coilDiv = el('div','coil'+(coilLive?' live':'')+(isTiming?' timing':''));
+  coilDiv.appendChild(el('div','ktag', coilKindLabel(coil.kind)));
+  var stateOn = coil.tag && state.tags[coil.tag] ? !!state.tags[coil.tag].value : false;
+  coilDiv.appendChild(el('div','statedot'+(stateOn?' on':'')));
+  coilDiv.appendChild(el('div','lbl', escapeHtml(coil.tag||'— set coil —')));
+  if (coil.kind==='TON') coilDiv.appendChild(el('div','preset', ((coil.preset||0)/1000)+'s'));
+  if (coil.kind==='CTU') coilDiv.appendChild(el('div','preset', 'PV '+(coil.preset||0)));
+  coilDiv.title = (coil.tag||'unassigned') + ' — ' + coil.kind;
+  coilDiv.addEventListener('click', function(){ if (mode==='run') return; openCoilModal(ri,coil); });
+  coilWrap.appendChild(coilDiv);
+  railWrap.appendChild(coilWrap);
+
+  railWrap.appendChild(el('div','rail'+(coilLive?'':' dim')));
+  body.appendChild(railWrap);
+  card.appendChild(body);
+  return card;
+}
+
+function renderLadder(liveOnly){
+  var wrap = document.getElementById('ladderArea');
+  if (liveOnly && wrap.dataset.count == state.rungs.length){
+    // fast path: just update classes without full rebuild
+    var cards = wrap.querySelectorAll('.rung-card');
+    state.rungs.forEach(function(rung, ri){
+      if (cards[ri]) { var fresh = renderRung(ri, rung); cards[ri].replaceWith(fresh); }
+    });
+    return;
+  }
+  wrap.innerHTML = '';
+  wrap.dataset.count = state.rungs.length;
+  var frame = el('div','ladder-frame');
+  if (state.description){
+    frame.appendChild(el('div','project-desc', escapeHtml(state.description)));
+  }
+  if (state.rungs.length===0){
+    frame.appendChild(el('div','empty-ladder','No rungs yet. Click “Add rung” to start building your ladder diagram.'));
+  }
+  state.rungs.forEach(function(rung, ri){
+    frame.appendChild(renderRung(ri, rung));
+  });
+  if (mode==='edit'){
+    var addWrap = el('div','add-rung-wrap');
+    var addBtn = el('button','btn primary','＋ Add rung');
+    addBtn.addEventListener('click', addRung);
+    addWrap.appendChild(addBtn);
+    frame.appendChild(addWrap);
+  }
+  wrap.appendChild(frame);
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* =========================================================
+   RENDER: TAGS PANEL
+   ========================================================= */
+var TYPE_LABELS = {I:'INPUTS', Q:'OUTPUTS', M:'MEMORY (INTERNAL)', T:'TIMERS', C:'COUNTERS'};
+function renderTags(){
+  var list = document.getElementById('tagsList');
+  list.innerHTML = '';
+  ['I','Q','M','T','C'].forEach(function(type){
+    var names = tagsByType(type);
+    if (names.length===0) return;
+    list.appendChild(el('div','taggroup-h', TYPE_LABELS[type]));
+    names.forEach(function(name){
+      var t = state.tags[name];
+      var row = el('div','tagrow');
+      row.appendChild(el('div','dot'+(t.value?' on':'')));
+      row.appendChild(el('div','nm', name));
+      if (type==='T' && state.timers[name]) row.appendChild(el('div','meta', ((state.timers[name].preset||0)/1000)+'s'));
+      if (type==='C' && state.counters[name]) row.appendChild(el('div','meta', (state.counters[name].count||0)+'/'+(state.counters[name].preset||0)));
+      var rm = el('button','rm','×');
+      rm.title = 'Delete tag';
+      rm.addEventListener('click', function(){
+        var uses = deleteTagUsageCount(name);
+        if (uses>0 && !confirm('"'+name+'" is used in '+uses+' place(s) on the ladder. Delete anyway?')) return;
+        delete state.tags[name]; delete state.timers[name]; delete state.counters[name];
+        markDirty(); renderAll();
+      });
+      row.appendChild(rm);
+      list.appendChild(row);
+    });
+  });
+  if (Object.keys(state.tags).length===0){
+    list.appendChild(el('div','learn-box','No tags yet. Add one, or add a contact/coil on the ladder.'));
+  }
+}
+
+/* =========================================================
+   RENDER: I/O + EQUIPMENT (right panel)
+   ========================================================= */
+function ioItemShell(title){
+  var box = el('div','io-item');
+  var head = el('div','head');
+  head.appendChild(el('div','name', escapeHtml(title)));
+  box.appendChild(head);
+  return {box:box, head:head};
+}
+
+function renderIO(){
+  var inWrap = document.getElementById('inputsList');
+  var outWrap = document.getElementById('outputsList');
+  inWrap.innerHTML=''; outWrap.innerHTML='';
+  var disabled = mode!=='run';
+
+  if (state.visuals.length===0){
+    inWrap.appendChild(el('div','learn-box','Load an example project to see interactive inputs here, or map your own tags to widgets.'));
+  }
+
+  state.visuals.forEach(function(v, idx){
+    var tag = v.tag ? ensureTag(v.tag, v.tagType||'I') : null;
+    var isInput = ['pushbutton','toggle','sensor'].indexOf(v.type) !== -1;
+    var target = isInput ? inWrap : outWrap;
+
+    if (v.type==='pushbutton'){
+      var s = ioItemShell(v.label||v.tag);
+      var btn = el('button','pushbtn'+((tag&&tag.value)?' pressed':''), (tag&&tag.value)?'PRESSED':'PRESS');
+      btn.disabled = disabled;
+      var press=function(){ if(tag){tag.value=true; renderIOQuiet();} };
+      var release=function(){ if(tag){tag.value=false; renderIOQuiet();} };
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('touchstart', function(e){ e.preventDefault(); press(); }, {passive:false});
+      ['mouseup','mouseleave'].forEach(function(ev){ btn.addEventListener(ev, release); });
+      btn.addEventListener('touchend', function(e){ e.preventDefault(); release(); });
+      s.box.appendChild(btn);
+      target.appendChild(s.box);
+    }
+    else if (v.type==='toggle'){
+      var s2 = ioItemShell(v.label||v.tag);
+      var row = el('div','toggle-row');
+      row.appendChild(el('div',null,''));
+      var sw = el('button','toggle-sw'+((tag&&tag.value)?' on':'')+(v.danger?' danger':''));
+      sw.disabled = disabled;
+      sw.appendChild(el('div','knob'));
+      sw.addEventListener('click', function(){ if(tag){ tag.value=!tag.value; renderIOQuiet(); } });
+      s2.head.appendChild(sw);
+      target.appendChild(s2.box);
+    }
+    else if (v.type==='sensor'){
+      var s3 = ioItemShell('');
+      s3.box.innerHTML='';
+      var led = el('button','sensor-led'+((tag&&tag.value)?' on':''));
+      led.disabled = disabled || !!v.autoPulse;
+      led.appendChild(el('div','led'));
+      led.appendChild(el('span', null, escapeHtml(v.label||v.tag)+(v.autoPulse?' (auto)':'')));
+      led.addEventListener('click', function(){ if(tag && !v.autoPulse){ tag.value=!tag.value; renderIOQuiet(); } });
+      s3.box.appendChild(led);
+      target.appendChild(s3.box);
+    }
+    else if (v.type==='motor'){
+      var s4 = ioItemShell(v.label||v.tag);
+      var mb = el('div','motor-box');
+      var ring = el('div','motor-ring'+((tag&&tag.value)?' run':''));
+      mb.appendChild(ring);
+      mb.appendChild(el('div','motor-status'+((tag&&tag.value)?' on':''), (tag&&tag.value)?'RUNNING':'STOPPED'));
+      s4.box.appendChild(mb);
+      target.appendChild(s4.box);
+    }
+    else if (v.type==='conveyor'){
+      var s5 = ioItemShell(v.label||v.tag);
+      var track = el('div','conveyor-track'+((tag&&tag.value)?' run':''));
+      track.appendChild(el('div','belt'));
+      s5.box.appendChild(track);
+      target.appendChild(s5.box);
+    }
+    else if (v.type==='lamp'){
+      var s6 = ioItemShell(v.label||v.tag);
+      var lb = el('div','lamp-box');
+      lb.appendChild(el('div','lamp'+(v.color==='green'?' green':'')+((tag&&tag.value)?' on':'')));
+      lb.appendChild(el('div', null, (tag&&tag.value)?'ON':'OFF'));
+      s6.box.appendChild(lb);
+      target.appendChild(s6.box);
+    }
+    else if (v.type==='cylinder'){
+      var s7 = ioItemShell(v.label||'Cylinder');
+      var rt = visualRuntime[idx] || {pos:0};
+      var trackW = 200; var headW = 14; var maxLeft = trackW - headW - 4;
+      var track = el('div','cyl-track');
+      var rod = el('div','cyl-rod'); rod.style.width = (2 + rt.pos*(maxLeft-2)) + 'px';
+      var head = el('div','cyl-head'); head.style.left = (2 + rt.pos*maxLeft) + 'px';
+      track.appendChild(rod); track.appendChild(head);
+      s7.box.appendChild(track);
+      var labels = el('div','cyl-labels');
+      labels.appendChild(el('span',null,'RETRACTED'));
+      labels.appendChild(el('span',null,(rt.pos*100).toFixed(0)+'%'));
+      labels.appendChild(el('span',null,'EXTENDED'));
+      s7.box.appendChild(labels);
+      target.appendChild(s7.box);
+    }
+    else if (v.type==='tank'){
+      var s8 = ioItemShell(v.label||'Tank');
+      var rt2 = visualRuntime[idx] || {level:0};
+      var tb = el('div','tank-box');
+      var shell = el('div','tank-shell');
+      var fill = el('div','tank-fill'); fill.style.height = rt2.level+'%';
+      shell.appendChild(fill);
+      var loMark = el('div','tank-mark'); loMark.style.bottom = (v.lowPct!==undefined?v.lowPct:15)+'%';
+      var hiMark = el('div','tank-mark'); hiMark.style.bottom = (v.highPct!==undefined?v.highPct:90)+'%';
+      shell.appendChild(loMark); shell.appendChild(hiMark);
+      tb.appendChild(shell);
+      var readout = el('div','tank-readout', rt2.level.toFixed(0)+'<small>%</small>');
+      tb.appendChild(readout);
+      s8.box.appendChild(tb);
+      target.appendChild(s8.box);
+    }
+    else if (v.type==='counter-display'){
+      var s9 = ioItemShell(v.label||v.tag);
+      var meta = state.counters[v.tag] || {count:0,preset:1};
+      var cb = el('div','counter-box');
+      cb.appendChild(el('div','counter-num', meta.count+'<small> / '+meta.preset+'</small>'));
+      var bar = el('div','counter-bar');
+      var fillBar = el('i'); fillBar.style.width = clamp(100*meta.count/Math.max(1,meta.preset),0,100)+'%';
+      bar.appendChild(fillBar);
+      cb.appendChild(bar);
+      s9.box.appendChild(cb);
+      target.appendChild(s9.box);
+    }
+  });
+}
+function renderIOQuiet(){ renderIO(); }
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+function closeModal(){
+  var root = document.getElementById('modalRoot');
+  root.innerHTML='';
+}
+function openModalWith(innerHtmlBuilder){
+  closeModal();
+  var root = document.getElementById('modalRoot');
+  var overlay = el('div','modal-overlay');
+  var modal = el('div','modal');
+  overlay.addEventListener('click', function(e){ if (e.target===overlay) closeModal(); });
+  innerHtmlBuilder(modal);
+  overlay.appendChild(modal);
+  root.appendChild(overlay);
+  return modal;
+}
+
+function tagOptions(select, types, current){
+  select.innerHTML = '<option value="">— choose tag —</option>';
+  types.forEach(function(type){
+    var names = tagsByType(type);
+    if (!names.length) return;
+    var grp = document.createElement('optgroup');
+    grp.label = TYPE_LABELS[type];
+    names.forEach(function(n){
+      var o = document.createElement('option'); o.value=n; o.textContent=n;
+      if (n===current) o.selected = true;
+      grp.appendChild(o);
+    });
+    select.appendChild(grp);
+  });
+}
+
+function openContactModal(ri,bi,ei,existing){
+  openModalWith(function(modal){
+    modal.appendChild(el('h4', null, existing ? 'Edit contact' : 'Add contact'));
+
+    var kindField = el('div','field');
+    kindField.appendChild(el('label',null,'Type'));
+    var seg = el('div','seg');
+    var noBtn = el('button', existing && existing.kind==='NC' ? '' : 'active', 'NO — Normally Open');
+    var ncBtn = el('button', existing && existing.kind==='NC' ? 'active' : '', 'NC — Normally Closed');
+    var kind = existing ? existing.kind : 'NO';
+    noBtn.addEventListener('click', function(){ kind='NO'; noBtn.classList.add('active'); ncBtn.classList.remove('active'); });
+    ncBtn.addEventListener('click', function(){ kind='NC'; ncBtn.classList.add('active'); noBtn.classList.remove('active'); });
+    seg.appendChild(noBtn); seg.appendChild(ncBtn);
+    kindField.appendChild(seg);
+    modal.appendChild(kindField);
+
+    var tagField = el('div','field');
+    tagField.appendChild(el('label',null,'Tag'));
+    var sel = document.createElement('select');
+    tagOptions(sel, ['I','Q','M','T','C'], existing?existing.tag:'');
+    tagField.appendChild(sel);
+    modal.appendChild(tagField);
+
+    var newField = el('div','field');
+    newField.appendChild(el('label',null,'Or create a new tag'));
+    var newRow = el('div','row-btns');
+    var newName = document.createElement('input'); newName.type='text'; newName.placeholder='e.g. Start_PB'; newName.style.flex='2';
+    var newType = document.createElement('select'); newType.style.flex='1';
+    ['I','Q','M'].forEach(function(t){ var o=document.createElement('option'); o.value=t; o.textContent=t; newType.appendChild(o); });
+    newRow.appendChild(newName); newRow.appendChild(newType);
+    newField.appendChild(newRow);
+    modal.appendChild(newField);
+
+    var actions = el('div','modal-actions');
+    var saveBtn = el('button','btn primary','Save');
+    saveBtn.addEventListener('click', function(){
+      var tagName = newName.value.trim() ? newName.value.trim() : sel.value;
+      if (!tagName){ alert('Choose or create a tag.'); return; }
+      if (newName.value.trim()) ensureTag(tagName, newType.value);
+      if (ei===null){ addContact(ri,bi,kind,tagName); } else { updateContact(ri,bi,ei,kind,tagName); }
+      closeModal();
+    });
+    actions.appendChild(saveBtn);
+    if (existing){
+      var delBtn = el('button','btn danger-outline','Delete');
+      delBtn.addEventListener('click', function(){ deleteContact(ri,bi,ei); closeModal(); });
+      actions.appendChild(delBtn);
+    }
+    var cancelBtn = el('button','btn','Cancel');
+    cancelBtn.addEventListener('click', closeModal);
+    actions.appendChild(cancelBtn);
+    modal.appendChild(actions);
+  });
+}
+
+function openCoilModal(ri,existing){
+  openModalWith(function(modal){
+    modal.appendChild(el('h4',null,'Edit coil'));
+
+    var kindField = el('div','field');
+    kindField.appendChild(el('label',null,'Coil type'));
+    var selKind = document.createElement('select');
+    var kinds = [['OUT','OUT — Output'],['SET','SET — Latch on'],['RST','RST — Latch off'],['TON','TON — On-delay timer'],['CTU','CTU — Count up'],['CTR','RES — Reset counter']];
+    kinds.forEach(function(k){ var o=document.createElement('option'); o.value=k[0]; o.textContent=k[1]; if(existing&&existing.kind===k[0]) o.selected=true; selKind.appendChild(o); });
+    kindField.appendChild(selKind);
+    modal.appendChild(kindField);
+
+    var tagField = el('div','field');
+    tagField.appendChild(el('label',null,'Tag'));
+    var sel = document.createElement('select');
+    function refreshTagOptions(){
+      var k = selKind.value;
+      var types = (k==='TON') ? ['T'] : (k==='CTU'||k==='CTR') ? ['C'] : ['Q','M'];
+      tagOptions(sel, types, existing?existing.tag:'');
+    }
+    refreshTagOptions();
+    selKind.addEventListener('change', refreshTagOptions);
+    tagField.appendChild(sel);
+    modal.appendChild(tagField);
+
+    var newField = el('div','field');
+    newField.appendChild(el('label',null,'Or create a new tag'));
+    var newName = document.createElement('input'); newName.type='text'; newName.placeholder='e.g. Motor1';
+    newField.appendChild(newName);
+    modal.appendChild(newField);
+
+    var presetField = el('div','field');
+    presetField.id='presetField';
+    var presetInput = document.createElement('input'); presetInput.type='number'; presetInput.step='0.1'; presetInput.min='0';
+    function refreshPreset(){
+      var k = selKind.value;
+      presetField.innerHTML='';
+      if (k==='TON'){
+        presetField.appendChild(el('label',null,'Preset time (seconds)'));
+        presetInput.value = existing && existing.preset ? (existing.preset/1000) : 3;
+        presetInput.step='0.1';
+        presetField.appendChild(presetInput);
+        presetField.style.display='block';
+      } else if (k==='CTU'){
+        presetField.appendChild(el('label',null,'Preset count'));
+        presetInput.value = existing && existing.preset ? existing.preset : 5;
+        presetInput.step='1'; presetInput.min='1';
+        presetField.appendChild(presetInput);
+        presetField.style.display='block';
+      } else {
+        presetField.style.display='none';
+      }
+    }
+    refreshPreset();
+    selKind.addEventListener('change', refreshPreset);
+    modal.appendChild(presetField);
+
+    var actions = el('div','modal-actions');
+    var saveBtn = el('button','btn primary','Save');
+    saveBtn.addEventListener('click', function(){
+      var k = selKind.value;
+      var tagName = newName.value.trim() ? newName.value.trim() : sel.value;
+      if (!tagName){ alert('Choose or create a tag.'); return; }
+      if (newName.value.trim()){
+        var ttype = (k==='TON') ? 'T' : (k==='CTU'||k==='CTR') ? 'C' : 'Q';
+        ensureTag(tagName, ttype);
+      }
+      var preset;
+      if (k==='TON') preset = Math.round(parseFloat(presetInput.value||3)*1000);
+      if (k==='CTU') preset = Math.round(parseFloat(presetInput.value||5));
+      setCoil(ri, k, tagName, preset);
+      closeModal();
+    });
+    actions.appendChild(saveBtn);
+    var cancelBtn = el('button','btn','Cancel');
+    cancelBtn.addEventListener('click', closeModal);
+    actions.appendChild(cancelBtn);
+    modal.appendChild(actions);
+  });
+}
+
+function openNewTagModal(){
+  openModalWith(function(modal){
+    modal.appendChild(el('h4',null,'Add tag'));
+    var f1 = el('div','field'); f1.appendChild(el('label',null,'Name'));
+    var name = document.createElement('input'); name.type='text'; name.placeholder='e.g. Sensor1';
+    f1.appendChild(name); modal.appendChild(f1);
+    var f2 = el('div','field'); f2.appendChild(el('label',null,'Type'));
+    var sel = document.createElement('select');
+    [['I','Input'],['Q','Output'],['M','Internal memory']].forEach(function(t){ var o=document.createElement('option'); o.value=t[0]; o.textContent=t[1]+' ('+t[0]+')'; sel.appendChild(o); });
+    f2.appendChild(sel); modal.appendChild(f2);
+    var actions = el('div','modal-actions');
+    var save = el('button','btn primary','Add');
+    save.addEventListener('click', function(){
+      var n = name.value.trim();
+      if (!n){ alert('Enter a tag name.'); return; }
+      if (state.tags[n]){ alert('That tag already exists.'); return; }
+      ensureTag(n, sel.value);
+      markDirty(); renderAll(); closeModal();
+    });
+    actions.appendChild(save);
+    var cancel = el('button','btn','Cancel'); cancel.addEventListener('click', closeModal);
+    actions.appendChild(cancel);
+    modal.appendChild(actions);
+    name.focus();
+  });
+}
+
+function openSaveModal(){
+  openModalWith(function(modal){
+    modal.appendChild(el('h4',null,'Save project'));
+    var f1 = el('div','field'); f1.appendChild(el('label',null,'Save name'));
+    var name = document.createElement('input'); name.type='text'; name.value = state.projectName;
+    f1.appendChild(name); modal.appendChild(f1);
+    var actions = el('div','modal-actions');
+    var save = el('button','btn primary','Save');
+    save.addEventListener('click', function(){
+      var n = name.value.trim();
+      if (!n){ alert('Enter a name.'); return; }
+      saveNamedSlot(n);
+      closeModal();
+    });
+    actions.appendChild(save);
+    var cancel = el('button','btn','Cancel'); cancel.addEventListener('click', closeModal);
+    actions.appendChild(cancel);
+    modal.appendChild(actions);
+    name.focus();
+  });
+}
+
+function openLoadModal(){
+  var names = listNamedSlots();
+  openModalWith(function(modal){
+    modal.appendChild(el('h4',null,'Open saved project'));
+    if (names.length===0){
+      modal.appendChild(el('div','learn-box','No saved projects yet. Use Save to create one.'));
+    }
+    names.forEach(function(n){
+      var row = el('div','row-btns');
+      row.style.marginBottom='6px';
+      var openBtn = el('button','btn small',escapeHtml(n)); openBtn.style.flex='1'; openBtn.style.textAlign='left';
+      openBtn.addEventListener('click', function(){
+        loadNamedSlot(n); closeModal();
+      });
+      var delBtn = el('button','btn small danger-outline','Delete');
+      delBtn.addEventListener('click', function(){
+        if (!confirm('Delete saved project "'+n+'"?')) return;
+        deleteNamedSlot(n); openLoadModal();
+      });
+      row.appendChild(openBtn); row.appendChild(delBtn);
+      modal.appendChild(row);
+    });
+    var actions = el('div','modal-actions');
+    var cancel = el('button','btn','Close'); cancel.addEventListener('click', closeModal);
+    actions.appendChild(cancel);
+    modal.appendChild(actions);
+  });
+}
+
+/* =========================================================
+   PERSISTENCE
+   ========================================================= */
+function serializeProject(){
+  return {
+    projectName: state.projectName,
+    description: state.description,
+    tags: state.tags,
+    timers: state.timers,
+    counters: state.counters,
+    rungs: state.rungs,
+    visuals: state.visuals
+  };
+}
+function loadProjectData(data){
+  state.projectName = data.projectName || 'Untitled Project';
+  state.description = data.description || '';
+  state.tags = data.tags || {};
+  state.timers = data.timers || {};
+  state.counters = data.counters || {};
+  state.rungs = data.rungs || [];
+  state.visuals = data.visuals || [];
+  visualRuntime = {};
+  // reset live values on load
+  Object.keys(state.tags).forEach(function(k){ state.tags[k].value = false; });
+  Object.keys(state.timers).forEach(function(k){ state.timers[k].acc = 0; });
+  Object.keys(state.counters).forEach(function(k){ state.counters[k].count = 0; state.counters[k]._prevPower=false; });
+  stopRun();
+  document.getElementById('projName').value = state.projectName;
+  renderAll();
+}
+function markDirty(){ saveAutosave(); }
+function saveAutosave(){
+  try{ localStorage.setItem('plcsim_autosave', JSON.stringify(serializeProject())); }catch(e){}
+}
+function loadAutosave(){
+  try{
+    var raw = localStorage.getItem('plcsim_autosave');
+    if (raw) { loadProjectData(JSON.parse(raw)); return true; }
+  }catch(e){}
+  return false;
+}
+function saveNamedSlot(name){
+  try{
+    localStorage.setItem('plcsim_save_'+name, JSON.stringify(serializeProject()));
+    var idx = listNamedSlots();
+    if (idx.indexOf(name)===-1){ idx.push(name); localStorage.setItem('plcsim_saves', JSON.stringify(idx)); }
+  }catch(e){ alert('Could not save (storage may be full or unavailable).'); }
+}
+function listNamedSlots(){
+  try{ return JSON.parse(localStorage.getItem('plcsim_saves')||'[]'); }catch(e){ return []; }
+}
+function loadNamedSlot(name){
+  try{
+    var raw = localStorage.getItem('plcsim_save_'+name);
+    if (raw) loadProjectData(JSON.parse(raw));
+  }catch(e){ alert('Could not load that project.'); }
+}
+function deleteNamedSlot(name){
+  try{
+    localStorage.removeItem('plcsim_save_'+name);
+    var idx = listNamedSlots().filter(function(n){ return n!==name; });
+    localStorage.setItem('plcsim_saves', JSON.stringify(idx));
+  }catch(e){}
+}
+function exportProject(){
+  var blob = new Blob([JSON.stringify(serializeProject(), null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var safeName = (state.projectName||'project').replace(/[^a-z0-9\-_ ]/gi,'').trim().replace(/\s+/g,'-') || 'project';
+  a.href = url; a.download = safeName + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importProjectFile(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      loadProjectData(data);
+    }catch(e){ alert('That file is not a valid LadderSim project.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================================================
+   EXAMPLE PROJECTS
+   ========================================================= */
+function projMotor(){
+  return {
+    projectName:'Motor Start/Stop (Seal-In)',
+    description:'Classic 3-wire motor control. Start is momentary — the Motor contact in the second branch "seals in" the circuit so the motor keeps running after you release Start. Stop or an overload trip drops it out.',
+    tags:{
+      Start_PB:{type:'I',value:false}, Stop_PB:{type:'I',value:false}, Overload:{type:'I',value:false},
+      Motor:{type:'Q',value:false}
+    },
+    timers:{}, counters:{},
+    rungs:[
+      { comment:'Start/stop with seal-in + overload trip', branches:[
+          [{kind:'NO',tag:'Start_PB'},{kind:'NC',tag:'Stop_PB'},{kind:'NC',tag:'Overload'}],
+          [{kind:'NO',tag:'Motor'},{kind:'NC',tag:'Stop_PB'},{kind:'NC',tag:'Overload'}]
+        ], coil:{kind:'OUT',tag:'Motor'} }
+    ],
+    visuals:[
+      {type:'pushbutton', tag:'Start_PB', label:'Start'},
+      {type:'pushbutton', tag:'Stop_PB', label:'Stop'},
+      {type:'toggle', tag:'Overload', label:'Overload trip (fault)', danger:true},
+      {type:'motor', tag:'Motor', label:'Motor M1'}
+    ]
+  };
+}
+function projConveyor(){
+  return {
+    projectName:'Conveyor with Jam Sensor & Counter',
+    description:'Start/Stop control for a conveyor motor, an interlocked jam sensor that trips the line, and a photo sensor that counts items passing (a CTU counter). Run the belt to see items auto-detected.',
+    tags:{
+      Start_PB:{type:'I',value:false}, Stop_PB:{type:'I',value:false}, JamSensor:{type:'I',value:false},
+      ItemSensor:{type:'I',value:false}, ResetCount_PB:{type:'I',value:false},
+      Conveyor:{type:'Q',value:false}, RunLamp:{type:'Q',value:false}, ItemCount:{type:'C',value:false}
+    },
+    timers:{}, counters:{ ItemCount:{preset:10,count:0,_prevPower:false} },
+    rungs:[
+      { comment:'Conveyor start/stop, stops on jam', branches:[
+          [{kind:'NO',tag:'Start_PB'},{kind:'NC',tag:'Stop_PB'},{kind:'NC',tag:'JamSensor'}],
+          [{kind:'NO',tag:'Conveyor'},{kind:'NC',tag:'Stop_PB'},{kind:'NC',tag:'JamSensor'}]
+        ], coil:{kind:'OUT',tag:'Conveyor'} },
+      { comment:'Running lamp follows the motor', branches:[[{kind:'NO',tag:'Conveyor'}]], coil:{kind:'OUT',tag:'RunLamp'} },
+      { comment:'Count items passing the photo-eye', branches:[[{kind:'NO',tag:'ItemSensor'}]], coil:{kind:'CTU',tag:'ItemCount',preset:10} },
+      { comment:'Reset the count', branches:[[{kind:'NO',tag:'ResetCount_PB'}]], coil:{kind:'CTR',tag:'ItemCount'} }
+    ],
+    visuals:[
+      {type:'pushbutton', tag:'Start_PB', label:'Start'},
+      {type:'pushbutton', tag:'Stop_PB', label:'Stop'},
+      {type:'sensor', tag:'JamSensor', label:'Jam sensor'},
+      {type:'pushbutton', tag:'ResetCount_PB', label:'Reset count'},
+      {type:'conveyor', tag:'Conveyor', label:'Conveyor belt'},
+      {type:'lamp', tag:'RunLamp', label:'Run lamp', color:'green'},
+      {type:'sensor', tag:'ItemSensor', label:'Item sensor', autoPulse:{enableTag:'Conveyor', intervalMs:1400, pulseMs:150}},
+      {type:'counter-display', tag:'ItemCount', label:'Items counted'}
+    ]
+  };
+}
+function projPneumatic(){
+  return {
+    projectName:'Pneumatic Cylinder (Advance / Dwell / Retract)',
+    description:'Press Advance to extend a double-acting cylinder. A limit switch confirms full extension, a 2-second TON timer holds it there (dwell), then it auto-retracts. Limit switches are driven by the simulated piston position.',
+    tags:{
+      AdvancePB:{type:'I',value:false}, ExtendLS:{type:'I',value:false}, RetractLS:{type:'I',value:false},
+      Valve_Advance:{type:'Q',value:false}, Valve_Retract:{type:'Q',value:false}, DwellDone:{type:'T',value:false}
+    },
+    timers:{ DwellDone:{preset:2000,acc:0} }, counters:{},
+    rungs:[
+      { comment:'Advance until extend limit switch made', branches:[
+          [{kind:'NO',tag:'AdvancePB'},{kind:'NC',tag:'ExtendLS'}],
+          [{kind:'NO',tag:'Valve_Advance'},{kind:'NC',tag:'ExtendLS'}]
+        ], coil:{kind:'OUT',tag:'Valve_Advance'} },
+      { comment:'Dwell 2.0s once fully extended', branches:[[{kind:'NO',tag:'ExtendLS'}]], coil:{kind:'TON',tag:'DwellDone',preset:2000} },
+      { comment:'Retract after dwell, until retract limit switch made', branches:[
+          [{kind:'NO',tag:'DwellDone'},{kind:'NC',tag:'RetractLS'}],
+          [{kind:'NO',tag:'Valve_Retract'},{kind:'NC',tag:'RetractLS'}]
+        ], coil:{kind:'OUT',tag:'Valve_Retract'} }
+    ],
+    visuals:[
+      {type:'pushbutton', tag:'AdvancePB', label:'Advance'},
+      {type:'sensor', tag:'RetractLS', label:'Retract limit switch'},
+      {type:'sensor', tag:'ExtendLS', label:'Extend limit switch'},
+      {type:'cylinder', label:'Cylinder C1', advanceTag:'Valve_Advance', retractTag:'Valve_Retract', extendLSTag:'ExtendLS', retractLSTag:'RetractLS', travelMs:1400}
+    ]
+  };
+}
+function projTank(){
+  return {
+    projectName:'Tank Level Auto-Fill (Set/Reset Latch)',
+    description:'A pump fills the tank when the level drops to the low mark (SET) and shuts off at the high mark (RST). Toggle "Demand" to drain the tank and watch the pump cycle automatically.',
+    tags:{
+      Demand:{type:'I',value:false}, LowLevel:{type:'I',value:false}, HighLevel:{type:'I',value:false},
+      Pump:{type:'Q',value:false}
+    },
+    timers:{}, counters:{},
+    rungs:[
+      { comment:'Low level reached — start pump', branches:[[{kind:'NO',tag:'LowLevel'}]], coil:{kind:'SET',tag:'Pump'} },
+      { comment:'High level reached — stop pump', branches:[[{kind:'NO',tag:'HighLevel'}]], coil:{kind:'RST',tag:'Pump'} }
+    ],
+    visuals:[
+      {type:'toggle', tag:'Demand', label:'Demand (drain tank)'},
+      {type:'tank', label:'Tank T1', fillTag:'Pump', drainTag:'Demand', lowTag:'LowLevel', highTag:'HighLevel', lowPct:15, highPct:90, fillRatePct:10, drainRatePct:5},
+      {type:'motor', tag:'Pump', label:'Fill pump'}
+    ]
+  };
+}
+var EXAMPLES = [
+  {id:'motor', title:'Motor Start/Stop', desc:'Seal-in circuit with overload trip', build:projMotor},
+  {id:'conveyor', title:'Conveyor + Counter', desc:'Jam interlock and item counting', build:projConveyor},
+  {id:'pneumatic', title:'Pneumatic Cylinder', desc:'Advance / dwell / auto-retract with a timer', build:projPneumatic},
+  {id:'tank', title:'Tank Level Control', desc:'SET/RST latch, auto fill & drain', build:projTank}
+];
+function loadExample(id){
+  var ex = EXAMPLES.filter(function(e){ return e.id===id; })[0];
+  if (!ex) return;
+  loadProjectData(ex.build());
+}
+function renderExamples(){
+  var wrap = document.getElementById('examplesList');
+  wrap.innerHTML = '';
+  EXAMPLES.forEach(function(ex){
+    var card = el('div','example-card');
+    card.appendChild(el('div','t', ex.title));
+    card.appendChild(el('div','d', ex.desc));
+    card.addEventListener('click', function(){ loadExample(ex.id); });
+    wrap.appendChild(card);
+  });
+}
+
+/* =========================================================
+   BLANK PROJECT
+   ========================================================= */
+function blankProject(){
+  return {
+    projectName:'Untitled Project', description:'',
+    tags:{}, timers:{}, counters:{}, rungs:[newRung()], visuals:[]
+  };
+}
+
+/* =========================================================
+   WIRING / INIT
+   ========================================================= */
+function renderAll(){ renderLadder(); renderTags(); renderIO(); }
+
+function initEvents(){
+  document.getElementById('btnEdit').addEventListener('click', stopRun);
+  document.getElementById('btnRun').addEventListener('click', startRun);
+  document.getElementById('btnStep').addEventListener('click', stepOnce);
+  document.getElementById('projName').addEventListener('change', function(e){ state.projectName = e.target.value || 'Untitled Project'; markDirty(); });
+
+  document.getElementById('btnNew').addEventListener('click', doNew);
+  document.getElementById('btnNew2').addEventListener('click', doNew);
+  function doNew(){
+    if (!confirm('Start a new blank project? Unsaved changes to the current one will be lost (unless you Save first).')) return;
+    loadProjectData(blankProject());
+  }
+  document.getElementById('btnSave').addEventListener('click', openSaveModal);
+  document.getElementById('btnSave2').addEventListener('click', openSaveModal);
+  document.getElementById('btnOpen').addEventListener('click', openLoadModal);
+  document.getElementById('btnOpen2').addEventListener('click', openLoadModal);
+  document.getElementById('btnExport').addEventListener('click', exportProject);
+  document.getElementById('btnImport').addEventListener('click', function(){ document.getElementById('fileImport').click(); });
+  document.getElementById('fileImport').addEventListener('change', function(e){
+    if (e.target.files && e.target.files[0]) importProjectFile(e.target.files[0]);
+    e.target.value='';
+  });
+  document.getElementById('btnAddTag').addEventListener('click', openNewTagModal);
+
+  document.getElementById('btnLeftPanel').addEventListener('click', function(){
+    document.getElementById('leftPanel').classList.toggle('open');
+    document.getElementById('rightPanel').classList.remove('open');
+  });
+  document.getElementById('btnRightPanel').addEventListener('click', function(){
+    document.getElementById('rightPanel').classList.toggle('open');
+    document.getElementById('leftPanel').classList.remove('open');
+  });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key==='Escape') closeModal();
+  });
+}
+
+function init(){
+  renderExamples();
+  initEvents();
+  if (!loadAutosave()){
+    loadProjectData(projMotor());
+  } else {
+    renderAll();
+  }
+  // subtle logo pulse to hint at "power flow" — the one orchestrated motion
+  var r1 = document.getElementById('logoRung1'), r2 = document.getElementById('logoRung2');
+  var t = 0;
+  setInterval(function(){
+    t++;
+    if (r1) r1.setAttribute('stroke', (t%2===0)?'#37d98a':'#57697a');
+    if (r2) r2.setAttribute('stroke', (t%2===1)?'#37d98a':'#57697a');
+  }, 900);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
