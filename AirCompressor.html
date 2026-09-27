@@ -519,17 +519,8 @@
         }
 
         @media(max-width:767px){
-            .top-nav { position: relative; }
             .top-nav-actions { gap: 6px; }
-            .theme-toggle {
-                width: 32px;
-                height: 28px;
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-            }
-            .theme-toggle:hover { transform: translate(-50%, -50%) scale(1.04); }
+            .theme-toggle { width: 32px; height: 28px; }
         }
 
         /* Print CSS for Clean PDF Generation */
@@ -759,136 +750,185 @@
             .results-header h4 { color: black !important; border-bottom: 2px solid #000 !important; }
             .result-main span:last-child { color: black !important; font-weight: bold; }
         }
-    
-        .footer-right { text-align: center; line-height: 1.45; }
-        .footer-line-1 { font-weight: 700; letter-spacing: .2px; }
-        .footer-line-2 { font-size: .9em; opacity: .9; }
-        .footer-line-3 { font-size: .78em; opacity: .7; margin-top: 2px; }
-</style>
+    </style>
 </head>
 <body>
     <canvas id="bubble-canvas"></canvas>
     <div class="theme-transition-overlay" id="theme-transition-overlay" aria-hidden="true"></div>
     <div class="container">
-    <div class="container">
-        <!-- ================= HOME / DASHBOARD VIEW (Add more tiles here) ================= -->
-        <div id="view-home" class="view-section active">
+        <!-- ================= TOOL 1: AIR COMPRESSOR VIEW ================= -->
+        <div id="view-compressor" class="view-section active">
             <div class="top-nav">
-                <a href="index.html" class="back-btn">Back To Basic lab</a>
-                <div class="top-nav-actions">
-                    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Switch to light mode">☾</button>
-                    <span class="metric-pill">● ENGINEERING MODE</span>
-                </div>
+                <button class="nav-btn" onclick="window.location.href='Advanced.html'">← BACK TO TOOLBOX</button>
             </div>
-            <div class="eyebrow">Industrial calculation workspace</div>
-            <h1 class="page-title">Advanced Engineering Toolbox</h1>
-            <p class="page-subtitle">Select an industrial calculator module below. More tool modules can be easily appended here.</p>
+            <h1 class="page-title">💨 Air Compressor Sizing Engine</h1>
+            <p class="page-subtitle">Calculate exact FAD, verified motor kW, and detailed piping metrics based on ISO 1217 standards.</p>
+
+            <h2 class="section-heading">📊 1. Plant Air Volume Estimator</h2>
+            <p class="section-sub">Estimate rough baseline flow requirements based on typical heavy industry profiles.</p>
             
-            <div class="tools-grid">
-                <!-- Tile 1: Air Compressor Sizing -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='AirCompressor.html'" onkeydown="cardLink(event,'AirCompressor.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon">💨</div>
-                        <h3>Air Compressor Selection</h3>
+            <div class="workspace-card estimator-card">
+                <div class="form-column" style="gap: 12px;">
+                    <div class="input-group">
+                        <label>Industry / Plant Type</label><div class="input-hint">Choose the closest plant profile; its typical air demand per line is used as the starting estimate.</div>
+                        <select id="industry-type" oninput="updateEstimator()">
+                            <option value="2.5">Textiles & Garments (Air-jet looms, spinning) ~ 2.5 m³/min per line</option>
+                            <option value="1.5">Battery Manufacturing (Presses, assembly) ~ 1.5 m³/min per line</option>
+                            <option value="3.0">Automotive & Heavy Assembly (Robotics, paint) ~ 3.0 m³/min per line</option>
+                            <option value="1.0">Food & Beverage (Packaging lines, sorting) ~ 1.0 m³/min per line</option>
+                            <option value="0.8">Pharmaceutical (Clean packaging, filling) ~ 0.8 m³/min per line</option>
+                            <option value="0.5">General Light Manufacturing ~ 0.5 m³/min per line</option>
+                        </select>
                     </div>
-                    <p>FAD demand, indicative motor sizing, receiver starting point, dryer selection, and main-pipe sizing.</p>
-                        <div class="card-arrow">Open module →</div>
+                    <div class="input-group">
+                        <label>Number of Active Production Lines / Major Cell Units</label><div class="input-hint">Enter the number of production lines or major air-consuming cells operating together.</div>
+                        <input type="number" id="industry-scale" value="1" min="1" oninput="updateEstimator()">
+                    </div>
+                </div>
+                
+                <div class="estimator-result-box">
+                    <span>Estimated Baseline Demand</span>
+                    <div class="value" id="estimator-result">2.5 m³/min</div>
+                    <div class="hint">Starting-point estimate only; it is not a measured demand.</div>
+                    <button class="ghost-btn" type="button" onclick="useEstimate()">Use in sizing engine</button>
+                </div>
+            </div>
+
+            <h2 class="section-heading">⚙️ 2. Compressor Sizing Engine</h2>
+            <div class="workspace-card">
+                <div class="form-column">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Required Air Volume (FAD)</label><div class="input-hint">Enter measured or calculated free-air demand at the compressor inlet reference condition.</div>
+                            <input type="number" id="air-flow" placeholder="e.g. 3.5" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Volume Unit</label><div class="input-hint">Select the unit used for your FAD value.</div>
+                            <select id="flow-unit">
+                                <option value="m3min">m³/min</option>
+                                <option value="cfm">CFM</option>
+                                <option value="lmin">L/min</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Working Pressure Required</label><div class="input-hint">Enter the pressure the plant must receive at the required operating point.</div>
+                            <input type="number" id="air-pressure" value="7.0" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>Pressure Unit</label><div class="input-hint">Select the pressure unit used above.</div>
+                            <select id="pressure-unit">
+                                <option value="bar">bar</option>
+                                <option value="psi">psi</option>
+                                <option value="mpa">MPa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Design Margin</label>
+                        <select id="design-margin">
+                            <option value="0.10">10% Design Margin</option>
+                            <option value="0.15" selected>15% Design Margin</option>
+                            <option value="0.20">20% Design Margin</option>
+                            <option value="0.25">25% Design Margin</option>
+                        </select>
+                        <div class="input-hint">Applied to the entered FAD demand before selecting compressor capacity.</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Operation Duty & Air Demand Profile</label><div class="input-hint">Choose continuous operation or intermittent demand/storage behavior.</div>
+                        <select id="duty-mode">
+                            <option value="continuous">Continuous Heavy Output (24/7 Industrial)</option>
+                            <option value="intermittent">Intermittent / Temporary Storage</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Ambient Operating Condition</label><div class="input-hint">Select normal or hot/dusty conditions for the treatment recommendation.</div>
+                        <select id="temp-condition">
+                            <option value="normal">Normal (up to 35°C ambient)</option>
+                            <option value="hot">High Ambient / Dust (40°C - 45°C)</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                            <button class="action-btn" onclick="calculateCompressor()">Calculate & Generate Specifications</button>
+                            <button class="clear-btn" onclick="clearCompressor()">Reset</button>
+                        </div>
+                        <div class="inline-status" id="compressor-status" aria-live="polite"></div>
                 </div>
 
-                <!-- Tile 2: Fire Hydrant & Suppression -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='FireHydrant.html'" onkeydown="cardLink(event,'FireHydrant.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon blue">🚒</div>
-                        <h3>Fire Hydrant & Suppression</h3>
-                    </div>
-                    <p>Parametric flow, pump-head, tank-volume, hydrant-count, and header-size estimates with assumptions clearly separated from code verification.</p>
-                        <div class="card-arrow">Open module →</div>
-                </div>
+                <div class="result-column">
+                    <div class="results-panel">
+                        <div class="results-header">
+                            <h4>Engineering Specifications</h4>
+                            <div class="result-tools">
+                                <button class="ghost-btn" onclick="copyResults('compressor')">Copy</button>
+                                <button class="print-btn" onclick="window.print()">🖨️ PDF</button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-grid">
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Compressor Type:</span>
+                                <div><span id="res-type">--</span></div>
+                            </div>
+                        </div>
 
-                <!-- Tile: Transformer Field Test Analyzer -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='TFTA.html'" onkeydown="cardLink(event,'TFTA.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon">🧪</div>
-                        <h3>Transformer Field Test Analyzer</h3>
-                    </div>
-                    <p>Analyze transformer field test results such as insulation resistance, turns ratio, winding resistance and oil tests against acceptance limits.</p>
-                    <div class="card-arrow">Open module →</div>
-                </div>
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Corrected FAD Output:</span>
+                                <span id="res-fad">--</span>
+                            </div>
+                        </div>
 
-                <!-- Tile: ABB REF615 Feeder Protection Relay -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='REF615.html'" onkeydown="cardLink(event,'REF615.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon blue">🛡️</div>
-                        <h3>ABB REF615 Feeder Protection Relay</h3>
-                    </div>
-                    <p>Settings and reference support for the ABB REF615 feeder protection and control relay.</p>
-                    <div class="card-arrow">Open module →</div>
-                </div>
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Verified Motor Rating (kW):</span>
+                                <span id="res-power">--</span>
+                            </div>
+                        </div>
 
-                <!-- Tile: Power System Protection Coordination -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='PSPC.html'" onkeydown="cardLink(event,'PSPC.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon">📈</div>
-                        <h3>Power System Protection Coordination</h3>
-                    </div>
-                    <p>Fault-current study, IEC/IEEE inverse curves, time-current plot and relay coordination checks for radial feeders.</p>
-                    <div class="card-arrow">Open module →</div>
-                </div>
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Receiver Tank Capacity:</span>
+                                <span id="res-tank">--</span>
+                            </div>
+                        </div>
 
-                <!-- Tile: HT Transformer Protection Relay Settings -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='TPR.html'" onkeydown="cardLink(event,'TPR.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon blue">⚙️</div>
-                        <h3>HT Transformer Protection Relay Settings</h3>
-                    </div>
-                    <p>50/51 and 51N settings for 11 kV / 33 kV distribution transformers, with grading, inrush, CT and panel checks.</p>
-                    <div class="card-arrow">Open module →</div>
-                </div>
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Air Treatment Recommendation:</span>
+                                <span id="res-dryer">--</span>
+                            </div>
+                        </div>
 
-                <!-- Tile: Electra PLC TRAINER -->
-                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='PLC_TRAINER.html'" onkeydown="cardLink(event,'PLC_TRAINER.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon blue">🔌</div>
-                        <h3>Electra PLC TRAINER</h3>
+                        <div class="result-block">
+                            <div class="result-main">
+                                <span>Main Distribution Piping:</span>
+                                <div>
+                                    <span id="res-pipe">--</span>
+                                    <div class="result-subtext" id="res-pipe-wall">--</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p>Interactive PLC training and practical control-logic learning module.</p>
-                    <div class="card-arrow">Open module →</div>
-                </div>
+                    </div>
 
-                <!-- Tile: Electra Circuit Builder Pro -->
-                <div class="tool-card" role="button" tabindex="0"
-                     onclick="window.location.href='CBP_Sabbir.html'"
-                     onkeydown="cardLink(event,'CBP_Sabbir.html')">
-                    <div class="tool-header">
-                        <div class="tool-icon">⚡</div>
-                        <h3>Electra Circuit Builder Pro</h3>
+                    <div class="assumption-note">
+                        Assumptions: entered flow is treated as FAD; motor power is an indicative estimate using
+                        6.5 kW/(m³/min) at 7 bar; receiver is a 30-second starting point at 1 bar usable differential;
+                        pipe sizing targets 6 m/s. Confirm against OEM curves, actual pressure losses, fittings,
+                        elevation, temperature and receiver pressure-band data.
                     </div>
-                    <p>Build and explore electrical circuits with the Electra Circuit Builder Pro module.</p>
-                    <div class="card-arrow">Open module →</div>
                 </div>
-
-                <!-- TEMPLATE FOR FUTURE TILES: Copy paste block below and change ID -->
-                <!-- 
-                <div class="tool-card" onclick="switchView('your-new-tool')">
-                    <div class="tool-header">
-                        <div class="tool-icon">⚡</div>
-                        <h3>Your New Tool Title</h3>
-                    </div>
-                    <p>Short description of what your new engineering module calculates.</p>
-                </div> 
-                -->
             </div>
         </div>
-
     </div>
-    <footer>
-        <div class="footer-right">
-            <div class="footer-line-1">⚡ ElectraLab</div>
-            <div class="footer-line-2">Electrical Engineering Toolbox</div>
-            <div class="footer-line-3">Preliminary design aid only — verify against nameplate data, applicable standards, and a qualified engineer before construction.</div>
-        </div>
-    </footer>
-
     <script>
         const canvas = document.getElementById('bubble-canvas');
         const ctx = canvas.getContext('2d');
@@ -940,28 +980,219 @@
                 window.location.href = url;
             }
         }
-        function cardKey(e, view) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                switchView(view);
+
+        function setStatus(id, msg = '') {
+            const el = document.getElementById(id);
+            if (el) el.textContent = msg;
+        }
+
+        function getRequiredElement(id) {
+            const el = document.getElementById(id);
+            if (!el) {
+                throw new Error(`Missing page element: #${id}`);
+            }
+            return el;
+        }
+
+        function updateEstimator() {
+            const rate = parseFloat(document.getElementById('industry-type').value);
+            let scale = parseFloat(document.getElementById('industry-scale').value);
+            if (!Number.isFinite(scale) || scale < 0) scale = 0;
+            document.getElementById('estimator-result').textContent = `${(rate * scale).toFixed(1)} m³/min`;
+        }
+        updateEstimator();
+
+        function useEstimate() {
+            const value = parseFloat(document.getElementById('estimator-result').textContent);
+            if (Number.isFinite(value)) {
+                getRequiredElement('air-flow').value = value;
+                getRequiredElement('flow-unit').value = 'm3min';
+                setStatus('compressor-status', 'Estimator value copied into FAD input.');
             }
         }
 
-        function cardLink(e, url) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.location.href = url;
+        function getRequiredElement(id) {
+            const el = document.getElementById(id);
+            if (!el) {
+                throw new Error(`Missing page element: #${id}`);
+            }
+            return el;
+        }
+
+        function calculateCompressor() {
+            try {
+            const flowInput = parseFloat(getRequiredElement('air-flow').value);
+            const flowUnit = getRequiredElement('flow-unit').value;
+            const pressInput = parseFloat(getRequiredElement('air-pressure').value);
+            const pressUnit = getRequiredElement('pressure-unit').value;
+            const margin = parseFloat(getRequiredElement('design-margin').value);
+            const dutyMode = getRequiredElement('duty-mode').value;
+            const tempCondition = getRequiredElement('temp-condition').value;
+
+            if (![flowInput, pressInput, margin].every(Number.isFinite) || flowInput <= 0 || pressInput <= 0) {
+                setStatus('compressor-status', 'Enter positive flow and pressure values before calculating.');
+                return;
+            }
+
+            let pBar = pressUnit === 'psi' ? pressInput / 14.5038 :
+                       pressUnit === 'mpa' ? pressInput * 10 : pressInput;
+            if (pBar <= 0) {
+                setStatus('compressor-status', 'Pressure must be positive.');
+                return;
+            }
+
+            let qFad = flowInput;
+            if (flowUnit === 'cfm') qFad = flowInput * 0.0283168466;
+            if (flowUnit === 'lmin') qFad = flowInput / 1000;
+
+            // Input is explicitly FAD, so ambient temperature is NOT multiplied into demand.
+            const requiredFAD = qFad * (1 + margin);
+
+            // Indicative power model only: 6.5 kW/(m³/min) at 7 bar.
+            const specificPower = 6.5 * (pBar / 7);
+            const estimatedPowerKw = Math.max(2.2, requiredFAD * specificPower);
+
+            const standardPowers = [2.2,3.7,5.5,7.5,11,15,18.5,22,30,37,45,55,75,90,110,132,160,200,250];
+            const selectedPower = standardPowers.find(p => p >= estimatedPowerKw) ||
+                                  Math.ceil(estimatedPowerKw / 10) * 10;
+            const hpRating = Math.round(selectedPower * 1.34102);
+
+            const compressorType = dutyMode === 'continuous'
+                ? 'Rotary Screw Compressor (VSD profile)'
+                : (selectedPower <= 15
+                    ? 'Reciprocating / screw package — verify duty cycle'
+                    : 'Rotary Screw Compressor (fixed-speed candidate)');
+
+            const dryerType = tempCondition === 'hot' || requiredFAD > 10
+                ? 'Refrigerated dryer, +3°C PDP class; verify high-inlet-temperature rating'
+                : 'Refrigerated dryer, +3°C PDP class';
+
+            // Starting-point receiver: 30 s of FAD at 1 bar usable pressure differential.
+            const usableDeltaPBar = 1;
+            const tankLitres = Math.max(150, Math.round(requiredFAD * 500 / usableDeltaPBar));
+
+            // Preliminary main-pipe sizing at 6 m/s. No fittings/length/elevation loss is modeled.
+            const absolutePressureBar = pBar + 1.01325;
+            const actualFlowM3Min = requiredFAD * 1.01325 / absolutePressureBar;
+            const actualFlowM3Sec = actualFlowM3Min / 60;
+            const pipeDiameterMm = Math.sqrt((4 * actualFlowM3Sec) / (Math.PI * 6)) * 1000;
+
+            const pipeSpecs = [
+                {dn:15,inc:'1/2"',sch40:'2.77 mm',alu:'1.2 mm'},
+                {dn:20,inc:'3/4"',sch40:'2.87 mm',alu:'1.5 mm'},
+                {dn:25,inc:'1"',sch40:'3.38 mm',alu:'1.5 mm'},
+                {dn:32,inc:'1-1/4"',sch40:'3.56 mm',alu:'1.5 mm'},
+                {dn:40,inc:'1-1/2"',sch40:'3.68 mm',alu:'1.5 mm'},
+                {dn:50,inc:'2"',sch40:'3.91 mm',alu:'2.0 mm'},
+                {dn:65,inc:'2-1/2"',sch40:'5.16 mm',alu:'2.0 mm'},
+                {dn:80,inc:'3"',sch40:'5.49 mm',alu:'2.5 mm'},
+                {dn:100,inc:'4"',sch40:'6.02 mm',alu:'2.5 mm'}
+            ];
+            const selectedPipe = pipeSpecs.find(p => p.dn >= pipeDiameterMm) || pipeSpecs[pipeSpecs.length - 1];
+
+            document.getElementById('res-type').textContent = compressorType;
+            document.getElementById('res-fad').textContent =
+                `${requiredFAD.toFixed(2)} m³/min (${(requiredFAD * 35.3147).toFixed(1)} CFM)`;
+            document.getElementById('res-power').textContent = `${selectedPower} kW / ${hpRating} HP`;
+            document.getElementById('res-tank').textContent =
+                `${tankLitres.toLocaleString()} L (${Math.round(tankLitres * 0.264172)} US gal)`;
+            document.getElementById('res-dryer').textContent = dryerType;
+            document.getElementById('res-pipe').textContent = `${selectedPipe.inc} (DN${selectedPipe.dn})`;
+            document.getElementById('res-pipe-wall').innerHTML =
+                `Indicative wall: Sch-40 ${selectedPipe.sch40} / aluminum ${selectedPipe.alu}
+                 <div class="result-meta">Calculated diameter ≈ ${pipeDiameterMm.toFixed(0)} mm at 6 m/s.</div>`;
+            setStatus('compressor-status', `Calculated with ${(margin * 100).toFixed(0)}% design margin.`);
+            saveInputs();
+            } catch (error) {
+                console.error('Compressor calculation error:', error);
+                setStatus('compressor-status', `Calculation error: ${error.message}`);
             }
         }
 
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            const target = document.getElementById('view-' + viewName);
-            if (target) target.classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function clearCompressor() {
+            try {
+                // Restore the complete compressor module to its starting state.
+                getRequiredElement('industry-type').value = '2.5';
+                getRequiredElement('industry-scale').value = '1';
+                getRequiredElement('air-flow').value = '';
+                getRequiredElement('air-pressure').value = '7.0';
+                getRequiredElement('flow-unit').value = 'm3min';
+                getRequiredElement('pressure-unit').value = 'bar';
+                getRequiredElement('design-margin').value = '0.15';
+                getRequiredElement('duty-mode').value = 'continuous';
+                getRequiredElement('temp-condition').value = 'normal';
+                updateEstimator();
+                ['res-type','res-fad','res-power','res-tank','res-dryer','res-pipe','res-pipe-wall']
+                    .forEach(id => document.getElementById(id).textContent = '--');
+                try { localStorage.removeItem('electralab-compressor'); } catch {}
+                setStatus('compressor-status', 'Compressor form reset to defaults.');
+            } catch (error) {
+                console.error('Compressor reset error:', error);
+                setStatus('compressor-status', `Reset error: ${error.message}`);
+            }
         }
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeOverlay = document.getElementById('theme-transition-overlay');
+
+        function resultText(scope) {
+            const root = scope === 'compressor'
+                ? document.getElementById('view-compressor')
+                : document.getElementById('view-fire-system');
+            const title = root.querySelector('.page-title').textContent.trim();
+            const rows = [...root.querySelectorAll('.result-block')].map(block => {
+                const label = block.querySelector('.result-main > span:first-child');
+                const valueNode = block.querySelector('.result-main > span:last-child, .result-main > div > span');
+                return label && valueNode
+                    ? `${label.textContent.trim()} ${valueNode.textContent.trim()}`
+                    : '';
+            }).filter(Boolean);
+            const testResults = scope === 'fire' ? [...root.querySelectorAll('.test-result')].map(card => {
+                const k = card.querySelector('.k');
+                const v = card.querySelector('.v');
+                return k && v ? `${k.textContent.trim()}: ${v.textContent.trim()}` : '';
+            }).filter(Boolean) : [];
+            return `${title}\n\n${rows.join('\n')}${testResults.length ? '\n\nHydrant Flow-Test Analysis\n' + testResults.join('\n') : ''}`;
+        }
+
+        async function copyResults(scope) {
+            try {
+                await navigator.clipboard.writeText(resultText(scope));
+                setStatus(scope === 'compressor' ? 'compressor-status' : 'fire-status', 'Results copied to clipboard.');
+            } catch {
+                setStatus(scope === 'compressor' ? 'compressor-status' : 'fire-status', 'Clipboard access is unavailable in this browser.');
+            }
+        }
+
+        function saveInputs() {
+            try {
+                const ids = ['industry-type','industry-scale','air-flow','flow-unit','air-pressure',
+                    'pressure-unit','design-margin','duty-mode','temp-condition'];
+                const data = {};
+                ids.forEach(id => data[id] = document.getElementById(id).value);
+                localStorage.setItem('electralab-compressor', JSON.stringify(data));
+            } catch {}
+        }
+
+        function restoreInputs() {
+            try {
+                const data = JSON.parse(localStorage.getItem('electralab-compressor') || 'null');
+                if (!data) return;
+                Object.entries(data).forEach(([id, value]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = value;
+                });
+                updateEstimator();
+            } catch {}
+        }
+
+        ['industry-type','industry-scale'].forEach(id =>
+            document.getElementById(id).addEventListener('input', updateEstimator));
+
+        ['air-flow','flow-unit','air-pressure','pressure-unit','design-margin','duty-mode','temp-condition']
+            .forEach(id => {
+                document.getElementById(id).addEventListener('change', saveInputs);
+                document.getElementById(id).addEventListener('input', saveInputs);
+            });
+
+        restoreInputs();
 
         function applyTheme(theme, animate = false) {
             const isLight = theme === 'light';
@@ -983,12 +1214,7 @@
             }
             try { localStorage.setItem('electralab-theme', theme); } catch {}
         }
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const nextTheme = document.body.classList.contains('theme-light') ? 'dark' : 'light';
-                applyTheme(nextTheme, true);
-            });
-        }
+
         let savedTheme = 'dark';
         try { savedTheme = localStorage.getItem('electralab-theme') || 'dark'; } catch {}
         applyTheme(savedTheme, false);
