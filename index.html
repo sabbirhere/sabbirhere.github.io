@@ -819,6 +819,44 @@ window.MathJax = {
 };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style id="v2-overrides">
+/* --- Contact card: separate, compact --- */
+.contact-strip{margin-top:18px}
+.tool-card.contact-solo{min-height:0;display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(145deg,#0a3a4f,#082a4c)}
+.tool-card.contact-solo .tool-icon{margin:0;flex-shrink:0}
+.tool-card.contact-solo h3{margin:0;flex:1;font-size:16px}
+.tool-card.contact-solo .badge{margin:0}
+
+/* --- Lightning: rare, thin, jagged, soft --- */
+.hero::before{animation:none;opacity:.45}
+.hero .lightning-overlay{opacity:0;animation:none;filter:none;z-index:1;will-change:opacity}
+.hero .lightning-overlay path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+#bolt-core path{stroke:#e6f7ff;stroke-width:1.15}
+#bolt-core path.br{stroke:#bfe8ff;stroke-width:.7}
+#bolt-glow{filter:blur(3px)}
+#bolt-glow path{stroke:#38bdf8;stroke-width:5;opacity:.4}
+.lightning-glow{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 42% 85% at var(--bx,60%) 0%,rgba(125,205,255,.28),rgba(125,205,255,0) 70%)}
+
+/* --- Energy ring: crisp vector, no scale/blur animation --- */
+.hero .energy-ring{border:0;background:none;box-shadow:none;animation:none;opacity:1;filter:none}
+.hero .energy-ring::before,.hero .energy-ring::after{content:none}
+.ring-svg{width:100%;height:100%;display:block;overflow:visible}
+.ring-svg circle{fill:none}
+.ring-svg .r1{stroke:#22d3ee;stroke-width:2.4}
+.ring-svg .r2{stroke:rgba(34,211,238,.7);stroke-width:1.2}
+.ring-svg .r3{stroke:rgba(34,211,238,.55);stroke-width:1.2;stroke-dasharray:2 7;stroke-linecap:round;transform-origin:100px 100px;animation:ringSpin 48s linear infinite}
+.ring-svg .r-halo{stroke:#22d3ee;stroke-width:7;opacity:.10;animation:ringHalo 3.2s ease-in-out infinite}
+.ring-svg .bolt-svg{fill:url(#boltGrad);stroke:#fff3a6;stroke-width:.8;stroke-linejoin:round;filter:drop-shadow(0 0 2px rgba(255,190,0,.55))}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+@keyframes ringHalo{0%,100%{opacity:.06}50%{opacity:.2}}
+@media(max-width:850px){.hero .energy-ring{opacity:.3}}
+@media(max-width:520px){.hero .energy-ring{opacity:.25}}
+body.light-theme .ring-svg .r1{stroke:#0891b2}
+body.light-theme .ring-svg .r2,body.light-theme .ring-svg .r3{stroke:rgba(8,145,178,.6)}
+body.light-theme .ring-svg .bolt-svg{filter:drop-shadow(0 0 2px rgba(217,119,6,.4))}
+@media (prefers-reduced-motion: reduce){.ring-svg .r3,.ring-svg .r-halo{animation:none}}
+</style>
 </head> <body> <!-- Floating particles --> <div class="particle" style="left:8%; animation-duration:12s;"></div> <div class="particle" style="left:18%; animation-duration:17s; animation-delay:2s;"></div> <div class="particle" style="left:31%; animation-duration:14s; animation-delay:5s;"></div> <div class="particle" style="left:45%; animation-duration:19s; animation-delay:1s;"></div> <div class="particle" style="left:59%; animation-duration:13s; animation-delay:4s;"></div> <div class="particle" style="left:72%; animation-duration:18s; animation-delay:7s;"></div> <div class="particle" style="left:86%; animation-duration:15s; animation-delay:3s;"></div>
 <!-- HEADER --> <header>
 <div class="logo">
@@ -834,17 +872,26 @@ window.MathJax = {
 <button class="theme-toggle" id="themeButton" onclick="toggleTheme()" aria-label="Toggle day and night mood">☾</button>
 
 </header> <!-- HERO --> <section class="hero" id="home">
-<svg class="lightning-overlay" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true">
-  <path d="M0 58 L85 42 L132 78 L214 54 L268 102 L346 72 L410 118 L492 82 L554 132 L628 94 L704 146 L780 106 L846 158 L930 112 L1008 164 L1094 126 L1200 174"/>
-  <path d="M0 228 L92 202 L156 244 L238 214 L314 256 L392 222 L468 270 L548 226 L622 266 L704 218 L786 262 L866 220 L944 252 L1032 210 L1112 244 L1200 214"/>
-  <path d="M112 0 L142 48 L126 92 L168 126 L146 174 L188 214 L166 300"/>
-  <path d="M1034 0 L1006 52 L1028 96 L984 142 L1010 184 L970 232 L986 300"/>
+<div class="lightning-glow" id="bolt-flash" aria-hidden="true"></div>
+<svg class="lightning-overlay" id="bolt-svg" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true">
+  <g id="bolt-glow"></g>
+  <g id="bolt-core"></g>
 </svg>
 <div class="hero-content">
     <div class="energy-ring">
-
-        <div class="bolt">ϟ</div>
-
+        <svg class="ring-svg" viewBox="0 0 200 200" aria-hidden="true" shape-rendering="geometricPrecision">
+            <defs>
+                <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#fff59a"/>
+                    <stop offset="1" stop-color="#ffb300"/>
+                </linearGradient>
+            </defs>
+            <circle class="r-halo" cx="100" cy="100" r="93"/>
+            <circle class="r1" cx="100" cy="100" r="93"/>
+            <circle class="r2" cx="100" cy="100" r="79"/>
+            <circle class="r3" cx="100" cy="100" r="65"/>
+            <path class="bolt-svg" d="M113 42 L72 110 H97 L86 160 L130 88 H104 Z"/>
+        </svg>
     </div>
 
     <h1>ElectraLab</h1>
@@ -968,13 +1015,21 @@ window.MathJax = {
         <p>Open the advanced electrical tools and utilities.</p>
         <span class="badge">OPEN TOOLS →</span>
     </a>
-    <button type="button" class="tool-card" onclick="openAppPanel('contact')">
+    <a class="tool-card" href="Plc_foundation.html">
+        <div class="tool-icon">▤</div>
+        <h3>PLC Foundation</h3>
+        <p>Learn PLC fundamentals, ladder logic basics and control concepts step by step.</p>
+        <span class="badge">OPEN MODULE →</span>
+    </a>
+
+</div>
+
+<div class="contact-strip">
+    <a class="tool-card contact-solo" href="contact_boss.html">
         <div class="tool-icon">✉</div>
         <h3>Contact</h3>
-        <p>Get in touch with the ElectraLab creator.</p>
         <span class="badge">OPEN CONTACT →</span>
-    </button>
-
+    </a>
 </div>
 </section>
 
@@ -1044,21 +1099,6 @@ window.MathJax = {
     </div>
     <button class="calc-action" onclick="calculatePFI()">CALCULATE PFI φ</button><button class="clear-inputs" onclick="clearCalculator(this)">CLEAR INPUTS</button>
     <div class="live-result" id="pfiResult">Enter load power, voltage and existing/target power factor.</div>
-  </div>
-</section>
-
-<section class="app-panel" id="panel-contact">
-  <div class="panel-inner">
-    <a class="back-tools" onclick="closeAppPanel()">← BACK TO TOOLBOX</a>
-    <h2>✉ Contact</h2>
-    <p class="panel-subtitle">Connect with the creator of ElectraLab.</p>
-    <div class="live-result contact-card">
-      <div class="ai-badge">ELECTRALAB CONTACT</div>
-      <h3><a href="https://www.facebook.com/ACSabbir" target="_blank" rel="noopener noreferrer">SABBIR AHAMED</a></h3>
-      <p>For questions, feedback, collaboration or technical suggestions:</p>
-      <p><a href="mailto:sabbirac@atomicmail.io">sabbirac@atomicmail.io</a></p>
-      <a class="start-button" href="mailto:sabbirac@atomicmail.io?subject=ElectraLab%20enquiry">SEND AN EMAIL →</a>
-    </div>
   </div>
 </section>
 
@@ -1616,7 +1656,7 @@ function calcBreaker(){
 </script>
 
 <script>
-const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi","contact","diagram"];
+const appPanels = ["ohms","power","threephase","cable","battery","resistor","motor","transformer","unit","breaker","contactor","busbar","pfi","diagram"];
 
 function openAppPanel(name) {
     document.querySelectorAll(".app-panel").forEach(p => p.classList.remove("active"));
@@ -2887,6 +2927,56 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   document.addEventListener("keydown",e=>{if(!document.getElementById("panel-diagram").classList.contains("active"))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();document.querySelector('[data-sld-action="undo"]').click();}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();document.querySelector('[data-sld-action="redo"]').click();}else if(e.key.toLowerCase()==="r"){document.querySelector('[data-sld-action="rotate"]').click();}else if(e.key==="Escape"){state.wireMode=false;state.draft=null;state.wireStart=null;state.selected=null;render();setStatus("Selection cleared · wire mode cancelled");}else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();removeSelected();}else if(state.selected&&state.selected[0]!=="w"&&state.selected[0]!=="f"&&["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();const n=state.nodes.find(x=>x.id===state.selected);if(n){commit();n.x+=e.key==="ArrowLeft"?-snap:e.key==="ArrowRight"?snap:0;n.y+=e.key==="ArrowUp"?-snap:e.key==="ArrowDown"?snap:0;render();}}});
   render();
+})();
+</script>
+<script>
+/* Subtle, realistic lightning: procedural jagged bolt + tiny branches, rare and brief */
+(function(){
+  const hero=document.getElementById('home'), svg=document.getElementById('bolt-svg'),
+        core=document.getElementById('bolt-core'), glow=document.getElementById('bolt-glow'),
+        flash=document.getElementById('bolt-flash');
+  if(!hero||!svg||!svg.animate||!flash.animate) return;
+  const rm=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const NS='http://www.w3.org/2000/svg';
+  const R=(a,b)=>a+Math.random()*(b-a);
+  let visible=true;
+  if('IntersectionObserver' in window){ new IntersectionObserver(e=>{visible=e[0].isIntersecting;}).observe(hero); }
+
+  function split(x1,y1,x2,y2,d,out){
+    if(d<2.5){ out.push([x2,y2]); return; }
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1;
+    const o=R(-d,d), mx=(x1+x2)/2-dy/len*o, my=(y1+y2)/2+dx/len*o;
+    split(x1,y1,mx,my,d/2,out); split(mx,my,x2,y2,d/2,out);
+  }
+  function bolt(x1,y1,x2,y2){
+    const out=[[x1,y1]], len=Math.hypot(x2-x1,y2-y1);
+    split(x1,y1,x2,y2,len*0.14,out); return out;
+  }
+  const toD=p=>'M'+p.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' L');
+  function add(g,d,cls){ const p=document.createElementNS(NS,'path'); p.setAttribute('d',d); if(cls) p.setAttribute('class',cls); g.appendChild(p); }
+
+  function strike(){
+    const w=hero.clientWidth, h=hero.clientHeight; if(!w||!h) return;
+    svg.setAttribute('viewBox','0 0 '+w+' '+h);
+    core.textContent=''; glow.textContent='';
+    const x0=R(w*.08,w*.92), y1=R(h*.6,h*.98), x1=x0+R(-w*.07,w*.07);
+    const main=bolt(x0,0,x1,y1);
+    const paths=[[main,'']];
+    const nb=Math.random()<.6?1:2;
+    for(let i=0;i<nb;i++){
+      const s=main[Math.floor(R(main.length*.25,main.length*.7))], dir=Math.random()<.5?-1:1;
+      paths.push([bolt(s[0],s[1],s[0]+dir*R(w*.04,w*.11),s[1]+R(h*.15,h*.32)),'br']);
+    }
+    paths.forEach(([p,c])=>{ const d=toD(p); add(core,d,c); add(glow,d,c); });
+    const dur=R(420,600);
+    svg.animate([{opacity:0},{opacity:.65,offset:.05},{opacity:.18,offset:.15},{opacity:.5,offset:.24},{opacity:.1,offset:.5},{opacity:0}],{duration:dur,easing:'linear'});
+    flash.style.setProperty('--bx',(x0/w*100).toFixed(1)+'%');
+    flash.animate([{opacity:0},{opacity:.9,offset:.05},{opacity:.25,offset:.16},{opacity:.7,offset:.25},{opacity:0}],{duration:dur*1.1,easing:'ease-out'});
+  }
+  function loop(delay){
+    setTimeout(()=>{ if(!document.hidden && visible && !rm.matches) strike(); loop(R(7000,15000)); }, delay);
+  }
+  loop(2200);
 })();
 </script>
 </body> </html>
