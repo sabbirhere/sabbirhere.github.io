@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=1280, viewport-fit=cover">
 <title>Circuit Builder Pro — Industrial</title>
 <style>
   :root{
@@ -14,7 +14,7 @@
   html,body{height:100%;}
   body{
     font-family:'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);
-    overflow:hidden;height:100vh;display:flex;flex-direction:column;
+    overflow:hidden;height:100vh;height:100dvh;min-width:1100px;display:flex;flex-direction:column;
     padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   }
   #toolbar{
@@ -52,15 +52,19 @@
   #canvas-wrap{flex:1;position:relative;overflow:hidden;min-height:0;}
   canvas{display:block;touch-action:none;cursor:crosshair;}
   #symbol-panel{
-    position:absolute;top:10px;left:10px;background:rgba(22,29,56,.97);
-    border:1px solid var(--line);border-radius:10px;padding:10px;
-    max-height:calc(100% - 20px);overflow-y:auto;width:212px;
-    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    position:absolute;top:8px;left:8px;background:rgba(22,29,56,.96);
+    border:1px solid var(--line);border-radius:8px;padding:6px;
+    width:170px;max-height:min(62%,470px);display:flex;flex-direction:column;
+    box-shadow:0 6px 18px rgba(0,0,0,.35);
   }
-  #symbol-panel::-webkit-scrollbar{width:7px;}
-  #symbol-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  #sym-head{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--dim);margin:0 2px 5px;flex-shrink:0;}
+  #sym-toggle{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:4px;width:20px;height:18px;line-height:14px;cursor:pointer;font-size:12px;padding:0;}
+  #sym-body{overflow-y:auto;overflow-x:hidden;min-height:0;padding-right:2px;}
+  #symbol-panel.collapsed #sym-body{display:none;}
+  #sym-body::-webkit-scrollbar{width:6px;}
+  #sym-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   #sym-search{
-    width:100%;padding:6px 8px;margin-bottom:8px;background:var(--panel2);
+    width:100%;padding:4px 7px;margin-bottom:6px;background:var(--panel2);
     border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:12px;
   }
   #symbol-panel summary{
@@ -70,10 +74,10 @@
   #symbol-panel summary::-webkit-details-marker{display:none;}
   #symbol-panel summary:before{content:'▸ ';font-size:9px;}
   details[open] > summary:before{content:'▾ ';}
-  .sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;}
+  .sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:3px;}
   .sym-btn{
     background:var(--panel2);border:1px solid var(--line);border-radius:7px;
-    padding:5px 2px 6px;cursor:grab;text-align:center;font-size:8.5px;color:#c7d0e8;
+    padding:3px 1px 4px;cursor:grab;text-align:center;font-size:8px;color:#c7d0e8;
     transition:background .12s,border-color .12s,transform .08s;line-height:1.2;
     touch-action:none;user-select:none;
   }
@@ -94,13 +98,13 @@
   #context-menu div{padding:6px 14px;font-size:12px;cursor:pointer;}
   #context-menu div:hover{background:var(--panel2);}
   @media (max-width:700px){
-    #symbol-panel{width:172px;font-size:11px;}
+    #symbol-panel{width:160px;font-size:11px;}
   }
 </style>
 </head>
 <body>
   <div id="toolbar">
-    <button id="btn-back" title="Return to the Toolbox home page">← Back to Toolbox</button>
+    <button id="btn-back" title="Return to the Toolbox home page">← Back To Toolbox</button>
     <div class="sep"></div>
     <button id="btn-select" class="active" title="Select / Move (V)">⬚ Select</button>
     <button id="btn-wire" title="Wire (W)">⚡ Wire</button>
@@ -143,8 +147,11 @@
   <div id="canvas-wrap">
     <canvas id="canvas"></canvas>
     <div id="symbol-panel">
-      <input id="sym-search" type="text" placeholder="Search components…">
-      <div id="sym-container"></div>
+      <div id="sym-head"><span>Component Library</span><button id="sym-toggle" title="Collapse / expand">–</button></div>
+      <div id="sym-body">
+        <input id="sym-search" type="text" placeholder="Search components…">
+        <div id="sym-container"></div>
+      </div>
     </div>
     <div id="context-menu"></div>
     <div id="drag-ghost"></div>
@@ -216,7 +223,14 @@ function T(c,txt,x,y,font,align,base){
 }
 
 /* ============================== PORT TEMPLATES ============================== */
+function polesX(n){ return Array.from({length:n},(_,i)=>(i-(n-1)/2)*20); }
 function portsFor(spec,w,h){
+  if(typeof spec==='string'){
+    let m;
+    if((m=/^poles(\d)$/.exec(spec))){ const xs=polesX(+m[1]); return [...xs.map((x,i)=>({id:'a'+(i+1),x,y:-h/2})),...xs.map((x,i)=>({id:'b'+(i+1),x,y:h/2}))]; }
+    if((m=/^tops(\d)$/.exec(spec))){ return polesX(+m[1]).map((x,i)=>({id:'t'+(i+1),x,y:-h/2})); }
+    if(spec==='co_v') return [{id:'com',x:0,y:-h/2},{id:'nc',x:-8,y:h/2},{id:'no',x:8,y:h/2}];
+  }
   switch(spec){
     case 'h': return [{id:'a',x:-w/2,y:0},{id:'b',x:w/2,y:0}];
     case 'v': return [{id:'a',x:0,y:-h/2},{id:'b',x:0,y:h/2}];
@@ -273,7 +287,6 @@ const SYMLIB = [
 {id:'disconnector',name:'Disconnector',cat:'Switching & Protection',w:30,h:50,ports:'v',kind:'breaker',bkind:'disconnector'},
 {id:'load_break_switch',name:'Load Break Switch',cat:'Switching & Protection',w:30,h:50,ports:'v',kind:'breaker',bkind:'lbs'},
 {id:'earth_switch',name:'Earth Switch',cat:'Switching & Protection',w:30,h:50,ports:'v',kind:'breaker',bkind:'earth_sw'},
-{id:'fuse',name:'Fuse',cat:'Switching & Protection',w:20,h:46,ports:'v',kind:'breaker',bkind:'fuse'},
 {id:'mcb',name:'MCB',cat:'Switching & Protection',w:30,h:50,ports:'v',kind:'breaker',bkind:'mcb',label:'MCB'},
 {id:'mccb',name:'MCCB',cat:'Switching & Protection',w:34,h:54,ports:'v',kind:'breaker',bkind:'mccb',label:'MCCB'},
 {id:'acb',name:'ACB',cat:'Switching & Protection',w:38,h:58,ports:'v',kind:'breaker',bkind:'acb',label:'ACB'},
@@ -311,10 +324,7 @@ const SYMLIB = [
 {id:'shunt_trip',name:'Shunt Trip',cat:'Coils & Actuators',w:34,h:34,ports:'h',kind:'coil',label:'ST'},
 {id:'uv_trip',name:'Undervoltage Trip',cat:'Coils & Actuators',w:34,h:34,ports:'h',kind:'coil',label:'UVT'},
 {id:'brake_coil',name:'Brake Coil',cat:'Coils & Actuators',w:34,h:34,ports:'h',kind:'coil',label:'BR'},
-{id:'motor_3ph',name:'Motor 3Ph',cat:'Coils & Actuators',w:44,h:60,ports:'bottom1',kind:'motor',sub:'3~'},
 {id:'load_3ph',name:'3-Phase Load',cat:'Coils & Actuators',w:50,h:44,ports:'top3',kind:'load3ph',label:'LOAD',sub:'3~'},
-{id:'motor_1ph',name:'Motor 1Ph',cat:'Coils & Actuators',w:44,h:60,ports:'bottom1',kind:'motor',sub:'1~'},
-{id:'motor_dc',name:'Motor DC',cat:'Coils & Actuators',w:44,h:60,ports:'bottom1',kind:'motor',sub:'='},
 {id:'heater',name:'Heater',cat:'Coils & Actuators',w:34,h:44,ports:'v',kind:'powerElec',label:'HTR'},
 // -- Indicators & Alarms --
 {id:'lamp_red',name:'Pilot Lamp Red',cat:'Indicators & Alarms',w:28,h:36,ports:'bottom1',kind:'lamp',color:'#e94560'},
@@ -322,9 +332,6 @@ const SYMLIB = [
 {id:'lamp_yellow',name:'Pilot Lamp Yellow',cat:'Indicators & Alarms',w:28,h:36,ports:'bottom1',kind:'lamp',color:'#f1c40f'},
 {id:'lamp_blue',name:'Pilot Lamp Blue',cat:'Indicators & Alarms',w:28,h:36,ports:'bottom1',kind:'lamp',color:'#3498db'},
 {id:'lamp_white',name:'Pilot Lamp White',cat:'Indicators & Alarms',w:28,h:36,ports:'bottom1',kind:'lamp',color:'#ecf0f1'},
-{id:'buzzer',name:'Buzzer',cat:'Indicators & Alarms',w:30,h:38,ports:'bottom1',kind:'alarm',variant:'buzzer'},
-{id:'horn',name:'Horn',cat:'Indicators & Alarms',w:30,h:38,ports:'bottom1',kind:'alarm',variant:'horn'},
-{id:'siren',name:'Siren',cat:'Indicators & Alarms',w:30,h:38,ports:'bottom1',kind:'alarm',variant:'siren'},
 // -- Contacts --
 {id:'contact_3ph_no',name:'3-Phase Main Contact (NO)',cat:'Contacts',w:70,h:50,ports:'3poleV',kind:'contact3ph',variant:'no'},
 {id:'contact_3ph_nc',name:'3-Phase Main Contact (NC)',cat:'Contacts',w:70,h:50,ports:'3poleV',kind:'contact3ph',variant:'nc'},
@@ -389,10 +396,111 @@ const SYMLIB = [
 {id:'switch',name:'Switch',cat:'Basic',w:44,h:20,ports:'h',kind:'breaker',bkind:'switch'},
 {id:'junction',name:'Junction',cat:'Basic',w:12,h:12,ports:'cross',kind:'basicMisc',variant:'junction'},
 {id:'link',name:'Wire Link',cat:'Basic',w:30,h:6,ports:'h',kind:'basicMisc',variant:'link'},
+
+// -- Motors (IEC) --
+{id:'motor_1ph',name:'Motor 1Ph (M1~)',cat:'Motors',w:60,h:76,ports:'tops2',kind:'motorX',r:26,top:2,txt:'M1 ~'},
+{id:'motor_3ph',name:'Motor 3Ph (M3~)',cat:'Motors',w:70,h:76,ports:'tops3',kind:'motorX',r:28,top:3,txt:'M3 ~'},
+{id:'motor_star_delta',name:'Motor Star/Delta',cat:'Motors',w:70,h:84,ports:'poles3',kind:'motorX',r:28,top:3,bot:3,txt:'M3 ~',sub:'Star/Delta'},
+{id:'motor_two_speed',name:'Motor Two Speeds',cat:'Motors',w:70,h:84,ports:'poles3',kind:'motorX',r:28,top:3,bot:3,txt:'M3 ~',sub:'Two Speeds'},
+{id:'motor_dahlander',name:'Motor Dahlander',cat:'Motors',w:70,h:84,ports:'poles3',kind:'motorX',r:28,top:3,bot:3,txt:'M3 ~',sub:'Dahlander'},
+{id:'motor_dc',name:'Motor DC',cat:'Motors',w:60,h:76,ports:'top1',kind:'motorX',r:26,top:1,dc:true,txt:'M'},
+// -- Alarms (IEC) --
+{id:'buzzer',name:'Buzzer',cat:'Indicators & Alarms',w:30,h:44,ports:'bottom1',kind:'alarm',variant:'buzzer'},
+{id:'horn',name:'Horn',cat:'Indicators & Alarms',w:30,h:44,ports:'bottom1',kind:'alarm',variant:'horn'},
+{id:'siren',name:'Siren',cat:'Indicators & Alarms',w:30,h:44,ports:'bottom1',kind:'alarm',variant:'siren'},
+// -- Fuses & Overload (IEC) --
+{id:'fuse',name:'Fuse',cat:'Fuses & Overloads',w:20,h:46,ports:'v',kind:'fuseN',n:1},
+{id:'fuse_2p',name:'Fuse 2-Pole',cat:'Fuses & Overloads',w:40,h:46,ports:'poles2',kind:'fuseN',n:2},
+{id:'fuse_3p',name:'Fuse 3-Pole',cat:'Fuses & Overloads',w:60,h:46,ports:'poles3',kind:'fuseN',n:3},
+{id:'ovl_1p',name:'Thermal Overload 1P',cat:'Fuses & Overloads',w:30,h:50,ports:'poles1',kind:'ovl',n:1},
+{id:'ovl_2p',name:'Thermal Overload 2P',cat:'Fuses & Overloads',w:50,h:50,ports:'poles2',kind:'ovl',n:2},
+{id:'ovl_3p',name:'Thermal Overload 3P',cat:'Fuses & Overloads',w:70,h:50,ports:'poles3',kind:'ovl',n:3},
+{id:'ovl_element',name:'Heater Element',cat:'Fuses & Overloads',w:34,h:46,ports:'v',kind:'ovlEl'},
+{id:'iec_ctr_1p',name:'Contactor 1P',cat:'IEC Power Devices',w:30,h:60,ports:'poles1',kind:'iec',n:1,mark:'ctr'},
+{id:'iec_ctr_3p',name:'Contactor 3P',cat:'IEC Power Devices',w:70,h:60,ports:'poles3',kind:'iec',n:3,mark:'ctr'},
+{id:'iec_cb_1p',name:'Circuit Breaker 1P',cat:'IEC Power Devices',w:30,h:60,ports:'poles1',kind:'iec',n:1,mark:'cb'},
+{id:'iec_cb_3p',name:'Circuit Breaker 3P',cat:'IEC Power Devices',w:70,h:60,ports:'poles3',kind:'iec',n:3,mark:'cb'},
+{id:'iec_ds_1p',name:'Disconnector 1P',cat:'IEC Power Devices',w:30,h:60,ports:'poles1',kind:'iec',n:1,mark:'ds'},
+{id:'iec_ds_3p',name:'Disconnector 3P',cat:'IEC Power Devices',w:70,h:60,ports:'poles3',kind:'iec',n:3,mark:'ds'},
+{id:'iec_lbs_1p',name:'Switch-Disconnector 1P',cat:'IEC Power Devices',w:30,h:60,ports:'poles1',kind:'iec',n:1,mark:'lbs'},
+{id:'iec_lbs_3p',name:'Switch-Disconnector 3P',cat:'IEC Power Devices',w:70,h:60,ports:'poles3',kind:'iec',n:3,mark:'lbs'},
+{id:'iec_fsw_1p',name:'Fuse Switch 1P',cat:'IEC Power Devices',w:30,h:76,ports:'poles1',kind:'iec',n:1,mark:'fsw'},
+{id:'iec_fsw_3p',name:'Fuse Switch 3P',cat:'IEC Power Devices',w:70,h:76,ports:'poles3',kind:'iec',n:3,mark:'fsw'},
+{id:'iec_cb_tm_1p',name:'Breaker + Thermal-Mag 1P',cat:'IEC Power Devices',w:50,h:84,ports:'poles1',kind:'iec',n:1,mark:'cb',trip:1,handle:0,rcd:0},
+{id:'iec_cb_tm_3p',name:'Breaker + Thermal-Mag 3P',cat:'IEC Power Devices',w:90,h:84,ports:'poles3',kind:'iec',n:3,mark:'cb',trip:1,handle:0,rcd:0},
+{id:'iec_ctr_ol_3p',name:'Contactor + Overload 3P',cat:'IEC Power Devices',w:90,h:84,ports:'poles3',kind:'iec',n:3,mark:'ctr',trip:1,handle:0,rcd:0},
+{id:'iec_mpcb_3p',name:'Motor Protection Breaker',cat:'IEC Power Devices',w:90,h:84,ports:'poles3',kind:'iec',n:3,mark:'cb',trip:1,handle:1,rcd:0},
+{id:'iec_rcd_3p',name:'RCD Breaker 3P',cat:'IEC Power Devices',w:90,h:84,ports:'poles3',kind:'iec',n:3,mark:'cb',trip:1,handle:0,rcd:1},
+{id:'iec_rcd_1p',name:'RCD Breaker 1P',cat:'IEC Power Devices',w:50,h:84,ports:'poles1',kind:'iec',n:1,mark:'cb',trip:1,handle:0,rcd:1},
+{id:'ctl_push_no',name:'Push N/O',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'push'},
+{id:'ctl_push_nc',name:'Push N/C',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'push'},
+{id:'ctl_push_co',name:'Push Changeover',cat:'Control Switches',w:44,h:48,ports:'co_v',kind:'ctl',form:'co',head:'push'},
+{id:'ctl_pull_no',name:'Pull N/O',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'pull'},
+{id:'ctl_pull_nc',name:'Pull N/C',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'pull'},
+{id:'ctl_pull_co',name:'Pull Changeover',cat:'Control Switches',w:44,h:48,ports:'co_v',kind:'ctl',form:'co',head:'pull'},
+{id:'ctl_turn_no',name:'Turn N/O',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'turn'},
+{id:'ctl_turn_nc',name:'Turn N/C',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'turn'},
+{id:'ctl_turn_co',name:'Turn Changeover',cat:'Control Switches',w:44,h:48,ports:'co_v',kind:'ctl',form:'co',head:'turn'},
+{id:'ctl_key_no',name:'Key N/O',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'key'},
+{id:'ctl_key_nc',name:'Key N/C',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'key'},
+{id:'ctl_key_co',name:'Key Changeover',cat:'Control Switches',w:44,h:48,ports:'co_v',kind:'ctl',form:'co',head:'key'},
+{id:'ctl_emerg_no',name:'Mushroom N/O',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'emerg'},
+{id:'ctl_emerg_nc',name:'Mushroom N/C',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'emerg'},
+{id:'ctl_emerg_co',name:'Mushroom Changeover',cat:'Control Switches',w:44,h:48,ports:'co_v',kind:'ctl',form:'co',head:'emerg'},
+{id:'pos_roller_no',name:'Limit Roller N/O',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'roller'},
+{id:'pos_roller_nc',name:'Limit Roller N/C',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'roller'},
+{id:'pos_roller_co',name:'Limit Roller Changeover',cat:'Position Switches',w:52,h:48,ports:'co_v',kind:'ctl',form:'co',head:'roller'},
+{id:'pos_lever_no',name:'Limit Lever N/O',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'lever'},
+{id:'pos_lever_nc',name:'Limit Lever N/C',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'lever'},
+{id:'pos_lever_co',name:'Limit Lever Changeover',cat:'Position Switches',w:52,h:48,ports:'co_v',kind:'ctl',form:'co',head:'lever'},
+{id:'pos_cam_no',name:'Limit Cam N/O',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'cam'},
+{id:'pos_cam_nc',name:'Limit Cam N/C',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'cam'},
+{id:'pos_cam_co',name:'Limit Cam Changeover',cat:'Position Switches',w:52,h:48,ports:'co_v',kind:'ctl',form:'co',head:'cam'},
+{id:'iec_ctr_4p',name:'Contactor 4P',cat:'IEC Power Devices',w:90,h:60,ports:'poles4',kind:'iec',n:4,mark:'ctr'},
+{id:'iec_cb_4p',name:'Circuit Breaker 4P',cat:'IEC Power Devices',w:90,h:60,ports:'poles4',kind:'iec',n:4,mark:'cb'},
+{id:'iec_ds_4p',name:'Disconnector 4P',cat:'IEC Power Devices',w:90,h:60,ports:'poles4',kind:'iec',n:4,mark:'ds'},
+{id:'iec_lbs_4p',name:'Switch-Disconnector 4P',cat:'IEC Power Devices',w:90,h:60,ports:'poles4',kind:'iec',n:4,mark:'lbs'},
+{id:'iec_fsw_4p',name:'Fuse Switch 4P',cat:'IEC Power Devices',w:90,h:76,ports:'poles4',kind:'iec',n:4,mark:'fsw'},
+{id:'iec_cb_tm_4p',name:'Breaker + Thermal-Mag 4P',cat:'IEC Power Devices',w:110,h:84,ports:'poles4',kind:'iec',n:4,mark:'cb',trip:1},
+{id:'iec_ctr_ol_1p',name:'Contactor + Overload 1P',cat:'IEC Power Devices',w:50,h:84,ports:'poles1',kind:'iec',n:1,mark:'ctr',trip:1},
+{id:'iec_ctr_ol_2p',name:'Contactor + Overload 2P',cat:'IEC Power Devices',w:70,h:84,ports:'poles2',kind:'iec',n:2,mark:'ctr',trip:1},
+{id:'iec_ctr_ol_4p',name:'Contactor + Overload 4P',cat:'IEC Power Devices',w:110,h:84,ports:'poles4',kind:'iec',n:4,mark:'ctr',trip:1},
+{id:'iec_rcd_2p',name:'RCD Breaker 2P',cat:'IEC Power Devices',w:70,h:84,ports:'poles2',kind:'iec',n:2,mark:'cb',trip:0,rcd:1},
+{id:'iec_rcd_4p',name:'RCD Breaker 4P',cat:'IEC Power Devices',w:110,h:84,ports:'poles4',kind:'iec',n:4,mark:'cb',trip:0,rcd:1},
+{id:'fuse_4p',name:'Fuse 4-Pole',cat:'Fuses & Overloads',w:80,h:46,ports:'poles4',kind:'fuseN',n:4},
+{id:'ovl_4p',name:'Thermal Overload 4P',cat:'Fuses & Overloads',w:90,h:50,ports:'poles4',kind:'ovl',n:4},
+{id:'res_v_1p',name:'Resistor / Heater 1P',cat:'Fuses & Overloads',w:20,h:46,ports:'poles1',kind:'resV',n:1},
+{id:'res_v_2p',name:'Resistor / Heater 2P',cat:'Fuses & Overloads',w:40,h:46,ports:'poles2',kind:'resV',n:2},
+{id:'res_v_3p',name:'Resistor / Heater 3P',cat:'Fuses & Overloads',w:60,h:46,ports:'poles3',kind:'resV',n:3},
+{id:'res_v_4p',name:'Resistor / Heater 4P',cat:'Fuses & Overloads',w:80,h:46,ports:'poles4',kind:'resV',n:4},
+{id:'coil_box_v',name:'Relay Coil (vertical)',cat:'Coils & Actuators',w:30,h:50,ports:'v',kind:'coilV',dbl:0},
+{id:'coil_box_dbl',name:'Relay Coil (double winding)',cat:'Coils & Actuators',w:30,h:50,ports:'v',kind:'coilV',dbl:1},
+{id:'coil_box_h',name:'Relay Coil (horizontal)',cat:'Coils & Actuators',w:50,h:30,ports:'h',kind:'coilV',dbl:0,hor:1},
+{id:'coil_box_h_dbl',name:'Relay Coil (horiz. double)',cat:'Coils & Actuators',w:50,h:30,ports:'h',kind:'coilV',dbl:1,hor:1},
+{id:'ctl_push_x',name:'Push Crossover',cat:'Control Switches',w:52,h:48,ports:'poles2',kind:'ctl',form:'x',head:'push'},
+{id:'ctl_pull_x',name:'Pull Crossover',cat:'Control Switches',w:52,h:48,ports:'poles2',kind:'ctl',form:'x',head:'pull'},
+{id:'ctl_turn_x',name:'Turn Crossover',cat:'Control Switches',w:52,h:48,ports:'poles2',kind:'ctl',form:'x',head:'turn'},
+{id:'ctl_key_x',name:'Key Crossover',cat:'Control Switches',w:52,h:48,ports:'poles2',kind:'ctl',form:'x',head:'key'},
+{id:'ctl_emerg_x',name:'Mushroom Crossover',cat:'Control Switches',w:52,h:48,ports:'poles2',kind:'ctl',form:'x',head:'emerg'},
+{id:'ctl_push_no_latch',name:'Push N/O Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'push',latch:1},
+{id:'ctl_push_nc_latch',name:'Push N/C Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'push',latch:1},
+{id:'ctl_turn_no_latch',name:'Turn N/O Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'turn',latch:1},
+{id:'ctl_turn_nc_latch',name:'Turn N/C Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'turn',latch:1},
+{id:'ctl_key_no_latch',name:'Key N/O Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'no',head:'key',latch:1},
+{id:'ctl_key_nc_latch',name:'Key N/C Latching',cat:'Control Switches',w:44,h:48,ports:'v',kind:'ctl',form:'nc',head:'key',latch:1},
+{id:'pos_roller_x',name:'Limit Roller Crossover',cat:'Position Switches',w:60,h:48,ports:'poles2',kind:'ctl',form:'x',head:'roller'},
+{id:'pos_roller_no_latch',name:'Limit Roller N/O Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'roller',latch:1},
+{id:'pos_roller_nc_latch',name:'Limit Roller N/C Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'roller',latch:1},
+{id:'pos_lever_x',name:'Limit Lever Crossover',cat:'Position Switches',w:60,h:48,ports:'poles2',kind:'ctl',form:'x',head:'lever'},
+{id:'pos_lever_no_latch',name:'Limit Lever N/O Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'lever',latch:1},
+{id:'pos_lever_nc_latch',name:'Limit Lever N/C Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'lever',latch:1},
+{id:'pos_cam_x',name:'Limit Cam Crossover',cat:'Position Switches',w:60,h:48,ports:'poles2',kind:'ctl',form:'x',head:'cam'},
+{id:'pos_cam_no_latch',name:'Limit Cam N/O Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'no',head:'cam',latch:1},
+{id:'pos_cam_nc_latch',name:'Limit Cam N/C Latching',cat:'Position Switches',w:52,h:48,ports:'v',kind:'ctl',form:'nc',head:'cam',latch:1},
 ];
 const SYMLIB_MAP = Object.fromEntries(SYMLIB.map(s=>[s.id,s]));
-const CAT_ORDER = ['Power Source','Grounding','Transformers','Switching & Protection','Protection Relays',
-  'Coils & Actuators','Indicators & Alarms','Contacts','Controls & Sensors','Power Electronics',
+const CAT_ORDER = ['Power Source','Grounding','Transformers','Switching & Protection','IEC Power Devices','Fuses & Overloads','Protection Relays',
+  'Motors','Coils & Actuators','Indicators & Alarms','Contacts','Control Switches','Position Switches','Controls & Sensors','Power Electronics',
   'Measurement','Basic'];
 
 /* ============================== SYMBOL RENDERING ============================== */
@@ -420,13 +528,13 @@ function contactBase(c,w,h,nc,arc,delay){
 }
 
 function drawSymbol(c, sym){
-  c.lineWidth = 1.6;
+  c.lineWidth = 1.1;
   const w=sym.w, h=sym.h;
   switch(sym.kind){
     case 'source': {
       const r = sym.r||16;
       C(c,0,0,r);
-      T(c,sym.glyph,0,0,'bold 13px sans-serif');
+      T(c,sym.glyph,0,0,'13px sans-serif');
       if(sym.sub) T(c,sym.sub,0,-r-9,'8px sans-serif');
       portsFor(sym.ports,w,h).forEach(p=>{
         const ang = Math.atan2(p.y,p.x);
@@ -440,7 +548,7 @@ function drawSymbol(c, sym){
         const stemEnd = h/2-8;
         L(c,[[0,-h/2],[0,stemEnd]]);
         L(c,[[-10,stemEnd],[10,stemEnd]]);
-        T(c,'N',18,stemEnd,'bold 10px sans-serif');
+        T(c,'N',18,stemEnd,'10px sans-serif');
       } else {
         const barY = v==='ngr' ? 12 : 2;
         L(c,[[0,-h/2],[0,barY]]);
@@ -448,7 +556,7 @@ function drawSymbol(c, sym){
         L(c,[[-11,barY],[11,barY]]);
         L(c,[[-7,barY+5],[7,barY+5]]);
         L(c,[[-3,barY+10],[3,barY+10]]);
-        if(v==='pe') T(c,'PE',18,barY+2,'bold 8px sans-serif');
+        if(v==='pe') T(c,'PE',18,barY+2,'8px sans-serif');
         if(v==='rod') T(c,'ROD',18,barY+2,'7px sans-serif');
         if(v==='ngr') T(c,'NGR',18,-4,'7px sans-serif');
       }
@@ -468,13 +576,13 @@ function drawSymbol(c, sym){
       L(c,[[-w/2,0],[x,0]]);
       for(let i=0;i<n;i++){
         const cx = x + gap*(i+0.5);
-        c.lineWidth=2.4; L(c,[[cx-3,-12],[cx-3,12]]); c.lineWidth=1.2; L(c,[[cx+3,-7],[cx+3,7]]); c.lineWidth=1.6;
+        c.lineWidth=1.8; L(c,[[cx-3,-12],[cx-3,12]]); c.lineWidth=1; L(c,[[cx+3,-7],[cx+3,7]]); c.lineWidth=1.1;
       }
       L(c,[[x+span,0],[w/2,0]]);
       break;
     }
     case 'bus': {
-      c.save(); c.lineWidth=4; L(c,[[-w/2,0],[w/2,0]]); c.restore();
+      c.save(); c.lineWidth=3; L(c,[[-w/2,0],[w/2,0]]); c.restore();
       break;
     }
     case 'xfmr': {
@@ -543,13 +651,13 @@ function drawSymbol(c, sym){
         L(c,[[0,-h/2],[0,-half]]);
         L(c,[[0,half],[0,h/2]]);
         R(c,-w/2,-half,w,half*2);
-        T(c,sym.label,0,0,'bold 8px sans-serif');
+        T(c,sym.label,0,0,'8px sans-serif');
       }
       break;
     }
     case 'ansiRelay': {
       C(c,0,0,17);
-      T(c,sym.num,0,0,'bold 10px sans-serif');
+      T(c,sym.num,0,0,'10px sans-serif');
       L(c,[[0,-17],[0,-h/2]]);
       L(c,[[0,17],[0,h/2]]);
       break;
@@ -558,12 +666,12 @@ function drawSymbol(c, sym){
       const rad = Math.min(w,h)/2-2;
       if(sym.timer){
         R(c,-w/2,-h/2,w,h);
-        T(c,sym.label,0,-3,'bold 8px sans-serif');
+        T(c,sym.label,0,-3,'8px sans-serif');
         T(c,'⏱',0,8,'8px sans-serif');
         L(c,[[-w/2,0],[-w/2,0]]);
       } else {
         C(c,0,0,rad);
-        T(c,sym.label,0,0,'bold 8px sans-serif');
+        T(c,sym.label,0,0,'8px sans-serif');
       }
       L(c,[[-w/2,0],[-rad,0]]);
       L(c,[[rad,0],[w/2,0]]);
@@ -571,25 +679,25 @@ function drawSymbol(c, sym){
     }
     case 'motor': {
       C(c,0,0,17);
-      T(c,'M',0,-3,'bold 13px sans-serif');
+      T(c,'M',0,-3,'13px sans-serif');
       if(sym.sub) T(c,sym.sub,0,9,'7px sans-serif');
       L(c,[[0,17],[0,h/2]]);
       break;
     }
     case 'lamp': {
-      C(c,0,0,13);
-      L(c,[[-9,-9],[9,9]]);
-      L(c,[[-9,9],[9,-9]]);
-      c.save(); c.strokeStyle=sym.color; c.lineWidth=3; C(c,0,0,13); c.restore();
-      L(c,[[0,13],[0,h/2]]);
+      C(c,0,0,11);
+      L(c,[[-7.8,-7.8],[7.8,7.8]]);
+      L(c,[[-7.8,7.8],[7.8,-7.8]]);
+      c.save(); c.strokeStyle=sym.color; c.lineWidth=2; C(c,0,0,11); c.restore();
+      L(c,[[0,11],[0,h/2]]);
       break;
     }
     case 'alarm': {
       const v = sym.variant;
-      if(v==='buzzer'){ C(c,0,-2,12); T(c,'♪',0,-2,'11px sans-serif'); }
-      else if(v==='horn'){ A(c,-2,0,12,Math.PI*1.25,Math.PI*1.75); L(c,[[8,-8],[16,-14]]); L(c,[[8,8],[16,14]]); L(c,[[16,-14],[16,14]]); }
-      else { C(c,0,-2,11); for(let i=0;i<3;i++) A(c,0,-2,15+i*4,Math.PI*1.15,Math.PI*1.85); }
-      L(c,[[0,10],[0,h/2]]);
+      if(v==='buzzer'){ A(c,0,4,11,Math.PI,0); L(c,[[-11,4],[11,4]]); }
+      else if(v==='horn'){ c.save(); c.rotate(-Math.PI/2); R(c,-9,-4,7,8); L(c,[[-2,-4],[9,-10],[9,10],[-2,4]]); c.restore(); }
+      else { c.save(); c.rotate(-Math.PI/2); R(c,-10,-5,8,10); L(c,[[-2,-9],[9,0],[-2,9]]); c.restore(); }
+      L(c,[[0,v==='buzzer'?4:8],[0,h/2]]);
       break;
     }
     case 'contact3ph': {
@@ -614,7 +722,7 @@ function drawSymbol(c, sym){
       const cols=[-w/2+10,0,w/2-10];
       cols.forEach(x=> L(c,[[x,-h/2],[x,-h/2+10]]) );
       R(c,-w/2,-h/2+10,w,h-10);
-      T(c,sym.label||'LOAD',0,sym.sub?-3:2,'bold 8px sans-serif');
+      T(c,sym.label||'LOAD',0,sym.sub?-3:2,'8px sans-serif');
       if(sym.sub) T(c,sym.sub,0,9,'7px sans-serif');
       break;
     }
@@ -651,12 +759,12 @@ function drawSymbol(c, sym){
     }
     case 'fieldSwitch': {
       contactBase(c,w,h,false,false,false);
-      T(c,sym.badge,0,-h/2-8,'bold 7.5px sans-serif');
+      T(c,sym.badge,0,-h/2-8,'7.5px sans-serif');
       break;
     }
     case 'powerElec': {
       R(c,-w/2,-h/2,w,h);
-      T(c,sym.label,0,sym.sub?-4:0,'bold 8.5px sans-serif');
+      T(c,sym.label,0,sym.sub?-4:0,'8.5px sans-serif');
       if(sym.sub) T(c,sym.sub,0,7,'7px sans-serif');
       if(sym.ports==='v'){ L(c,[[0,-h/2],[0,-h/2-8]]); L(c,[[0,h/2],[0,h/2+8]]); }
       break;
@@ -685,20 +793,20 @@ function drawSymbol(c, sym){
         for(let i=0;i<n;i++) A(c,-w/2+6+step*(i+0.5),0,step/2,Math.PI,0);
         L(c,[[w/2-6,0],[w/2,0]]);
       } else if(v==='cap_bank'){
-        R(c,-w/2,-h/2,w,h); T(c,'C',0,-5,'bold 10px sans-serif'); T(c,'BANK',0,7,'7px sans-serif');
+        R(c,-w/2,-h/2,w,h); T(c,'C',0,-5,'10px sans-serif'); T(c,'BANK',0,7,'7px sans-serif');
         L(c,[[0,-h/2],[0,-h/2-8]]); L(c,[[0,h/2],[0,h/2+8]]);
       }
       break;
     }
     case 'meter': {
       C(c,0,0,15);
-      T(c,sym.label,0,0,'bold 8px sans-serif');
+      T(c,sym.label,0,0,'8px sans-serif');
       L(c,[[0,15],[0,h/2]]);
       break;
     }
     case 'plcBlock': {
       R(c,-w/2,-h/2,w,h);
-      T(c,sym.label,0,0,'bold 8.5px sans-serif');
+      T(c,sym.label,0,0,'8.5px sans-serif');
       stubLines(c,sym);
       break;
     }
@@ -720,9 +828,132 @@ function drawSymbol(c, sym){
         L(c,[[0,5],[0,h/2]]);
       } else {
         R(c,-w/2,-h/2,w,h);
-        T(c,sym.label,0,0,'bold 8px sans-serif');
+        T(c,sym.label,0,0,'8px sans-serif');
         L(c,[[0,-h/2],[0,-h/2-8]]); L(c,[[0,h/2],[0,h/2+8]]);
       }
+      break;
+    }
+
+    case 'motorX': {
+      const r=sym.r;
+      C(c,0,0,r);
+      polesX(sym.top).forEach(x=>{ const y=-Math.sqrt(Math.max(0,r*r-x*x)); L(c,[[x,y],[x,-h/2]]); });
+      if(sym.bot) polesX(sym.bot).forEach(x=>{ const y=Math.sqrt(Math.max(0,r*r-x*x)); L(c,[[x,y],[x,h/2]]); });
+      if(sym.dc){
+        R(c,-5,-r-7,10,7); L(c,[[0,-r-7],[0,-h/2]]);
+        T(c,'M',0,-4,'15px sans-serif');
+        L(c,[[-7,8],[7,8]]); c.save(); c.setLineDash([2,2]); L(c,[[-7,12],[7,12]]); c.restore();
+      } else {
+        T(c,sym.txt,0,sym.sub?-5:0,'13px sans-serif');
+        if(sym.sub) T(c,sym.sub,0,9,'8px sans-serif');
+      }
+      break;
+    }
+    case 'fuseN': {
+      polesX(sym.n).forEach(x=>{ L(c,[[x,-h/2],[x,-9]]); R(c,x-4,-9,8,18); L(c,[[x,9],[x,h/2]]); });
+      break;
+    }
+    case 'ovl': {
+      const xs=polesX(sym.n);
+      xs.forEach(x=>{ L(c,[[x,-h/2],[x,-11]]); R(c,x-7,-11,14,22);
+        L(c,[[x,-11],[x,-6],[x-4,-3],[x+4,3],[x,6],[x,11]]); L(c,[[x,11],[x,h/2]]); });
+      if(xs.length>1){ c.save(); c.setLineDash([2,2]); L(c,[[xs[0],0],[xs[xs.length-1],0]]); c.restore(); }
+      break;
+    }
+    case 'ovlEl': {
+      L(c,[[0,-h/2],[0,-10]]); R(c,-14,-10,28,20);
+      c.beginPath(); c.moveTo(-6,6); c.lineTo(6,6); c.lineTo(0,-5); c.closePath(); c.stroke();
+      L(c,[[0,10],[0,h/2]]);
+      break;
+    }
+    case 'iec': {
+      const n=sym.n, xs=polesX(n), trip=!!sym.trip, fsw=sym.mark==='fsw', mk=sym.mark;
+      const hy = fsw ? -14 : (trip ? -24 : -16);
+      const cy = fsw ? 14  : (trip ? 4 : 16);
+      const dx = 7;
+      xs.forEach(x=>{
+        let topY=-h/2;
+        if(fsw){ L(c,[[x,topY],[x,topY+6]]); R(c,x-3,topY+6,6,14); L(c,[[x,topY+20],[x,hy]]); }
+        else L(c,[[x,topY],[x,hy]]);
+        // blade
+        L(c,[[x,hy],[x+dx,cy-4]]);
+        FC(c,x,hy,1.3);
+        // fixed contact + lower lead
+        if(trip){ L(c,[[x,cy],[x,cy+6]]); }
+        else L(c,[[x,cy],[x,h/2]]);
+        const mx=x+dx/2, my=(hy+cy-4)/2;
+        const bl=Math.hypot(dx,cy-4-hy), nx=(cy-4-hy)/bl, ny=-dx/bl;
+        if(mk==='cb'||mk==='cb_tm'||mk==='mpcb'){ const ex=x+dx, ey=cy-4; L(c,[[ex-3,ey-3],[ex+3,ey+3]]); L(c,[[ex-3,ey+3],[ex+3,ey-3]]); }
+        if(mk==='ctr'){ A(c,mx-1,my,3.6,Math.PI*0.5,Math.PI*1.5); }
+        if(mk==='ds'){ L(c,[[mx-nx*4,my-ny*4],[mx+nx*4,my+ny*4]]); }
+        if(mk==='lbs'||mk==='fsw'){ const ex=x+dx, ey=cy-4; L(c,[[ex-nx*4,ey-ny*4],[ex+nx*4,ey+ny*4]]); }
+      });
+      if(trip){
+        const x0=xs[0]-8, x1=xs[n-1]+8, y0=cy+6, y1=y0+16;
+        R(c,x0,y0,x1-x0,16);
+        xs.forEach(x=>{
+          c.save(); c.setLineDash([2,2]); L(c,[[x-7,y0+8],[x+7,y0+8]]); c.restore();
+          c.beginPath(); c.moveTo(x-3,y0+4); c.lineTo(x-3,y0+12); c.lineTo(x+3,y0+8); c.closePath(); c.stroke();
+          L(c,[[x,y1],[x,h/2]]);
+        });
+      }
+      if(n>1 || sym.handle){
+        const ly = (hy+cy-4)/2;
+        c.save(); c.setLineDash([2,2]);
+        L(c,[[xs[0]+dx/2,ly],[xs[n-1]+dx/2,ly]]);
+        if(sym.handle){ L(c,[[xs[0]-8,ly],[xs[0]+dx/2,ly]]); }
+        c.restore();
+        if(sym.handle){ R(c,xs[0]-16,ly-4,8,8); FC(c,xs[0]-12,ly,1.2); }
+      }
+      if(sym.rcd){
+        const ry = trip ? cy+14 : cy+6;
+        c.beginPath(); c.ellipse(0,ry,xs[n-1]+13,7,0,0,Math.PI*2); c.stroke();
+      }
+      break;
+    }
+    case 'ctl': {
+      const hh=h/2-8, f=sym.form, hd=sym.head;
+      const bx = (f==='co') ? 0 : 0;
+      if(f!=='x'){ L(c,[[0,-h/2],[0,-hh]]); FC(c,0,-hh,1.3); }
+      let my;
+      if(f==='no'){
+        L(c,[[0,-hh],[7,hh-5]]); L(c,[[0,hh],[0,h/2]]); my=0;
+      } else if(f==='nc'){
+        L(c,[[0,-hh],[6,hh]]); L(c,[[6,hh],[6,hh+3],[0,hh+3],[0,h/2]]); L(c,[[3,hh-3],[10,hh-3]]); my=0;
+      } else if(f==='x'){
+        L(c,[[-10,-h/2],[-10,-hh]]); L(c,[[10,-h/2],[10,-hh]]);
+        L(c,[[-10,-hh],[10,hh]]); L(c,[[10,-hh],[-10,hh]]);
+        L(c,[[-10,hh],[-10,h/2]]); L(c,[[10,hh],[10,h/2]]); my=0;
+      } else {
+        L(c,[[0,-hh],[-8,hh-3]]);
+        L(c,[[-8,hh],[-8,h/2]]); L(c,[[8,hh],[8,h/2]]); L(c,[[3,hh],[13,hh]]); my=0;
+      }
+      c.save(); c.setLineDash([2,2]);
+      const lx = (f==='co') ? -4 : (f==='x' ? -2 : 3);
+      if(hd==='push'){ L(c,[[lx,my],[-8,my]]); c.restore(); c.save(); A(c,-8,my,5,Math.PI/2,Math.PI*1.5); L(c,[[-8,my-5],[-8,my+5]]); }
+      else if(hd==='pull'){ L(c,[[lx,my],[-9,my]]); c.restore(); c.save(); C(c,-12.5,my,3.5); }
+      else if(hd==='turn'){ L(c,[[lx,my],[-8,my]]); c.restore(); c.save(); L(c,[[-8,my-6],[-8,my+6]]); L(c,[[-8,my],[-15,my]]); L(c,[[-15,my],[-15,my-5]]); }
+      else if(hd==='key'){ L(c,[[lx,my],[-8,my]]); c.restore(); c.save(); C(c,-12.5,my,4); L(c,[[-16.5,my],[-20,my]]); }
+      else if(hd==='emerg'){ L(c,[[lx,my],[-8,my]]); c.restore(); c.save(); c.beginPath(); c.arc(-8,my,6,Math.PI/2,Math.PI*1.5); c.closePath(); c.fill(); }
+      else if(hd==='roller'){ L(c,[[lx,my],[-12,my]]); c.restore(); c.save(); L(c,[[-12,my],[-19,my],[-19,my-8]]); C(c,-19,my-11,3); }
+      else if(hd==='lever'){ L(c,[[lx,my],[-9,my]]); c.restore(); c.save(); L(c,[[-9,my],[-22,my-10]]); L(c,[[-22,my-10],[-19,my-12]]); }
+      else if(hd==='cam'){ L(c,[[lx,my],[-8,my]]); c.restore(); c.save(); L(c,[[-8,my-6],[-8,my+6]]); A(c,-8,my,6,Math.PI/2,Math.PI*1.5); L(c,[[-14,my],[-20,my]]); }
+      c.restore();
+      if(sym.latch){ c.save(); c.setLineDash([]); L(c,[[-4,my-3],[2,my],[-4,my+3]]); c.restore(); }
+      break;
+    }
+
+    case 'resV': {
+      polesX(sym.n).forEach(x=>{ L(c,[[x,-h/2],[x,-10]]); R(c,x-4,-10,8,20); L(c,[[x,10],[x,h/2]]); });
+      break;
+    }
+    case 'coilV': {
+      const bw = sym.hor?24:14, bh = sym.hor?14:24;
+      const stop = (sym.hor?bw:bh)/2;
+      R(c,-bw/2,-bh/2,bw,bh);
+      if(sym.dbl){ if(sym.hor) L(c,[[-bw/2+4,-bh/2],[-bw/2+4,bh/2]]); else L(c,[[-bw/2,-bh/2+4],[bw/2,-bh/2+4]]); }
+      if(sym.hor){ L(c,[[-w/2,0],[-bw/2,0]]); L(c,[[bw/2,0],[w/2,0]]); }
+      else { L(c,[[0,-h/2],[0,-bh/2]]); L(c,[[0,bh/2],[0,h/2]]); }
       break;
     }
     case 'basicMisc': {
@@ -739,9 +970,9 @@ function renderPreview(cvs, sym){
   cx.clearRect(0,0,cvs.width,cvs.height);
   cx.save();
   cx.translate(cvs.width/2, cvs.height/2-4);
-  const s = Math.min((cvs.width-10)/sym.w, (cvs.height-16)/sym.h, 1.15);
+  const s = Math.min((cvs.width-6)/(sym.w+8), (cvs.height-10)/(sym.h+4), 1.0);
   cx.scale(s,s);
-  cx.strokeStyle='#dfe6f5'; cx.fillStyle='#dfe6f5'; cx.lineWidth=1.6;
+  cx.strokeStyle='#dfe6f5'; cx.fillStyle='#dfe6f5'; cx.lineWidth=1.1;
   drawSymbol(cx, sym);
   cx.restore();
 }
@@ -758,7 +989,7 @@ CAT_ORDER.forEach(cat=>{
     const btn = document.createElement('div');
     btn.className = 'sym-btn'; btn.title = sym.name; btn.dataset.name = sym.name.toLowerCase();
     btn.dataset.symId = sym.id;
-    const cvs = document.createElement('canvas'); cvs.width = 52; cvs.height = 40;
+    const cvs = document.createElement('canvas'); cvs.width = 46; cvs.height = 36;
     btn.appendChild(cvs);
     const span = document.createElement('span'); span.textContent = sym.name; btn.appendChild(span);
     grid.appendChild(btn);
@@ -767,6 +998,10 @@ CAT_ORDER.forEach(cat=>{
   det.appendChild(grid);
   symContainer.appendChild(det);
 });
+document.getElementById('sym-toggle').onclick = function(){
+  const p = document.getElementById('symbol-panel'); p.classList.toggle('collapsed');
+  this.textContent = p.classList.contains('collapsed') ? '+' : '–';
+};
 document.getElementById('sym-search').oninput = function(){
   const q = this.value.trim().toLowerCase();
   symContainer.querySelectorAll('details').forEach(det=>{
@@ -1004,7 +1239,7 @@ function selectAll(){
 
 /* ============================== ZOOM / FIT ============================== */
 function zoomFit(){
-  if(!components.length && !wires.length){ zoom=1; panX=W/2; panY=H/2; draw(); return; }
+  if(!components.length && !wires.length){ fitSheet(); return; }
   let mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
   components.forEach(c=>{
     const s=SYMLIB_MAP[c.symbolId];
@@ -1022,29 +1257,55 @@ function zoomFit(){
 }
 
 /* ============================== DRAW ============================== */
+const SHEET = {x:0, y:0, w:1680, h:1188};   // A3-proportion drawing sheet (world units)
+function fitSheet(){
+  zoom = Math.max(0.1, Math.min((W-200)/SHEET.w, (H-30)/SHEET.h, 2));
+  panX = W/2 - (SHEET.x+SHEET.w/2)*zoom + 80;
+  panY = H/2 - (SHEET.y+SHEET.h/2)*zoom;
+  draw();
+}
 function drawGrid(target){
-  target.fillStyle = '#12172b';
+  target.fillStyle = '#0c1020';
   target.fillRect(0,0,W,H);
-  if(!showGrid) return;
-  let step = grid;
-  while(step*zoom < 7) step *= 2;
-  const tl = screenToWorld(0,0), br = screenToWorld(W,H);
-  const x0 = Math.floor(tl.x/step)*step, x1 = Math.ceil(br.x/step)*step;
-  const y0 = Math.floor(tl.y/step)*step, y1 = Math.ceil(br.y/step)*step;
-  target.fillStyle = '#2a3563';
-  for(let gx=x0; gx<=x1; gx+=step){
-    for(let gy=y0; gy<=y1; gy+=step){
-      const s = worldToScreen(gx,gy);
-      target.fillRect(s.x-0.75, s.y-0.75, 1.5, 1.5);
+  const a = worldToScreen(SHEET.x,SHEET.y), sw = SHEET.w*zoom, sh = SHEET.h*zoom;
+  target.fillStyle = '#12172b';
+  target.fillRect(a.x,a.y,sw,sh);
+  if(showGrid){
+    let step = grid;
+    while(step*zoom < 7) step *= 2;
+    const tl = screenToWorld(0,0), br = screenToWorld(W,H);
+    const x0 = Math.max(SHEET.x, Math.floor(tl.x/step)*step), x1 = Math.min(SHEET.x+SHEET.w, Math.ceil(br.x/step)*step);
+    const y0 = Math.max(SHEET.y, Math.floor(tl.y/step)*step), y1 = Math.min(SHEET.y+SHEET.h, Math.ceil(br.y/step)*step);
+    target.fillStyle = '#2a3563';
+    for(let gx=x0; gx<=x1; gx+=step){
+      for(let gy=y0; gy<=y1; gy+=step){
+        const s = worldToScreen(gx,gy);
+        target.fillRect(s.x-0.75, s.y-0.75, 1.5, 1.5);
+      }
     }
   }
+  target.strokeStyle = '#3a477e'; target.lineWidth = 1.2;
+  target.strokeRect(a.x,a.y,sw,sh);
+  const m = 14*zoom;
+  target.lineWidth = 1;
+  target.strokeRect(a.x+m,a.y+m,sw-2*m,sh-2*m);
+  // title block
+  const tw = 340*zoom, th = 64*zoom, tx = a.x+sw-m-tw, ty = a.y+sh-m-th;
+  target.strokeRect(tx,ty,tw,th);
+  target.beginPath(); target.moveTo(tx,ty+th/2); target.lineTo(tx+tw,ty+th/2); target.moveTo(tx+tw*0.62,ty+th/2); target.lineTo(tx+tw*0.62,ty+th); target.stroke();
+  target.fillStyle = '#8b96b8';
+  target.font = (Math.max(7,11*zoom))+'px Segoe UI, sans-serif';
+  target.textAlign = 'left'; target.textBaseline = 'middle';
+  target.fillText('Circuit Builder Pro — ElectraLab', tx+8*zoom, ty+th/4);
+  target.fillText('Drawn by:', tx+8*zoom, ty+th*0.75);
+  target.fillText('Sheet 1 / 1', tx+tw*0.62+8*zoom, ty+th*0.75);
 }
 function drawWires(target){
   wires.forEach(w=>{
     const pts = resolveWirePoints(w).map(p=>worldToScreen(p.x,p.y));
     const selected = wireSelection.has(w.uid);
     target.strokeStyle = selected ? '#ff6b81' : '#5fd0ff';
-    target.lineWidth = selected ? 2.6 : 2;
+    target.lineWidth = selected ? 2 : 1.4;
     target.beginPath();
     pts.forEach((p,i)=> i? target.lineTo(p.x,p.y) : target.moveTo(p.x,p.y));
     target.stroke();
@@ -1095,7 +1356,7 @@ function drawComponents(target){
     }
     target.strokeStyle = selected ? '#ff6b81' : '#e7ecf5';
     target.fillStyle = selected ? '#ff6b81' : '#e7ecf5';
-    target.lineWidth = 1.6;
+    target.lineWidth = 1.1;
     try{ drawSymbol(target, sym); }catch(e){}
     if(tool==='wire' || hoverCompUid===comp.uid){
       target.fillStyle = '#2ecc71';
@@ -1512,7 +1773,7 @@ document.addEventListener('keyup', e=>{ if(e.key===' ') spaceDown=false; });
   history=[]; historyIdx=-1;
   pushHistory();
   resize();
-  if(restored) zoomFit(); else { panX=W/2; panY=H/2; }
+  if(restored) zoomFit(); else fitSheet();
   updateToolbar();
   draw();
 })();
