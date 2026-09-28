@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Contact | ElectraLab</title>
 <style>
   :root{
@@ -30,9 +30,7 @@
     flex-direction:column;
     overflow-x:hidden;
     position:relative;
-    background-image:
-      radial-gradient(circle at 72% 12%,rgba(12,107,190,.18),transparent 30%),
-      radial-gradient(circle at 20% 85%,rgba(20,83,170,.14),transparent 32%);
+    transition:background .25s ease, color .25s ease;
   }
 
   /* Animated scientific backdrop */
@@ -43,7 +41,8 @@
     height:100%;
     pointer-events:none;
     z-index:0;
-    opacity:.68;
+    opacity:.5;
+    contain:strict;
   }
 
   body::before{
@@ -52,7 +51,7 @@
     inset:0;
     pointer-events:none;
     z-index:0;
-    opacity:.22;
+    opacity:.18;
     background-image:
       linear-gradient(rgba(70,210,255,.045) 1px,transparent 1px),
       linear-gradient(90deg,rgba(70,210,255,.045) 1px,transparent 1px);
@@ -60,26 +59,16 @@
     mask-image:linear-gradient(to bottom,black,transparent 92%);
   }
 
-  body::after{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:0;
-    background:
-      radial-gradient(circle at 50% 45%,transparent 0,transparent 38%,rgba(0,0,0,.22) 100%);
-  }
-
   header{
-    height:68px;
+    height:60px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 28px;
-    background:rgba(2,12,27,.72);
+    padding:0 24px;
+    background:rgba(2,12,27,.82);
     border-bottom:1px solid var(--line);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
     position:relative;
     z-index:2;
   }
@@ -87,53 +76,42 @@
   .logo{
     display:flex;
     align-items:center;
-    gap:11px;
-    font-size:21px;
+    gap:9px;
+    font-size:19px;
     font-weight:bold;
     letter-spacing:1px;
-    text-shadow:0 0 18px rgba(16,217,255,.14);
+    text-shadow:0 0 14px rgba(16,217,255,.14);
   }
 
   .logo-icon{
-    width:38px;
-    height:38px;
+    width:34px;
+    height:34px;
     display:grid;
     place-items:center;
-    border-radius:11px;
+    border-radius:9px;
     background:linear-gradient(135deg,#00ffff,#6366f1);
     color:#020617;
-    box-shadow:0 0 20px rgba(16,217,255,.22);
+    box-shadow:0 0 14px rgba(16,217,255,.22);
     position:relative;
-  }
-
-  .logo-icon::after{
-    content:"";
-    position:absolute;
-    inset:-4px;
-    border:1px solid rgba(109,243,255,.18);
-    border-radius:13px;
-    animation:pulseRing 3.2s ease-in-out infinite;
   }
 
   .logo span{color:var(--cyan)}
 
   .theme-toggle{
-    width:40px;
-    height:32px;
+    width:36px;
+    height:30px;
     background:rgba(11,185,237,.16);
     border:1px solid rgba(16,217,255,.25);
     color:#dffcff;
-    border-radius:18px;
+    border-radius:16px;
     cursor:pointer;
-    font-size:16px;
+    font-size:15px;
     transition:.22s ease;
-    box-shadow:inset 0 0 12px rgba(16,217,255,.05);
   }
 
   .theme-toggle:hover{
     transform:translateY(-1px);
     background:rgba(11,185,237,.28);
-    box-shadow:0 0 18px rgba(16,217,255,.16);
   }
 
   main{
@@ -141,69 +119,38 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:50px 20px;
+    padding:30px 16px;
     position:relative;
     z-index:1;
   }
 
+  /* Compact Smaller Contact Card */
   .card{
     width:100%;
-    max-width:590px;
-    padding:36px;
-    border-radius:22px;
-    background:
-      linear-gradient(145deg,rgba(15,35,64,.84),rgba(5,24,46,.72));
+    max-width:460px;
+    padding:24px 26px;
+    border-radius:18px;
+    background:rgba(9, 28, 52, 0.88);
     border:1px solid rgba(16,217,255,.24);
-    box-shadow:
-      0 30px 80px rgba(0,0,0,.34),
-      0 0 45px rgba(16,217,255,.07),
-      inset 0 1px 0 rgba(255,255,255,.04);
-    backdrop-filter:blur(7px);
-    -webkit-backdrop-filter:blur(7px);
+    box-shadow:0 20px 50px rgba(0,0,0,.35);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
     position:relative;
     overflow:hidden;
-    animation:cardIn .8s cubic-bezier(.2,.75,.25,1) both;
-  }
-
-  .card::before{
-    content:"";
-    position:absolute;
-    left:-20%;
-    top:-70%;
-    width:140%;
-    height:100%;
-    background:linear-gradient(115deg,transparent 40%,rgba(109,243,255,.07) 50%,transparent 60%);
-    transform:rotate(8deg);
-    animation:scan 8s linear infinite;
-    pointer-events:none;
-  }
-
-  .card::after{
-    content:"";
-    position:absolute;
-    width:180px;
-    height:180px;
-    right:-110px;
-    top:-110px;
-    border-radius:50%;
-    border:1px solid rgba(16,217,255,.14);
-    box-shadow:0 0 0 18px rgba(16,217,255,.025),0 0 0 36px rgba(16,217,255,.018);
-    animation:orbitHalo 10s linear infinite;
-    pointer-events:none;
   }
 
   .back{
     display:inline-flex;
     align-items:center;
-    gap:7px;
-    margin-bottom:28px;
-    padding:9px 15px;
-    border-radius:10px;
+    gap:6px;
+    margin-bottom:20px;
+    padding:7px 12px;
+    border-radius:8px;
     border:1px solid rgba(0,255,255,.22);
     color:var(--cyan);
     text-decoration:none;
     background:rgba(0,255,255,.045);
-    font-size:13px;
+    font-size:12px;
     transition:.2s ease;
     position:relative;
     z-index:1;
@@ -212,52 +159,59 @@
   .back:hover{
     transform:translateX(-2px);
     background:rgba(0,255,255,.08);
-    box-shadow:0 0 20px rgba(16,217,255,.09);
   }
 
   .tag{
     color:var(--cyan);
     font-size:10px;
-    letter-spacing:3px;
-    margin-bottom:11px;
+    letter-spacing:2.5px;
+    margin-bottom:8px;
     display:flex;
     align-items:center;
-    gap:9px;
+    gap:8px;
   }
 
   .tag::before{
     content:"";
-    width:22px;
+    width:18px;
     height:1px;
     background:var(--cyan);
-    box-shadow:0 0 8px var(--cyan);
   }
 
   h1{
-    font-size:29px;
-    margin-bottom:8px;
+    font-size:clamp(20px, 5vw, 24px);
+    margin-bottom:6px;
     letter-spacing:.2px;
     position:relative;
     z-index:1;
   }
 
+  /* Subtle Scientific Animation for SABBIR AHAMED */
   h1 a{
-    color:inherit;
     text-decoration:none;
     border-bottom:1px solid rgba(16,217,255,.4);
-    transition:.2s ease;
+    background: linear-gradient(110deg, #f4f8ff 35%, #10d9ff 50%, #f4f8ff 65%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: subtleGlow 6s ease-in-out infinite;
+    display: inline-block;
   }
 
   h1 a:hover{
-    color:var(--cyan);
-    text-shadow:0 0 20px rgba(16,217,255,.25);
+    text-shadow:0 0 15px rgba(16,217,255,.4);
+  }
+
+  @keyframes subtleGlow {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
   }
 
   p{
     color:var(--muted);
-    line-height:1.65;
-    margin-bottom:12px;
-    font-size:15px;
+    line-height:1.5;
+    margin-bottom:10px;
+    font-size:14px;
     position:relative;
     z-index:1;
   }
@@ -265,23 +219,21 @@
   p a{
     color:var(--cyan);
     text-decoration:none;
-    transition:.2s ease;
   }
 
   p a:hover{
     text-decoration:underline;
-    text-shadow:0 0 12px rgba(16,217,255,.25);
   }
 
   .contact-line{
     display:flex;
     align-items:center;
     gap:10px;
-    margin:18px 0 4px;
-    padding:13px 15px;
+    margin:14px 0 4px;
+    padding:10px 12px;
     border:1px solid rgba(16,217,255,.12);
-    border-radius:12px;
-    background:rgba(0,0,0,.12);
+    border-radius:10px;
+    background:rgba(0,0,0,.18);
   }
 
   .contact-dot{
@@ -289,8 +241,7 @@
     height:7px;
     border-radius:50%;
     background:var(--cyan);
-    box-shadow:0 0 12px var(--cyan);
-    animation:blink 2.2s ease-in-out infinite;
+    box-shadow:0 0 8px var(--cyan);
     flex:0 0 auto;
   }
 
@@ -298,79 +249,40 @@
     display:inline-flex;
     align-items:center;
     gap:8px;
-    margin-top:14px;
-    padding:14px 22px;
-    border-radius:11px;
+    margin-top:12px;
+    padding:12px 18px;
+    border-radius:10px;
     color:#fff;
     text-decoration:none;
     font-weight:bold;
+    font-size:13px;
     background:linear-gradient(100deg,#0bd1ed,#7350ed);
-    box-shadow:0 8px 28px rgba(16,217,255,.12);
-    transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+    box-shadow:0 6px 20px rgba(16,217,255,.12);
+    transition:transform .2s ease,box-shadow .2s ease;
     position:relative;
     z-index:1;
     overflow:hidden;
   }
 
-  .btn::before{
-    content:"";
-    position:absolute;
-    top:0;
-    left:-80%;
-    width:55%;
-    height:100%;
-    background:linear-gradient(100deg,transparent,rgba(255,255,255,.2),transparent);
-    transform:skewX(-20deg);
-    transition:left .5s ease;
-  }
-
   .btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 30px rgba(16,217,255,.22);
-    filter:saturate(1.08);
+    transform:translateY(-1px);
+    box-shadow:0 8px 24px rgba(16,217,255,.2);
   }
-
-  .btn:hover::before{left:130%}
 
   footer{
-    padding:14px 28px;
+    padding:12px 24px;
     text-align:right;
     border-top:1px solid var(--line);
     color:#7f9bb7;
     font-size:11px;
     position:relative;
     z-index:2;
-    background:rgba(2,12,27,.45);
-    backdrop-filter:blur(7px);
+    background:rgba(2,12,27,.6);
   }
 
   a:focus-visible,button:focus-visible{
     outline:2px solid var(--cyan);
     outline-offset:3px;
-  }
-
-  @keyframes cardIn{
-    from{opacity:0;transform:translateY(16px) scale(.985)}
-    to{opacity:1;transform:none}
-  }
-
-  @keyframes scan{
-    0%{transform:translate(-45%,120%) rotate(8deg)}
-    100%{transform:translate(45%,-120%) rotate(8deg)}
-  }
-
-  @keyframes orbitHalo{
-    to{transform:rotate(360deg)}
-  }
-
-  @keyframes pulseRing{
-    0%,100%{transform:scale(.94);opacity:.45}
-    50%{transform:scale(1.08);opacity:1}
-  }
-
-  @keyframes blink{
-    0%,100%{opacity:.45}
-    50%{opacity:1}
   }
 
   body.light-theme{
@@ -381,33 +293,28 @@
     --cyan:#087f9e;
     background:#edf4fb;
     color:var(--text);
-    background-image:
-      radial-gradient(circle at 72% 12%,rgba(12,107,190,.08),transparent 30%),
-      radial-gradient(circle at 20% 85%,rgba(20,83,170,.07),transparent 32%);
   }
-
-  body.light-theme::before{
-    opacity:.15;
-    background-image:
-      linear-gradient(rgba(8,126,158,.08) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(8,126,158,.08) 1px,transparent 1px);
-  }
-
-  body.light-theme #scienceCanvas{opacity:.34}
 
   body.light-theme header{
-    background:rgba(248,250,252,.74);
+    background:rgba(248,250,252,.85);
     border-bottom-color:rgba(8,145,178,.18);
   }
 
   body.light-theme .card{
-    background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(226,232,240,.78));
+    background:rgba(255,255,255,.92);
     border-color:rgba(8,145,178,.25);
-    box-shadow:0 24px 60px rgba(15,23,42,.09),inset 0 1px 0 rgba(255,255,255,.8);
+    box-shadow:0 20px 40px rgba(15,23,42,.08);
+  }
+
+  body.light-theme h1 a{
+    background: linear-gradient(110deg, #0f172a 35%, #087f9e 50%, #0f172a 65%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   body.light-theme .contact-line{
-    background:rgba(255,255,255,.38);
+    background:rgba(255,255,255,.5);
     border-color:rgba(8,145,178,.12);
   }
 
@@ -417,7 +324,7 @@
   body.light-theme footer{
     color:#64748b;
     border-top-color:#dbe4ee;
-    background:rgba(248,250,252,.55);
+    background:rgba(248,250,252,.7);
   }
 
   body.light-theme .theme-toggle{
@@ -426,15 +333,13 @@
     border-color:rgba(8,145,178,.22);
   }
 
-
   .email-form{
     display:none;
-    margin-top:20px;
-    padding-top:20px;
+    margin-top:16px;
+    padding-top:16px;
     border-top:1px solid rgba(16,217,255,.13);
     position:relative;
     z-index:2;
-    animation:formIn .35s ease both;
   }
 
   .email-form.open{display:block}
@@ -442,10 +347,10 @@
   .form-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:13px;
+    gap:10px;
   }
 
-  .field{margin-bottom:13px}
+  .field{margin-bottom:10px}
 
   .field.full{grid-column:1/-1}
 
@@ -453,9 +358,9 @@
     display:flex;
     justify-content:space-between;
     gap:8px;
-    margin:0 0 7px;
+    margin:0 0 5px;
     color:#c7d9ea;
-    font-size:12px;
+    font-size:11px;
     letter-spacing:.2px;
   }
 
@@ -465,18 +370,18 @@
   .field textarea{
     width:100%;
     border:1px solid rgba(91,208,255,.17);
-    border-radius:10px;
+    border-radius:8px;
     background:rgba(1,12,27,.48);
     color:var(--text);
-    padding:12px 13px;
+    padding:10px 11px;
     font:inherit;
     font-size:14px;
     outline:none;
-    transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+    transition:border-color .18s ease;
   }
 
   .field textarea{
-    min-height:125px;
+    min-height:100px;
     resize:vertical;
   }
 
@@ -486,7 +391,7 @@
   .field input:focus,
   .field textarea:focus{
     border-color:rgba(16,217,255,.62);
-    box-shadow:0 0 0 3px rgba(16,217,255,.07),0 0 18px rgba(16,217,255,.06);
+    box-shadow:0 0 0 2px rgba(16,217,255,.1);
     background:rgba(1,16,33,.62);
   }
 
@@ -499,8 +404,8 @@
   }
 
   .validation{
-    min-height:16px;
-    margin-top:5px;
+    min-height:14px;
+    margin-top:4px;
     font-size:11px;
     color:#91a9c1;
   }
@@ -508,29 +413,28 @@
   .validation.ok{color:#65dfad}
   .validation.bad{color:#ff9a9a}
 
-
   .verify-note strong{
     display:inline-block;
-    margin-bottom:3px;
+    margin-bottom:2px;
     color:var(--cyan);
-    font-size:12px;
+    font-size:11px;
     letter-spacing:.1px;
   }
 
   .verify-note{
-    margin:2px 0 13px;
-    padding:9px 11px;
-    border-radius:9px;
+    margin:2px 0 10px;
+    padding:8px 10px;
+    border-radius:8px;
     background:rgba(16,217,255,.045);
     border:1px solid rgba(16,217,255,.10);
     color:#8eaac4;
     font-size:11px;
-    line-height:1.5;
+    line-height:1.4;
   }
 
   .form-actions{
     display:flex;
-    gap:10px;
+    gap:8px;
     align-items:center;
   }
 
@@ -544,14 +448,16 @@
     border:1px solid rgba(16,217,255,.16);
     background:rgba(16,217,255,.045);
     color:#a9c3db;
-    padding:13px 16px;
-    border-radius:10px;
+    padding:10px 14px;
+    border-radius:8px;
     cursor:pointer;
+    font-size:12px;
+    min-height:42px;
   }
 
   .send-status{
-    min-height:18px;
-    margin-top:11px;
+    min-height:16px;
+    margin-top:8px;
     font-size:12px;
     line-height:1.45;
   }
@@ -586,75 +492,71 @@
     border-color:rgba(8,126,158,.12);
   }
 
-  @keyframes formIn{
-    from{opacity:0;transform:translateY(-5px)}
-    to{opacity:1;transform:none}
-  }
-
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  @media(max-width:520px){
-    header{padding:0 14px;height:62px}
-    main{padding:28px 14px}
-    .card{padding:24px 19px;border-radius:18px}
-    h1{font-size:23px}
-    .btn{width:100%;justify-content:center}
+  .form-intro{
+    margin:0 0 14px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:rgba(255,255,255,.035);
+  }
+  .form-intro-title{
+    margin:0 0 3px;
+    font-size:13px;
+    font-weight:800;
+  }
+  .form-intro-text{
+    margin:0;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.4;
+  }
+
+  .btn:disabled{opacity:.65;cursor:wait;transform:none!important;box-shadow:none!important}
+  
+  /* Bright Amber Warning Text */
+  .moderation-warning{
+    color:#ffbf00;
+    font-weight:800;
+    line-height:1.4;
+    text-shadow:0 0 12px rgba(255,191,0,.4);
+  }
+
+  /* Responsive layout optimizations for Tabs & Mobile */
+  html{scroll-behavior:smooth}
+  body{min-width:320px;overflow-x:hidden}
+  button,input,textarea,select{font:inherit}
+  input,textarea,select,button{min-height:44px}
+
+  @media (max-width: 768px){
+    main{padding:24px 14px}
+    .card{padding:20px 18px;max-width:100%}
+  }
+
+  @media (max-width: 520px){
+    header{padding:0 14px;height:56px}
+    main{padding:16px 10px}
+    .card{padding:18px 14px;border-radius:14px}
     .form-grid{grid-template-columns:1fr}
     .field.full{grid-column:auto}
     .form-actions{flex-direction:column;align-items:stretch}
     .form-actions .btn,.cancel-btn{width:100%;justify-content:center}
-    footer{text-align:center;padding:13px 14px}
+    footer{text-align:center;padding:10px 14px}
   }
 
-  @media(prefers-reduced-motion:reduce){
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
     *,*::before,*::after{
       animation-duration:.01ms!important;
       animation-iteration-count:1!important;
-      scroll-behavior:auto!important;
       transition-duration:.01ms!important;
+      scroll-behavior:auto!important;
     }
+    #scienceCanvas{display:none}
+    h1 a{animation:none}
   }
-
-    .form-intro{
-      margin:0 0 20px;
-      padding:14px 16px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:rgba(255,255,255,.035);
-    }
-    .form-intro-title{
-      margin:0 0 5px;
-      font-size:15px;
-      font-weight:800;
-      letter-spacing:.02em;
-    }
-    .form-intro-text{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.55;
-    }
-    .field-hint{
-      margin-top:7px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.4;
-    }
-
-
-    #scienceCanvas{
-      contain:strict;
-      pointer-events:none;
-    }
-    @media (max-width:700px){
-      #scienceCanvas{opacity:.72}
-      .card{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-    }
-    @media (prefers-reduced-motion:reduce){
-      #scienceCanvas{display:none}
-    }
-  .btn:disabled{opacity:.65;cursor:wait;transform:none!important;box-shadow:none!important}
-  </style>
+</style>
 </head>
 <body>
   <canvas id="scienceCanvas" aria-hidden="true"></canvas>
@@ -722,12 +624,22 @@
 <footer>⚡ ElectraLab · Electrical Engineering Toolbox</footer>
 
 <script>
-  /*
-    FORMSUBMIT SETUP
-    FormSubmit handles delivery for this static HTML page.
-    No mailbox connection, SMTP credentials, or EmailJS keys are required.
-    The first submission triggers an activation email to the destination mailbox.
-  */
+  // Dark/Light Theme Toggle Logic
+  const themeButton = document.getElementById("themeButton");
+  
+  // Check for saved preference
+  if (localStorage.getItem("electralab_theme") === "light") {
+    document.body.classList.add("light-theme");
+    themeButton.textContent = "☀";
+  }
+
+  themeButton.addEventListener("click", () => {
+    document.body.classList.toggle("light-theme");
+    const isLight = document.body.classList.contains("light-theme");
+    themeButton.textContent = isLight ? "☀" : "☾";
+    localStorage.setItem("electralab_theme", isLight ? "light" : "dark");
+  });
+
   const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/sabbirac@atomicmail.io";
 
   const openContactForm = document.getElementById("openContactForm");
@@ -789,17 +701,111 @@
     return {ok:true,text:"Contact number looks valid."};
   }
 
+  const MODERATION_WORDS = [
+    "ass", "arse", "arsehole", "asshole", "bastard", "bitch", "bullshit",
+    "crap", "cunt", "damn", "dick", "dumbass", "fuck", "fucker", "fucking",
+    "fck", "fcking", "fcuk", "fuk", "fukk", "idiot", "jerk", "loser",
+    "motherfucker", "motherfuck", "moron", "piss", "prick", "shit",
+    "shite", "stupid", "twat", "wtf", "mf",
+    "boob", "boobs", "tits", "titties", "tit", "porn", "porno",
+    "kutta", "kutti", "boka", "bokachoda", "chod", "choda", "chodna",
+    "chodon", "madarchod", "maderchod", "mc", "bc", "bhenchod", "banchod", "benchod", "behenchod",
+    "haramzada", "haramzadi", "haraamzada", "haraamzadi",
+    "shala", "shali", "bastard",
+    "bilaai", "bilai", "biral", "gadha", "pagol", "harami",
+    "khankir", "khankirputro", "kharap", "noshtho", "nasto"
+  ];
+
+  const MODERATION_PHRASES = [
+    "shut up", "you are stupid", "you're stupid", "you are an idiot",
+    "you're an idiot", "you are a loser", "you're a loser", "go to hell",
+    "mother fucker", "mother f u c k e r", "m f", "kill yourself",
+    "i will hurt you", "i will harm you", "you will die", "die now",
+    "send nudes", "show me your tits", "show me your boobs"
+  ];
+
+  const MODERATION_STANDALONE = new Set(["ass", "tit", "mf", "mc", "bc", "wtf"]);
+
+  function normalizeForModeration(value){
+    return value
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[@4]/g, "a")
+      .replace(/[3]/g, "e")
+      .replace(/[1!|]/g, "i")
+      .replace(/[0]/g, "o")
+      .replace(/[5$]/g, "s")
+      .replace(/[7]/g, "t")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/(.)\1{3,}/g, "$1$1")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function compactForModeration(value){
+    return normalizeForModeration(value).replace(/\s+/g, "");
+  }
+
+  function hasModerationMatch(value){
+    const normalized = normalizeForModeration(value);
+    const compact = compactForModeration(value);
+
+    const wordHit = MODERATION_WORDS.some(word => {
+      if (MODERATION_STANDALONE.has(word)) {
+        const pattern = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i");
+        return pattern.test(normalized);
+      }
+      const normalPattern = new RegExp("\\b" + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i");
+      return normalPattern.test(normalized) || compact.includes(word);
+    });
+
+    const phraseHit = MODERATION_PHRASES.some(phrase =>
+      normalized.includes(normalizeForModeration(phrase))
+    );
+
+    const repeatedBlock = /(.)\1{7,}/i.test(value.replace(/\s/g, ""));
+    const tooManyUrls = (value.match(/https?:\/\//gi) || []).length > 3;
+    const excessiveCaps = value.length >= 30 &&
+      (value.replace(/[^A-Z]/g, "").length / Math.max(value.replace(/[^A-Za-z]/g, "").length, 1)) > 0.82;
+
+    return {
+      blocked: wordHit || phraseHit || repeatedBlock || tooManyUrls || excessiveCaps,
+      reason:
+        wordHit || phraseHit
+          ? "Repeated or targeted abuse may be documented and, where appropriate, reported through relevant platform or cyber-crime channels."
+          : tooManyUrls
+            ? "Please remove excessive links from the message."
+            : excessiveCaps
+              ? "Please avoid sending the entire message in capital letters."
+              : repeatedBlock
+                ? "Please remove repeated characters or spam-like text."
+                : ""
+    };
+  }
+
   function checkMessage(value){
     const text=value.trim();
     if(text.length < 3) return {ok:false,text:"Please write a message."};
+
+    const moderation = hasModerationMatch(text);
+    if(moderation.blocked){
+      return {ok:false,text:moderation.reason};
+    }
+
     return {ok:true,text:""};
   }
 
   function showValidation(input, box, result){
     input.classList.toggle("valid", result.ok);
     input.classList.toggle("invalid", !result.ok);
-    box.textContent = result.text;
-    box.className = result.ok ? "validation valid-text" : "validation invalid-text";
+    
+    if(!result.ok && result.text && result.text.includes("Repeated or targeted abuse")) {
+      box.innerHTML = '<span class="moderation-warning">⚠ ' + result.text + '</span>';
+    } else {
+      box.textContent = result.text;
+    }
+    box.className = result.ok ? "validation ok" : "validation bad";
   }
 
   [emailInput, phoneInput, messageInput].forEach(el => {
@@ -829,14 +835,7 @@
       return;
     }
 
-    if(!FORMSUBMIT_ENDPOINT.includes("sabbirac@atomicmail.io")){
-      sendStatus.textContent = "The contact service is not configured correctly.";
-      sendStatus.className = "send-status error";
-      return;
-    }
-
     sendMessageButton.disabled = true;
-    sendMessageButton.dataset.originalText = sendMessageButton.textContent;
     sendMessageButton.textContent = "SENDING...";
 
     const payload = {
@@ -845,8 +844,7 @@
       message: messageInput.value.trim(),
       _subject: "New ElectraLab Contact Message",
       _replyto: emailInput.value.trim(),
-      _template: "table",
-      _honey: ""
+      _template: "table"
     };
 
     try {
@@ -874,7 +872,7 @@
       sendStatus.className = "send-status error";
     } finally {
       sendMessageButton.disabled = false;
-      sendMessageButton.textContent = sendMessageButton.dataset.originalText || "SEND MESSAGE →";
+      sendMessageButton.textContent = "SEND MESSAGE →";
     }
   });
 </script>
