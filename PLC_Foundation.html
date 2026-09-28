@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLC Foundation & Familiarization | ElectraLab</title>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-header: #0b1120;
+      --bg-card: #1e293b;
+      --bg-card-header: rgba(255, 255, 255, 0.02);
+      --bg-inner: #0f172a;
+      --border-color: #334155;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-amber: #fbbf24;
+      --accent-purple: #c084fc;
+      --accent-pink: #f472b6;
+      --accent-red: #f87171;
+      --accent-cyan: #22d3ee;
+      --accent-slate: #94a3b8;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --symbol-stroke: #f8fafc;
+      --footer-bg: #0f172a; /* Matched to --bg-main */
+    }
+
+    [data-theme="light"] {
+      --bg-main: #f8fafc;
+      --bg-header: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-header: #f1f5f9;
+      --bg-inner: #f1f5f9;
+      --border-color: #cbd5e1;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-amber: #d97706;
+      --accent-purple: #9333ea;
+      --accent-pink: #db2777;
+      --accent-red: #dc2626;
+      --accent-cyan: #0891b2;
+      --accent-slate: #475569;
+      --text-light: #0f172a;
+      --text-muted: #64748b;
+      --symbol-stroke: #0f172a;
+      --footer-bg: #f8fafc; /* Matched to --bg-main */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-light);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background-color: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-return {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .btn-return:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-icon {
+      font-size: 1.5rem;
+      color: var(--accent-blue);
+    }
+
+    .header-text h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    /* Icon-only Dark/Light Toggle Button */
+    .theme-toggle-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-light);
+      width: 36px;
+      height: 36px;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    /* Main Container Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* PLC Component Cards Accordion/List */
+    .component-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+
+    .comp-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .comp-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.875rem 1rem;
+      background-color: var(--bg-card-header);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .comp-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .comp-header-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .comp-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-light);
+    }
+
+    .comp-cat {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comp-body {
+      padding: 1rem;
+    }
+
+    .comp-desc {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      background-color: var(--bg-inner);
+      border: 1px solid var(--border-color);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      color: var(--accent-slate);
+    }
+
+    /* Symbol Reference Section */
+    .symbols-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+
+    .symbols-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .symbols-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .sub-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 1.25rem 0 0.75rem 0;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.25rem;
+    }
+
+    .symbols-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.875rem;
+    }
+
+    .symbol-card {
+      background-color: var(--bg-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .symbol-card:hover {
+      border-color: var(--accent-blue);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+    }
+
+    .symbol-icon-container {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .symbol-svg {
+      width: 50px;
+      height: 36px;
+      stroke: var(--symbol-stroke);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .symbol-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .symbol-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Modal Touch/Click Info Window */
+    .symbol-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .symbol-detail-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .symbol-modal {
+      background-color: var(--bg-card);
+      border: 1px solid var(--accent-blue);
+      border-radius: 0.75rem;
+      max-width: 500px;
+      width: 100%;
+      padding: 1.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: var(--text-light);
+    }
+
+    /* Knowledge Base Section */
+    .knowledge-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .knowledge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .know-box {
+      background: var(--bg-inner);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+
+    .know-box h4 {
+      font-size: 0.95rem;
+      color: var(--accent-amber);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .know-box ul {
+      list-style-type: disc;
+      padding-left: 1.2rem;
+      font-size: 0.825rem;
+      color: var(--text-light);
+    }
+
+    .know-box ul li {
+      margin-bottom: 0.35rem;
+    }
+
+    /* Footer Optimized with Body Background Match */
+    footer {
+      background-color: var(--footer-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 1rem 1.25rem;
+      margin-top: auto;
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    .footer-right {
+      text-align: right;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .footer-line-1 {
+      color: var(--text-light);
+      font-weight: 700;
+      font-size: 0.85rem;
+      line-height: 1.2;
+    }
+
+    .footer-line-2 {
+      color: var(--text-light);
+      font-weight: 600;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .footer-line-3 {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      line-height: 1.2;
+      margin-top: 0.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Mobile, Tablet, and Desktop Responsiveness */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.6rem 0.875rem;
+      }
+
+      .btn-return span {
+        display: none; /* Icon-only return button on mobile */
+      }
+
+      .btn-return {
+        padding: 0.4rem 0.6rem;
+      }
+
+      .header-text h1 {
+        font-size: 0.95rem;
+      }
+
+      .container {
+        padding: 0.875rem;
+        gap: 1rem;
+      }
+
+      .symbols-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.6rem;
+      }
+
+      .symbol-card {
+        padding: 0.75rem 0.5rem;
+      }
+
+      footer {
+        justify-content: center;
+      }
+
+      .footer-right {
+        text-align: center;
+      }
+    }
+  
+    .foundation-flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px 0 4px;padding:16px;border:1px solid var(--border);background:rgba(15,23,42,.5);border-radius:12px}
+    .flow-pill{padding:8px 12px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.06em;border:1px solid var(--border);background:rgba(30,41,59,.75)}
+    .flow-pill.input{color:#38bdf8}.flow-pill.plc{color:#4ade80}.flow-pill.logic{color:#fbbf24}.flow-pill.output{color:#c084fc}.flow-pill.device{color:#f87171}
+    .flow-arrow{color:var(--text-muted);font-weight:800}
+    .foundation-icon{font-size:24px;display:flex;align-items:center;justify-content:center;width:58px;height:58px}
+    .mini-symbol{font-family:monospace;font-weight:800;font-size:14px;color:var(--accent-cyan);white-space:nowrap}
+
+
+
+    /* Compact roadmap: use the full width instead of reserving space for the removed PLC illustration. */
+    .roadmap-grid{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:.75rem;
+    }
+    .roadmap-grid .know-box{
+      padding:.8rem;
+    }
+    .roadmap-grid .know-box h4{
+      margin-bottom:.4rem;
+      font-size:.9rem;
+    }
+    .roadmap-grid .know-box ul{
+      font-size:.78rem;
+    }
+    .roadmap-grid .know-box ul li{
+      margin-bottom:.25rem;
+    }
+    .foundation-flow{
+      margin:10px 0 0;
+      padding:10px 12px;
+      gap:7px;
+    }
+    .flow-pill{padding:6px 10px}
+    @media (max-width: 900px){
+      .roadmap-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
+    @media (max-width: 600px){
+      .roadmap-grid{grid-template-columns:1fr;}
+      .foundation-flow{justify-content:flex-start;}
+    }
+</style>
+
+
+</head>
+<body data-theme="dark">
+
+  <!-- Header with Return Button and Icon-only Theme Toggle Switcher -->
+  <header>
+    <div class="nav-left">
+      <a href="index.html" class="btn-return" title="Return to Toolbox">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Return to Toolbox</span>
+      </a>
+      <div class="header-title-box">
+        <i class="fa-solid fa-microchip header-icon"></i>
+        <div class="header-text">
+          <h1>PLC Foundation</h1>
+        </div>
+      </div>
+    </div>
+    <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+      <i class="fa-solid fa-sun" id="theme-icon"></i>
+    </button>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="container">
+
+    <section class="knowledge-section">
+      <div class="symbols-header">
+        <h2><i class="fa-solid fa-compass" style="color:var(--accent-cyan);"></i> PLC Foundation Roadmap</h2>
+        <p>Use this page for familiarization: recognize the component, understand its purpose, and learn where it fits in a PLC control system.</p>
+      </div>
+
+      <div class="foundation-tiles">
+        <div class="knowledge-grid roadmap-grid">
+          <div class="know-box">
+            <h4><i class="fa-solid fa-microchip"></i> 1. Identify the PLC</h4>
+            <ul><li>CPU / processor</li><li>Power supply</li><li>Digital and analog I/O</li><li>Communication and expansion</li></ul>
+          </div>
+          <div class="know-box">
+            <h4><i class="fa-solid fa-arrow-right-arrow-left"></i> 2. Follow the Signal</h4>
+            <ul><li><strong>Input:</strong> sensor or switch</li><li><strong>PLC:</strong> program and logic</li><li><strong>Output:</strong> actuator or controlled device</li></ul>
+          </div>
+          <div class="know-box">
+            <h4><i class="fa-solid fa-diagram-project"></i> 3. Recognize the Panel</h4>
+            <ul><li>Relays and contactors</li><li>Overloads and breakers</li><li>Terminal blocks</li><li>24 VDC control power</li></ul>
+          </div>
+          <div class="know-box">
+            <h4><i class="fa-solid fa-book-open"></i> 4. Learn the Language</h4>
+            <ul><li>NO / NC contacts</li><li>Coils and latches</li><li>Timers and counters</li><li>Analog signals and scaling</li></ul>
+          </div>
+        </div>
+      </div>
+      <div class="foundation-flow">
+        <span class="flow-pill input">FIELD INPUT</span><span class="flow-arrow">→</span>
+        <span class="flow-pill plc">PLC INPUT</span><span class="flow-arrow">→</span>
+        <span class="flow-pill logic">PROGRAM / LOGIC</span><span class="flow-arrow">→</span>
+        <span class="flow-pill output">PLC OUTPUT</span><span class="flow-arrow">→</span>
+        <span class="flow-pill device">FIELD DEVICE</span>
+      </div>
+    </section>
+
+    <!-- Hardware Modules Section -->
+    <section>
+      <div class="section-title">PLC Hardware & Architecture</div>
+      <div class="component-cards-grid" id="component-cards-container"></div>
+    </section>
+
+    <!-- Comprehensive Symbols & Schematics Reference -->
+    <section class="symbols-section">
+      <div class="symbols-header">
+        <h2>Symbol & Schematics Reference</h2>
+        <p>Foundation reference for recognizing PLC hardware, ladder instructions, field devices, actuators, motor-control components and common industrial signals. Touch or click any item for a simple explanation.</p>
+      </div>
+
+      <div class="sub-section-title">Ladder Logic & PLC Instructions</div>
+      <div class="symbols-grid" id="ladder-symbols-grid"></div>
+
+      <div class="sub-section-title">Switches, Sensors & Field Inputs</div>
+      <div class="symbols-grid" id="input-symbols-grid"></div>
+
+      <div class="sub-section-title">Outputs, Actuators & Controlled Equipment</div>
+      <div class="symbols-grid" id="output-symbols-grid"></div>
+
+      <div class="sub-section-title">Relays, Motor Control & Electrical Protection</div>
+      <div class="symbols-grid" id="power-symbols-grid"></div>
+    </section>
+
+    <!-- Knowledge Base -->
+    <section class="knowledge-section">
+      <div class="symbols-header">
+        <h2><i class="fa-solid fa-graduation-cap" style="color:var(--accent-amber);"></i> Complete PLC Essentials</h2>
+        <p>Core concepts every automation and electrical engineer must know.</p>
+      </div>
+
+      <div class="knowledge-grid">
+        <div class="know-box">
+          <h4><i class="fa-solid fa-arrows-rotate"></i> The PLC Scan Cycle</h4>
+          <ul>
+            <li><strong>1. Read Inputs:</strong> Reads physical input terminal voltages into Input Image RAM.</li>
+            <li><strong>2. Execute Program:</strong> Evaluates ladder logic top-to-bottom, left-to-right.</li>
+            <li><strong>3. Diagnostic & Comm:</strong> Checks memory integrity and network communication.</li>
+            <li><strong>4. Update Outputs:</strong> Writes computed output memory to physical field terminals.</li>
+          </ul>
+        </div>
+
+        <div class="know-box">
+          <h4><i class="fa-solid fa-plug"></i> Sourcing vs. Sinking (DC)</h4>
+          <ul>
+            <li><strong>Sinking (NPN):</strong> Connects load to 0V. Current flows <em>into</em> the module.</li>
+            <li><strong>Sourcing (PNP):</strong> Connects load to +24VDC. Current flows <em>out of</em> the module.</li>
+            <li><strong>Rule:</strong> Sourcing outputs connect directly to Sinking inputs.</li>
+          </ul>
+        </div>
+
+        <div class="know-box">
+          <h4><i class="fa-solid fa-network-wired"></i> Industrial Protocols</h4>
+          <ul>
+            <li><strong>EtherNet/IP:</strong> Standard Ethernet for Allen-Bradley/Rockwell systems.</li>
+            <li><strong>PROFINET:</strong> High-speed Industrial Ethernet standard for Siemens S7.</li>
+            <li><strong>Modbus TCP/RTU:</strong> Universal open protocol for industrial meters and VFDs.</li>
+          </ul>
+        </div>
+
+        <div class="know-box">
+          <h4><i class="fa-solid fa-book"></i> IEC 61131-3 Standard</h4>
+          <ul>
+            <li><strong>LAD (Ladder Diagram):</strong> Relay ladder-based visual programming.</li>
+            <li><strong>FBD (Function Block):</strong> Connected block diagrams for continuous process control.</li>
+            <li><strong>ST (Structured Text):</strong> High-level text programming for algorithms and data processing.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detailed Modal Display -->
+  <div class="symbol-detail-overlay" id="symbol-modal-overlay">
+    <div class="symbol-modal">
+      <button class="modal-close" onclick="closeSymbolModal()"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-symbol-icon" style="height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;"></div>
+      <h3 id="modal-symbol-title" style="color: var(--accent-blue); font-size: 1.2rem; margin-bottom: 0.25rem; text-align: center;"></h3>
+      <div id="modal-symbol-cat" style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; text-align: center; margin-bottom: 1rem;"></div>
+      <p id="modal-symbol-desc" style="font-size: 0.9rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1rem;"></p>
+      <div style="background: var(--bg-inner); padding: 0.75rem; border-radius: 0.375rem; border: 1px solid var(--border-color);">
+        <strong style="color: var(--accent-amber); font-size: 0.8rem; text-transform: uppercase;">Wiring & Application Note:</strong>
+        <p id="modal-symbol-note" style="font-size: 0.825rem; color: var(--accent-slate); margin-top: 0.25rem;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streamlined Footer matching the main background color -->
+  <footer>
+    <div class="footer-right">
+      <div class="footer-line-1">⚡ ElectraLab</div>
+      <div class="footer-line-2">Electrical Engineering Toolbox</div>
+      <div class="footer-line-3">Preliminary design aid only — verify against nameplate data, applicable standards, and a qualified engineer before construction.</div>
+    </div>
+  </footer>
+
+  <script>
+    // Pure Icon Theme Switcher
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.getElementById("theme-icon");
+
+      if (body.getAttribute("data-theme") === "dark") {
+        body.setAttribute("data-theme", "light");
+        themeIcon.className = "fa-solid fa-moon";
+      } else {
+        body.setAttribute("data-theme", "dark");
+        themeIcon.className = "fa-solid fa-sun";
+      }
+    }
+
+    /* PLC Hardware Components Data */
+    const componentsData = [
+      {
+        id: "power-supply",
+        name: "Power Supply",
+        cat: "POWER",
+        color: "#f87171",
+        desc: "Converts incoming AC or DC power into regulated control power for the PLC and associated circuits.",
+        tags: ["24 VDC", "AC/DC input", "Protection", "Control power"]
+      },
+      {
+        id: "cpu",
+        name: "CPU / Processor",
+        cat: "PROCESSING",
+        color: "#38bdf8",
+        desc: "The PLC's main processing unit. It executes the user program, manages memory, diagnostics and communications.",
+        tags: ["Program", "Scan cycle", "Memory", "Diagnostics"]
+      },
+      {
+        id: "digital-input",
+        name: "Digital Input (DI)",
+        cat: "DIGITAL I/O",
+        color: "#4ade80",
+        desc: "Receives discrete ON/OFF signals from switches, sensors and contacts.",
+        tags: ["ON/OFF", "24 VDC", "PNP / NPN", "Isolation"]
+      },
+      {
+        id: "digital-output",
+        name: "Digital Output (DO)",
+        cat: "DIGITAL I/O",
+        color: "#fbbf24",
+        desc: "Provides discrete ON/OFF commands to relays, contactors, solenoids, lamps and similar devices.",
+        tags: ["Relay", "Transistor", "Sourcing", "Sinking"]
+      },
+      {
+        id: "analog-input",
+        name: "Analog Input (AI)",
+        cat: "ANALOG I/O",
+        color: "#22d3ee",
+        desc: "Measures continuously varying signals such as 4–20 mA, 0–10 V, RTD or thermocouple inputs.",
+        tags: ["4–20 mA", "0–10 V", "RTD", "Thermocouple"]
+      },
+      {
+        id: "analog-output",
+        name: "Analog Output (AO)",
+        cat: "ANALOG I/O",
+        color: "#c084fc",
+        desc: "Produces a variable control signal such as 4–20 mA or 0–10 V for drives, valves and other devices.",
+        tags: ["4–20 mA", "0–10 V", "DAC", "Setpoint"]
+      },
+      {
+        id: "high-speed-input",
+        name: "High-Speed / Pulse Input",
+        cat: "SPECIAL I/O",
+        color: "#f472b6",
+        desc: "Reads fast pulses from encoders, flow meters and high-speed sensors.",
+        tags: ["Pulse", "Encoder", "Frequency", "Position"]
+      },
+      {
+        id: "high-speed-output",
+        name: "High-Speed / Pulse Output",
+        cat: "SPECIAL I/O",
+        color: "#94a3b8",
+        desc: "Generates controlled pulses for devices such as stepper drives and some motion applications.",
+        tags: ["Pulse train", "Stepper", "Position", "Frequency"]
+      },
+      {
+        id: "safety-module",
+        name: "Safety I/O / Safety PLC",
+        cat: "SAFETY",
+        color: "#f87171",
+        desc: "Dedicated safety hardware used for safety-related inputs and outputs.",
+        tags: ["E-stop", "Guard", "Safety I/O", "Diagnostics"]
+      },
+      {
+        id: "communication",
+        name: "Communication Module",
+        cat: "NETWORKING",
+        color: "#38bdf8",
+        desc: "Connects the PLC to HMIs, SCADA, drives, remote I/O and other controllers.",
+        tags: ["PROFINET", "EtherNet/IP", "Modbus", "RS-485"]
+      },
+      {
+        id: "remote-io",
+        name: "Remote I/O Station",
+        cat: "NETWORKING",
+        color: "#4ade80",
+        desc: "Places I/O close to field equipment while exchanging data with the PLC over an industrial network.",
+        tags: ["Distributed I/O", "Network", "Field wiring", "Expansion"]
+      },
+      {
+        id: "expansion",
+        name: "Expansion I/O Module",
+        cat: "I/O EXPANSION",
+        color: "#fbbf24",
+        desc: "Adds digital or analog channels when the base PLC I/O is insufficient.",
+        tags: ["DI/DO", "AI/AO", "Channels", "Expansion"]
+      },
+      {
+        id: "backplane",
+        name: "Backplane / Rack",
+        cat: "INFRASTRUCTURE",
+        color: "#22d3ee",
+        desc: "Provides physical mounting and the internal power/data path between PLC modules.",
+        tags: ["Rack", "Bus", "Slots", "DIN rail"]
+      },
+      {
+        id: "memory",
+        name: "Memory Card / Storage",
+        cat: "INFRASTRUCTURE",
+        color: "#c084fc",
+        desc: "Stores or transfers PLC programs and configuration data on supported platforms.",
+        tags: ["Backup", "Program", "Configuration", "Transfer"]
+      },
+      {
+        id: "hmi",
+        name: "HMI",
+        cat: "OPERATOR INTERFACE",
+        color: "#f472b6",
+        desc: "Provides a graphical interface for operators to view status, enter commands and acknowledge alarms.",
+        tags: ["Screens", "Alarms", "Setpoints", "Status"]
+      },
+      {
+        id: "terminal-block",
+        name: "Terminal Blocks",
+        cat: "WIRING",
+        color: "#94a3b8",
+        desc: "Organize connections between PLC I/O, control power and field devices.",
+        tags: ["24 VDC", "Common", "Field wiring", "Panel"]
+      }
+    ];
+
+    /* Extended Symbol Reference Library */
+    function iconFor(name) {
+      const n = name.toLowerCase();
+      if (n.includes("contact") && n.includes("no")) return '<span class="mini-symbol no-contact">—| |—</span>';
+      if (n.includes("contact") && n.includes("nc")) return '<span class="mini-symbol nc-contact">—|/|—</span>';
+      if (n.includes("coil") || n.includes("latch") || n.includes("reset")) return '<span class="mini-symbol">—( )—</span>';
+      if (n.includes("timer")) return '<span class="mini-symbol">[ TON ]</span>';
+      if (n.includes("counter")) return '<span class="mini-symbol">[ CT ]</span>';
+      if (n.includes("compare")) return '<span class="mini-symbol">[ CMP ]</span>';
+      if (n.includes("input") || n.includes("sensor") || n.includes("switch") || n.includes("pushbutton")) return '<span class="mini-symbol">⇥ IN</span>';
+      if (n.includes("output") || n.includes("valve") || n.includes("motor") || n.includes("heater") || n.includes("light")) return '<span class="mini-symbol">OUT ⇥</span>';
+      if (n.includes("vfd") || n.includes("drive")) return '<span class="mini-symbol">⚙</span>';
+      return '<span class="mini-symbol">▣</span>';
+    }
+
+    const symbolsData = [
+      {
+        category: "ladder",
+        name: "NO Contact",
+        subtitle: "Examine ON (XIC)",
+        icon: `<div class="foundation-icon">${iconFor("$NO Contact")}</div>`,
+        desc: "Tests whether a Boolean condition is TRUE.",
+        note: "Commonly represents a field input or internal condition that must be ON."
+      },
+      {
+        category: "ladder",
+        name: "NC Contact",
+        subtitle: "Examine OFF (XIO)",
+        icon: `<div class="foundation-icon">${iconFor("$NC Contact")}</div>`,
+        desc: "Tests whether a Boolean condition is FALSE.",
+        note: "Commonly used for stop conditions, permissives and interlocks."
+      },
+      {
+        category: "ladder",
+        name: "Output Coil",
+        subtitle: "Output Energize (OTE)",
+        icon: `<div class="foundation-icon">${iconFor("$Output Coil")}</div>`,
+        desc: "Writes a rung result to an output or internal Boolean bit.",
+        note: "The output state follows the logic of the rung."
+      },
+      {
+        category: "ladder",
+        name: "SET / Latch Coil",
+        subtitle: "Latch / SET (OTL)",
+        icon: `<div class="foundation-icon">${iconFor("$SET / Latch Coil")}</div>`,
+        desc: "Sets a Boolean bit ON and retains it.",
+        note: "Normally paired with an unlatch/reset instruction."
+      },
+      {
+        category: "ladder",
+        name: "RESET / Unlatch Coil",
+        subtitle: "Unlatch / RESET (OTU)",
+        icon: `<div class="foundation-icon">${iconFor("$RESET / Unlatch Coil")}</div>`,
+        desc: "Clears a latched Boolean bit.",
+        note: "Often paired with SET/OTL."
+      },
+      {
+        category: "ladder",
+        name: "Rising Edge / One-Shot",
+        subtitle: "One scan on a rising transition",
+        icon: `<div class="foundation-icon">${iconFor("$Rising Edge / One-Shot")}</div>`,
+        desc: "Produces a pulse when a condition changes FALSE → TRUE.",
+        note: "Useful for detecting an event once."
+      },
+      {
+        category: "ladder",
+        name: "Falling Edge",
+        subtitle: "One scan on a falling transition",
+        icon: `<div class="foundation-icon">${iconFor("$Falling Edge")}</div>`,
+        desc: "Produces a pulse when a condition changes TRUE → FALSE.",
+        note: "Useful for detecting a completed or removed condition."
+      },
+      {
+        category: "ladder",
+        name: "TON Timer",
+        subtitle: "Timer ON Delay",
+        icon: `<div class="foundation-icon">${iconFor("$TON Timer")}</div>`,
+        desc: "Turns its done state ON after the input remains TRUE for the preset time.",
+        note: "Used for delays and sequencing."
+      },
+      {
+        category: "ladder",
+        name: "TOF Timer",
+        subtitle: "Timer OFF Delay",
+        icon: `<div class="foundation-icon">${iconFor("$TOF Timer")}</div>`,
+        desc: "Maintains an active state for a preset time after the input turns FALSE.",
+        note: "Used for run-on and delayed shutdown."
+      },
+      {
+        category: "ladder",
+        name: "TP Timer",
+        subtitle: "Pulse Timer",
+        icon: `<div class="foundation-icon">${iconFor("$TP Timer")}</div>`,
+        desc: "Generates a timed pulse when triggered.",
+        note: "Used for timed actuations and signals."
+      },
+      {
+        category: "ladder",
+        name: "CTU Counter",
+        subtitle: "Count Up",
+        icon: `<div class="foundation-icon">${iconFor("$CTU Counter")}</div>`,
+        desc: "Increments a count on valid input transitions.",
+        note: "Used for production and part counting."
+      },
+      {
+        category: "ladder",
+        name: "CTD Counter",
+        subtitle: "Count Down",
+        icon: `<div class="foundation-icon">${iconFor("$CTD Counter")}</div>`,
+        desc: "Decrements a count from a preset/current value.",
+        note: "Used for remaining quantity or batch control."
+      },
+      {
+        category: "ladder",
+        name: "Compare",
+        subtitle: "Comparison Instruction",
+        icon: `<div class="foundation-icon">${iconFor("$Compare")}</div>`,
+        desc: "Compares numeric values such as equal, greater-than or less-than.",
+        note: "Used for decisions based on values or registers."
+      },
+      {
+        category: "ladder",
+        name: "MOVE",
+        subtitle: "Move / Transfer",
+        icon: `<div class="foundation-icon">${iconFor("$MOVE")}</div>`,
+        desc: "Copies a value from one tag/register to another.",
+        note: "Common for setpoints, measurements and calculated values."
+      },
+      {
+        category: "ladder",
+        name: "ADD / SUB / MUL / DIV",
+        subtitle: "Math Instructions",
+        icon: `<div class="foundation-icon">${iconFor("$ADD / SUB / MUL / DIV")}</div>`,
+        desc: "Performs arithmetic operations on numeric values.",
+        note: "Used in calculations and process logic."
+      },
+      {
+        category: "ladder",
+        name: "Scale / Normalize",
+        subtitle: "Signal Scaling",
+        icon: `<div class="foundation-icon">${iconFor("$Scale / Normalize")}</div>`,
+        desc: "Converts a raw analog value into useful engineering units.",
+        note: "For example, a raw signal can represent pressure, level or temperature."
+      },
+      {
+        category: "ladder",
+        name: "PID / Function Block",
+        subtitle: "Process Control",
+        icon: `<div class="foundation-icon">${iconFor("$PID / Function Block")}</div>`,
+        desc: "Continuously regulates a process variable toward a desired setpoint.",
+        note: "Common in temperature, pressure, flow and level control."
+      },
+      {
+        category: "input",
+        name: "NO Pushbutton",
+        subtitle: "Momentary Start",
+        icon: `<div class="foundation-icon">${iconFor("$NO Pushbutton")}</div>`,
+        desc: "Manual switch that closes while pressed.",
+        note: "Often used as a START command."
+      },
+      {
+        category: "input",
+        name: "NC Pushbutton",
+        subtitle: "Momentary Stop",
+        icon: `<div class="foundation-icon">${iconFor("$NC Pushbutton")}</div>`,
+        desc: "Manual switch that opens while pressed.",
+        note: "Often used as a STOP command; safety circuits require appropriate design."
+      },
+      {
+        category: "input",
+        name: "Emergency Stop",
+        subtitle: "Safety Device",
+        icon: `<div class="foundation-icon">${iconFor("$Emergency Stop")}</div>`,
+        desc: "Manually operated device intended to initiate a safety-related stop function.",
+        note: "Actual safety implementation depends on risk assessment and applicable requirements."
+      },
+      {
+        category: "input",
+        name: "Selector Switch",
+        subtitle: "Mode Select",
+        icon: `<div class="foundation-icon">${iconFor("$Selector Switch")}</div>`,
+        desc: "Maintained switch used to select operating modes.",
+        note: "Common examples are OFF/AUTO/MANUAL."
+      },
+      {
+        category: "input",
+        name: "Limit Switch",
+        subtitle: "Mechanical Position Sensor",
+        icon: `<div class="foundation-icon">${iconFor("$Limit Switch")}</div>`,
+        desc: "Detects a machine position through mechanical actuation.",
+        note: "Common for end-of-travel and home-position detection."
+      },
+      {
+        category: "input",
+        name: "Inductive Proximity",
+        subtitle: "Metal Detection",
+        icon: `<div class="foundation-icon">${iconFor("$Inductive Proximity")}</div>`,
+        desc: "Non-contact sensor for suitable metallic targets.",
+        note: "Commonly available in PNP or NPN versions."
+      },
+      {
+        category: "input",
+        name: "Capacitive Proximity",
+        subtitle: "Object / Level Detection",
+        icon: `<div class="foundation-icon">${iconFor("$Capacitive Proximity")}</div>`,
+        desc: "Detects changes in capacitance and can sense many non-metallic materials.",
+        note: "Used for presence and some level applications."
+      },
+      {
+        category: "input",
+        name: "Photoelectric Sensor",
+        subtitle: "Optical Detection",
+        icon: `<div class="foundation-icon">${iconFor("$Photoelectric Sensor")}</div>`,
+        desc: "Uses light to detect object presence, absence or position.",
+        note: "Common in conveyors and counting."
+      },
+      {
+        category: "input",
+        name: "Ultrasonic Sensor",
+        subtitle: "Distance / Level",
+        icon: `<div class="foundation-icon">${iconFor("$Ultrasonic Sensor")}</div>`,
+        desc: "Uses sound waves to detect objects or measure distance.",
+        note: "Useful where optical sensing is unsuitable."
+      },
+      {
+        category: "input",
+        name: "Magnetic / Reed Sensor",
+        subtitle: "Magnetic Position",
+        icon: `<div class="foundation-icon">${iconFor("$Magnetic / Reed Sensor")}</div>`,
+        desc: "Detects a magnetic field, often from a magnet on a cylinder.",
+        note: "Common for pneumatic cylinder position feedback."
+      },
+      {
+        category: "input",
+        name: "Pressure Switch",
+        subtitle: "Pressure Threshold",
+        icon: `<div class="foundation-icon">${iconFor("$Pressure Switch")}</div>`,
+        desc: "Changes state when pressure crosses a preset threshold.",
+        note: "Provides a digital pressure condition."
+      },
+      {
+        category: "input",
+        name: "Float / Level Switch",
+        subtitle: "Point Level",
+        icon: `<div class="foundation-icon">${iconFor("$Float / Level Switch")}</div>`,
+        desc: "Changes state at a defined liquid level.",
+        note: "Common for tank high/low level indication."
+      },
+      {
+        category: "input",
+        name: "Temperature Switch",
+        subtitle: "Temperature Threshold",
+        icon: `<div class="foundation-icon">${iconFor("$Temperature Switch")}</div>`,
+        desc: "Changes state at a preset temperature.",
+        note: "Provides simple high/low temperature indication."
+      },
+      {
+        category: "input",
+        name: "Flow Switch",
+        subtitle: "Flow Threshold",
+        icon: `<div class="foundation-icon">${iconFor("$Flow Switch")}</div>`,
+        desc: "Changes state when flow crosses a defined threshold.",
+        note: "Used for pump proving and flow permissives."
+      },
+      {
+        category: "input",
+        name: "Encoder",
+        subtitle: "Position / Speed Feedback",
+        icon: `<div class="foundation-icon">${iconFor("$Encoder")}</div>`,
+        desc: "Produces pulses representing shaft movement or speed.",
+        note: "Often uses high-speed inputs or a motion module."
+      },
+      {
+        category: "output",
+        name: "Solenoid Valve",
+        subtitle: "Pneumatic / Hydraulic Actuator",
+        icon: `<div class="foundation-icon">${iconFor("$Solenoid Valve")}</div>`,
+        desc: "Electrically controlled valve for fluid direction or control.",
+        note: "Often driven by a PLC digital output through suitable interface/protection."
+      },
+      {
+        category: "output",
+        name: "Contactor Coil",
+        subtitle: "Motor Starter Control",
+        icon: `<div class="foundation-icon">${iconFor("$Contactor Coil")}</div>`,
+        desc: "Electromagnetic coil that operates the main contacts of a contactor.",
+        note: "The PLC commonly controls the coil rather than the motor directly."
+      },
+      {
+        category: "output",
+        name: "Relay Coil",
+        subtitle: "Interposing Relay",
+        icon: `<div class="foundation-icon">${iconFor("$Relay Coil")}</div>`,
+        desc: "Electromagnetic coil used to switch associated relay contacts.",
+        note: "Useful for isolation or different voltage/current requirements."
+      },
+      {
+        category: "output",
+        name: "Pilot Light",
+        subtitle: "Visual Status",
+        icon: `<div class="foundation-icon">${iconFor("$Pilot Light")}</div>`,
+        desc: "Lamp or LED used to indicate operating state, mode or fault.",
+        note: "Common for RUN, STOP and FAULT indication."
+      },
+      {
+        category: "output",
+        name: "Stack Light",
+        subtitle: "Multi-State Indicator",
+        icon: `<div class="foundation-icon">${iconFor("$Stack Light")}</div>`,
+        desc: "Tower light providing several visual status indications.",
+        note: "Often used for machine status."
+      },
+      {
+        category: "output",
+        name: "Alarm Horn / Buzzer",
+        subtitle: "Audible Notification",
+        icon: `<div class="foundation-icon">${iconFor("$Alarm Horn / Buzzer")}</div>`,
+        desc: "Provides audible warning or notification.",
+        note: "Typically activated by alarm or fault logic."
+      },
+      {
+        category: "output",
+        name: "Motor",
+        subtitle: "Rotating Machine",
+        icon: `<div class="foundation-icon">${iconFor("$Motor")}</div>`,
+        desc: "Converts electrical energy into mechanical rotation.",
+        note: "Usually controlled through a starter, contactor, VFD or drive."
+      },
+      {
+        category: "output",
+        name: "VFD / Drive",
+        subtitle: "Variable-Speed Motor Control",
+        icon: `<div class="foundation-icon">${iconFor("$VFD / Drive")}</div>`,
+        desc: "Controls motor speed and other drive functions.",
+        note: "PLC commands may be digital, analog or network based."
+      },
+      {
+        category: "output",
+        name: "Control Valve",
+        subtitle: "Process Flow Control",
+        icon: `<div class="foundation-icon">${iconFor("$Control Valve")}</div>`,
+        desc: "Controls or modulates process flow.",
+        note: "May use digital, analog or networked commands."
+      },
+      {
+        category: "output",
+        name: "Heater",
+        subtitle: "Thermal Actuator",
+        icon: `<div class="foundation-icon">${iconFor("$Heater")}</div>`,
+        desc: "Electrical heating element used to raise process or equipment temperature.",
+        note: "Often controlled through a relay, contactor or solid-state device."
+      },
+      {
+        category: "power",
+        name: "Auxiliary Contact (NO)",
+        subtitle: "Contactor / Relay Feedback",
+        icon: `<div class="foundation-icon">${iconFor("$Auxiliary Contact (NO)")}</div>`,
+        desc: "Normally open auxiliary contact closes when its device operates.",
+        note: "Used for seal-in logic and status feedback."
+      },
+      {
+        category: "power",
+        name: "Auxiliary Contact (NC)",
+        subtitle: "Contactor / Relay Interlock",
+        icon: `<div class="foundation-icon">${iconFor("$Auxiliary Contact (NC)")}</div>`,
+        desc: "Normally closed auxiliary contact opens when its device operates.",
+        note: "Used for interlocking and status logic."
+      },
+      {
+        category: "power",
+        name: "Power Contact (NO)",
+        subtitle: "Main Contactor Pole",
+        icon: `<div class="foundation-icon">${iconFor("$Power Contact (NO)")}</div>`,
+        desc: "High-current contact used to connect a load.",
+        note: "Carries load current within its rating."
+      },
+      {
+        category: "power",
+        name: "Overload Relay (NC)",
+        subtitle: "Motor Protection Contact",
+        icon: `<div class="foundation-icon">${iconFor("$Overload Relay (NC)")}</div>`,
+        desc: "Auxiliary contact that changes state after an overload trip.",
+        note: "Often wired into a contactor control circuit."
+      },
+      {
+        category: "power",
+        name: "Fuse",
+        subtitle: "Overcurrent Protection",
+        icon: `<div class="foundation-icon">${iconFor("$Fuse")}</div>`,
+        desc: "Protective device that opens under excessive current conditions.",
+        note: "Selection depends on circuit, equipment and requirements."
+      },
+      {
+        category: "power",
+        name: "MCB / Circuit Breaker",
+        subtitle: "Overcurrent Protection",
+        icon: `<div class="foundation-icon">${iconFor("$MCB / Circuit Breaker")}</div>`,
+        desc: "Resettable protective device for suitable electrical circuits.",
+        note: "Protects wiring/equipment against specified overcurrent."
+      },
+      {
+        category: "power",
+        name: "MCCB",
+        subtitle: "Higher-Rating Circuit Breaker",
+        icon: `<div class="foundation-icon">${iconFor("$MCCB")}</div>`,
+        desc: "Breaker commonly used for higher-current distribution applications.",
+        note: "Selection depends on voltage, current and fault requirements."
+      },
+      {
+        category: "power",
+        name: "Motor Protection Breaker",
+        subtitle: "Motor Circuit Protection",
+        icon: `<div class="foundation-icon">${iconFor("$Motor Protection Breaker")}</div>`,
+        desc: "Provides dedicated protection functions for motor circuits.",
+        note: "Settings depend on the motor and protection scheme."
+      },
+      {
+        category: "power",
+        name: "Transformer",
+        subtitle: "Voltage Conversion",
+        icon: `<div class="foundation-icon">${iconFor("$Transformer")}</div>`,
+        desc: "Transfers energy between circuits and can provide a different voltage level.",
+        note: "Common in control power systems."
+      },
+      {
+        category: "power",
+        name: "24 VDC Control Supply",
+        subtitle: "Control Voltage",
+        icon: `<div class="foundation-icon">${iconFor("$24 VDC Control Supply")}</div>`,
+        desc: "Low-voltage DC supply commonly used for PLC I/O, sensors and controls.",
+        note: "Verify device voltage and polarity."
+      }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderComponents();
+      renderSymbolGrids();
+    });
+
+    function renderComponents() {
+      const container = document.getElementById("component-cards-container");
+      container.innerHTML = componentsData.map(c => `
+        <div class="comp-card">
+          <div class="comp-card-header">
+            <div class="comp-dot" style="background-color: ${c.color}"></div>
+            <div class="comp-header-info">
+              <span class="comp-name">${c.name}</span>
+              <span class="comp-cat">${c.cat}</span>
+            </div>
+          </div>
+          <div class="comp-body">
+            <div class="comp-desc">${c.desc}</div>
+            <div class="info-tags">
+              ${c.tags.map(t => `<span class="tag">${t}</span>`).join("")}
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderSymbolGrids() {
+      const ladderContainer = document.getElementById("ladder-symbols-grid");
+      const inputContainer = document.getElementById("input-symbols-grid");
+      const outputContainer = document.getElementById("output-symbols-grid");
+      const powerContainer = document.getElementById("power-symbols-grid");
+
+      symbolsData.forEach(sym => {
+        const card = document.createElement("div");
+        card.className = "symbol-card";
+        card.onclick = () => openSymbolModal(sym);
+        card.innerHTML = `
+          <div class="symbol-icon-container">${sym.icon}</div>
+          <div class="symbol-name">${sym.name}</div>
+          <div class="symbol-subtitle">${sym.subtitle}</div>
+        `;
+
+        if (sym.category === "ladder") ladderContainer.appendChild(card);
+        else if (sym.category === "input") inputContainer.appendChild(card);
+        else if (sym.category === "output") outputContainer.appendChild(card);
+        else if (sym.category === "power") powerContainer.appendChild(card);
+      });
+    }
+
+    function openSymbolModal(symbol) {
+      document.getElementById("modal-symbol-icon").innerHTML = symbol.icon;
+      document.getElementById("modal-symbol-title").innerText = symbol.name;
+      document.getElementById("modal-symbol-cat").innerText = symbol.subtitle;
+      document.getElementById("modal-symbol-desc").innerText = symbol.desc;
+      document.getElementById("modal-symbol-note").innerText = symbol.note;
+
+      document.getElementById("symbol-modal-overlay").classList.add("active");
+    }
+
+    function closeSymbolModal() {
+      document.getElementById("symbol-modal-overlay").classList.remove("active");
+    }
+  </script>
+<div style="text-align:center;color:var(--text-muted);font-size:.72rem;padding:12px 0 24px;"></div>
+</body>
+</html>
