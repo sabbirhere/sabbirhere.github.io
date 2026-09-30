@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarPro PV Design | Electra Lab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{solar:{50:'#fefce8',100:'#fef9c3',500:'#eab308',600:'#ca8a04',700:'#a16207',900:'#713f12'}}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+html{-webkit-text-size-adjust:100%}.tb{flex-shrink:0}@media(max-width:640px){input,select{font-size:16px!important}}
+body{font-family:'Inter',sans-serif}.mono-font{font-family:'JetBrains Mono',monospace}
+@media print{
+ body,*{background:transparent!important;color:#000!important;border-color:#cbd5e1!important;box-shadow:none!important}
+ .no-print{display:none!important}.tab-content{display:none!important}#tab-rep,#tab-buy{display:block!important}
+}
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-solar-500 selection:text-black">
+<header class="bg-slate-900 border-b border-slate-800 md:sticky md:top-0 z-50 no-print">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+   <a href="Advanced.html" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition">← Back To Toolbox</a>
+   <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-solar-600 to-solar-400 flex items-center justify-center shadow-lg shadow-solar-500/20 text-slate-950 text-xl font-bold">☀</div>
+   <div>
+    <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">SolarPro <span class="text-xs uppercase px-2 py-0.5 rounded bg-solar-500/20 border border-solar-500/30">Electra Lab</span></h1>
+    <p class="text-xs text-slate-400">PV system design &amp; protection pre-check</p>
+   </div>
+  </div>
+  <div class="flex flex-wrap items-center gap-2 text-xs w-full lg:w-auto">
+   <select id="std" onchange="go()" class="w-full sm:w-auto bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 focus:outline-none"><option value="bd">Standard: Bangladesh (SREDA / BDS IEC)</option><option value="nec">Standard: NEC 690 (US)</option><option value="iec">Standard: IEC 62548 / 60364</option></select>
+   <select id="pre" onchange="loadPre(this.value)" class="w-full sm:w-auto bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 focus:outline-none"></select>
+   <button onclick="savePre()" class="bg-slate-800 hover:bg-slate-700 border border-solar-500/40 px-3 py-1.5 rounded-lg font-semibold">Save preset</button>
+   <button onclick="delPre()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg">Delete</button>
+   <button onclick="tab('rep');window.print()" class="bg-solar-500 hover:bg-solar-600 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm transition shadow-lg shadow-solar-500/10">Export report</button>
+  </div>
+ </div>
+</header>
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+ <div id="status" class="no-print"></div>
+ <div class="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-800 no-print" id="nav"></div>
+ <div id="tabs"></div>
+</main>
+<footer class="border-t border-slate-800 bg-slate-900 mt-8 no-print">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+  <div class="flex items-center gap-2"><span class="w-7 h-7 shrink-0 rounded-md bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white font-bold leading-none">⚡</span><span><b class="text-slate-200">Electra Lab SolarPro</b> by Sabbir Ahamed</span></div>
+  <p class="text-center sm:text-right max-w-xl">Preliminary design aid: verify with datasheets, local codes and a qualified engineer.</p>
+ </div>
+</footer>
+<script>
+const $=i=>document.getElementById(i),N=(i,d=0)=>{const x=parseFloat($(i).value);return isFinite(x)?x:d};
+const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f=(x,d=1)=>Number(x).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const IN='w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-solar-500';
+const CARD='bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl',H='text-lg font-semibold text-white';
+const LB='block text-xs font-medium text-slate-400 mb-1',TILE='bg-slate-950/60 p-3 rounded-xl border border-slate-800';
+
+/* ---- inputs [id,label,default,step] ---- */
+const F={
+ site:[['lat','Latitude (°)',32.78,.01],['lon','Longitude (°)',-96.8,.01],['psh','Peak sun hours, plane of array (design month)',5.2,.1],['tilt','Tilt (°)',25],['tmin','Min ambient (°C)',-10],['tmax','Max ambient (°C)',45],['dem','Load demand factor (0-1)',.8,.05],['sload','Sanctioned load, kW (for grid connection)',10,.5]],
+ mod:[['pmp','Pmp (W)',450],['vmp','Vmp (V)',41.5,.1],['imp','Imp (A)',10.84,.01],['voc','Voc (V)',49.6,.1],['isc','Isc (A)',11.52,.01],['bvoc','Voc coeff (%/°C)',-.27,.01],['gpm','Pmax coeff (%/°C)',-.35,.01],['fuse','Module max series fuse (A)',20],['msys','Module max system voltage (V)',1500],['mlen','Module length (mm)',2094,1],['mwid','Module width (mm)',1038,1]],
+ arr:[['nmod','Modules per string',12],['nstr','Parallel strings',2],['soil','Soiling loss (%)',2,.5],['wire','Wiring & mismatch loss (%)',2,.5],['oth','Other losses: LID, low-light, availability (%)',4,.5],['cover','Target: share of daily load covered by solar (%)',100,5],['roof','Available roof / ground area (m², 0 = skip check)',0,5]],
+ inv:[['ipow','Inverter AC rating (kW)',10,.5],['vdc','Inverter max DC voltage (V)',1000],['mmin','MPPT min voltage (V)',200],['mmax','MPPT max voltage (V)',850],['nmppt','MPPT inputs',2],['imppt','Max Isc per MPPT (A)',26,.5],['ieff','Inverter efficiency (%)',97.5,.1]],
+ ac:[['acv','AC voltage (V, line-line if 3-phase)',230],['aclen','AC cable run, one way (m)',15],['avd','Max AC voltage drop (%)',2,.5],['aamb','AC cable ambient (°C)',35],['agrp','AC circuits grouped together',1]],
+ bess:[['baut','Days of autonomy',.5,.5],['bdod','Max depth of discharge (%)',80],['bvolt','Battery system voltage (V)',48],['beff','Round-trip efficiency (%)',92],['bu','Battery unit voltage (V)',12.8,.1],['bah','Battery unit capacity (Ah)',200],['chg','Max charge current (A)',200]],
+ nec:[['amb','DC cable ambient (°C)',40],['ccc','Current-carrying conductors in the raceway',4],['len','String cable run, one way (m)',30],['vdmax','Max DC voltage drop (%)',2,.5]]
+};
+const DEF={siteName:'Residential home',ins:'90',mat:'cu',std:'bd',sys:'grid',ph:'1'};
+Object.values(F).flat().forEach(a=>DEF[a[0]]=a[2]);
+const NT={siteName:'Shown on the report. Any name works.',
+sys:'Grid-tied: no battery. Hybrid: grid plus battery backup. Off-grid: battery only, no utility.',
+lat:'Site latitude. Only used for the tilt suggestion below.',lon:'Site longitude (negative = west). For your records.',
+psh:'Average daily full-sun hours on the tilted panels for your WORST month. Get it from PVGIS or Global Solar Atlas.',
+tilt:'Panel angle from horizontal. Near your latitude works well; keep at least 10° so rain cleans the glass.',
+tmin:'Coldest ambient temperature ever expected. It sets the highest string voltage.',tmax:'Hottest ambient temperature expected. It sets the lowest string voltage.',
+dem:'Share of connected load running at the same time. 0.6 to 0.8 is typical for homes.',sload:'Utility-approved load in kW. For net metering the inverter may not exceed it.',
+pmp:'Module rated power at STC, from the datasheet.',vmp:'Voltage at maximum power (STC).',imp:'Current at maximum power (STC).',
+voc:'Open-circuit voltage (STC). Drives the cold-weather voltage limit.',isc:'Short-circuit current (STC). Basis for cable and fuse sizing.',
+bvoc:'Datasheet temperature coefficient of Voc. Usually about -0.25 to -0.30.',gpm:'Datasheet temperature coefficient of Pmax. Usually about -0.30 to -0.40.',
+fuse:'Datasheet maximum series fuse rating. String fuses may not exceed it.',msys:'Datasheet maximum system voltage: 1000 V or 1500 V.',
+mlen:'Long side of one module. Used for the area estimate only.',mwid:'Short side of one module.',
+nmod:'Modules in series in each string. The string assistant below suggests a valid range.',nstr:'Number of identical strings connected in parallel.',
+soil:'Dust and dirt loss. 2 to 5 % typical; higher in dusty or dry areas.',wire:'Cable resistance and module mismatch. 1 to 3 % typical.',
+oth:'Light-induced degradation, low light, downtime. 3 to 6 % typical.',cover:'Percent of daily load you want solar to supply. Used to size the array.',
+roof:'Usable area for the array. Enter 0 to skip the area check.',
+ipow:'Inverter continuous AC output, from the datasheet.',vdc:'Datasheet absolute maximum DC input voltage. Never exceed it, even on the coldest morning.',
+mmin:'Lowest voltage at which the inverter tracks maximum power.',mmax:'Highest voltage of the MPPT tracking window.',
+nmppt:'Independent MPPT inputs (trackers). Strings on one input share it.',imppt:'Datasheet maximum short-circuit current per MPPT input.',
+ieff:'Datasheet weighted efficiency (Euro or CEC), not the peak figure.',
+acv:'Voltage at the inverter output: 230 V single-phase, or 400 V line-to-line three-phase.',ph:'Must match the inverter and your supply.',
+aclen:'Cable length from inverter to distribution board, one way.',avd:'Allowed AC voltage drop. 1 to 2 % is good practice.',
+aamb:'Highest air temperature around the AC cable.',agrp:'Other AC circuits laid together with this one. More circuits means more derating.',
+baut:'Days the battery alone must supply the load. 0.5 is about 12 hours.',bdod:'Share of battery energy you may use. LiFePO4 is typically 80 to 90 %.',
+bvolt:'Battery bus voltage the inverter needs: 24, 48 or higher.',beff:'Energy out divided by energy in. About 90 to 95 % for lithium.',
+bu:'Voltage of one battery unit, e.g. 12.8 V LiFePO4.',bah:'Capacity of one battery unit in Ah.',chg:'Maximum charge current the inverter or charger allows.',
+ins:'Cable insulation temperature rating. NEC mode only.',mat:'Conductor material. NEC mode only.',
+amb:'Hottest air around the DC cable. On a roof, add about 20 °C to the ambient.',ccc:'Total conductors in the same conduit or tray: two per string (+ and −).',
+len:'Cable length from array to inverter, one way.',vdmax:'Allowed DC voltage drop. 1 to 2 % is good practice.'};
+const nt=id=>NT[id]?`<p class="text-[11px] leading-snug text-slate-500 mt-1">${NT[id]}</p>`:'';
+const fld=a=>`<div><label class="${LB}">${a[1]}</label><input type="number" inputmode="decimal" step="${a[3]||'any'}" id="${a[0]}" value="${a[2]}" oninput="go()" class="${IN}">${nt(a[0])}</div>`;
+const grid=l=>`<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${l.map(fld).join('')}</div>`;
+const sel=(id,l,o)=>`<div><label class="${LB}">${l}</label><select id="${id}" onchange="go()" class="${IN}">${o.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select>${nt(id)}</div>`;
+const row=(l,v,c='text-white')=>`<div class="flex justify-between items-center gap-3 ${TILE}"><span class="text-slate-400 text-xs">${l}</span><span class="mono-font font-bold ${c}">${v}</span></div>`;
+const B={ok:['emerald','Pass'],warn:['amber','Review'],fail:['red','Fail'],info:['slate','Verify']};
+const badge=s=>`<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-${B[s][0]}-500/20 text-${B[s][0]}-400 border border-${B[s][0]}-500/30">${B[s][1]}</span>`;
+
+/* ---- cable & device data ---- */
+// NEC 310.16: [AWG, Cu90, Cu75, Al90, Al75, Cu ohm/km]
+const W=[['14',25,20,0,0,10.07],['12',30,25,25,20,6.33],['10',40,35,35,30,3.97],['8',55,50,45,40,2.51],['6',75,65,60,50,1.61],['4',95,85,75,65,1.01],['3',115,100,85,75,.8],['2',130,115,100,90,.64],['1',145,130,115,100,.51],['1/0',170,150,135,120,.4],['2/0',195,175,150,135,.32],['3/0',225,200,175,155,.25],['4/0',260,230,205,180,.2],['250',290,255,230,205,.17],['300',320,285,260,230,.14],['350',350,310,280,250,.12],['400',380,335,305,270,.1],['500',430,380,350,310,.08]];
+const TF=[[10,1.15,1.2],[15,1.12,1.15],[20,1.08,1.11],[25,1.04,1.05],[30,1,1],[35,.96,.94],[40,.91,.88],[45,.87,.82],[50,.82,.75],[55,.76,.67],[60,.71,.58],[65,.65,.47],[70,.58,.33],[75,.5,0],[80,.41,0]];
+const tf=(t,i)=>{const r=TF.find(x=>t<=x[0]);return r?r[i===90?1:2]:0};
+const ff=n=>n<=3?1:n<=6?.8:n<=9?.7:n<=20?.5:n<=30?.45:n<=40?.4:.35;
+// IEC PV cable (EN 50618, tinned Cu, 120 C conductor limit): [mm2, A at 60 C ambient, ohm/km at 20 C]
+const DCI=[[4,55,5.09],[6,70,3.39],[10,98,1.95],[16,132,1.24],[25,176,.795],[35,218,.565],[50,276,.393],[70,347,.277]];
+// IEC 60364-5-52 PVC 70 C copper, method C: [mm2, 2 loaded, 3 loaded, ohm/km at 20 C]
+const ACI=[[1.5,19.5,17.5,12.1],[2.5,27,24,7.41],[4,36,32,4.61],[6,46,41,3.08],[10,63,57,1.83],[16,85,76,1.15],[25,112,96,.727],[35,138,119,.524],[50,168,144,.387],[70,213,184,.268],[95,258,223,.193],[120,299,259,.153],[150,344,299,.124],[185,392,341,.0991],[240,461,403,.0754]];
+const TFP=[[30,1],[35,.94],[40,.87],[45,.79],[50,.71],[55,.61],[60,.5]];
+const tfp=t=>{const r=TFP.find(x=>t<=x[0]);return r?r[1]:0};
+const gfi=n=>[1,1,.8,.7,.65,.6,.57,.54,.52,.5][Math.min(Math.max(1,Math.round(n)),9)];
+const STD=[15,20,25,30,35,40,45,50,60,70,80,90,100,110,125,150,175,200,225,250,300,350,400,450,500,600];
+const IECB=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250];
+const IECF=[10,12,15,16,20,25,30,32,40,50,63,80,100,125];
+// pick smallest cable that carries `need` amps (rows carry derated ampacity a) and meets voltage drop
+function pick(rows,need,len,V,ph,vdmax,Iv){
+ const vd=x=>(ph===3?1.732:2)*len*Iv*x.r/1000/V*100;
+ const ia=rows.findIndex(x=>x.a>=need),iv=rows.findIndex(x=>vd(x)<=vdmax),ix=Math.max(ia,iv);
+ return {row:ia<0||iv<0?null:rows[ix],vd:ia<0||iv<0?null:vd(rows[ix]),nA:ia<0?'none':rows[ia].n,nV:iv<0?'none':rows[iv].n};
+}
+const necRows=(al,ins,T1,F1,min)=>W.slice(min).map(x=>{const k=al?3:1,a75=x[k+1],ai=ins===90?x[k]:a75;return {n:x[0]+' AWG',a:a75?Math.min(a75/1.25,ai*T1*F1):0,r:x[5]*(al?1.64:1)}});
+const MAN={
+ bd:['Modules and inverter on the SREDA approved product list (solar.sreda.gov.bd): check exact model numbers','Modules: BDS IEC 61215 and BDS IEC 61730-1/-2 test reports','Inverter: BDS IEC 62109-1/-2, BDS IEC 61727 and BDS IEC 62116 (anti-islanding) reports','Net metering application and utility inspection (nem.powerdivision.gov.bd) if you export to the grid','SLD showing anti-islanding, earthing diagram, string diagram and roof layout','DC isolator, DC and AC surge protection, MCB and RCD per IEC 60364-7-712 and the BNBC electrical part','Roof structure and wind-load check for the mounting (BNBC)','Commissioning tests and records per IEC 62446-1 (insulation resistance, polarity, string Voc and Isc)'],
+ nec:['NEC 690.12 rapid shutdown (module-level on rooftops)','NEC 690.11 DC arc-fault protection','NEC 690.13 / 690.15 disconnecting means','NEC 690.41-690.47 grounding & bonding','NEC 705.12 interconnection (busbar 120% rule)','NEC 690.53 / 690.56 labels & placards','Inverter listing: UL 1741 SB / IEEE 1547-2018','Local AHJ, utility interconnection and structural approval'],
+ iec:['IEC 62548 earthing, bonding and equipotential design','IEC 61643-31 DC surge protection and IEC 62305 lightning risk','DC isolator per IEC 60947-3 (DC-rated, correct polarity and utilisation category)','Inverter safety and grid protection: IEC 62109, IEC 62116 anti-islanding, local grid code','IEC 60364-7-712 installation rules and fire-fighter isolation requirements','IEC 62446-1 commissioning tests and documentation','Cable type: EN 50618 (H1Z2Z2-K) and DC connector compatibility','Utility interconnection approval and structural / wind-load check']
+};
+
+/* ---- appliances ---- */
+const A0=[['Refrigerator / freezer',200,1,24],['LED lighting',150,1,6],['Inverter air conditioner',1500,1,8],['Washing machine',800,1,1],['TV & entertainment',250,1,5],['Water pump',1100,1,2]];
+let A=A0.map(a=>({n:a[0],p:a[1],q:a[2],h:a[3]})),R={};
+function drawA(){
+ $('ab').innerHTML=A.map((a,i)=>`<tr><td class="p-2"><input value="${E(a.n)}" oninput="ap(${i},'n',this.value)" class="${IN}"></td>
+ <td class="p-2"><input type="number" value="${a.p}" oninput="ap(${i},'p',this.value)" class="${IN} w-24 mono-font"></td>
+ <td class="p-2"><input type="number" value="${a.q}" oninput="ap(${i},'q',this.value)" class="${IN} w-16 mono-font"></td>
+ <td class="p-2"><input type="number" step="0.5" value="${a.h}" oninput="ap(${i},'h',this.value)" class="${IN} w-20 mono-font"></td>
+ <td id="ak${i}" class="p-2 mono-font text-white font-semibold">${(a.p*a.q*a.h/1000).toFixed(2)}</td>
+ <td class="p-2 text-center"><button onclick="A.splice(${i},1);drawA();go()" class="text-red-400 hover:text-red-300 p-1">✕</button></td></tr>`).join('');
+}
+function ap(i,k,v){const a=A[i];a[k]=k==='n'?v:Math.max(0,parseFloat(v)||0);if(k==='h')a.h=Math.min(24,a.h);const c=$('ak'+i);if(c)c.textContent=(a.p*a.q*a.h/1000).toFixed(2);go()}
+
+/* ---- layout ---- */
+const T=[['site','1. Site & loads'],['pv','2. PV array'],['inv','3. Inverter, AC & battery'],['prot','4. Protection & cables'],['buy','5. What to buy'],['rep','6. Report & SLD']];
+$('nav').innerHTML=T.map(t=>`<button onclick="tab('${t[0]}')" data-t="${t[0]}" class="tb px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap"></button>`).join('');
+document.querySelectorAll('.tb').forEach((b,i)=>b.textContent=T[i][1]);
+const G='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+$('tabs').innerHTML=`
+<div id="tab-site" class="tab-content ${G}">
+ <div class="${CARD} md:col-span-2 lg:col-span-1"><h2 class="${H}">Site & system type</h2>
+  <div><label class="${LB}">Project name / location</label><input id="siteName" value="Residential home" oninput="go()" class="${IN}"></div>
+  ${sel('sys','System type',[['grid','Grid-tied (no battery)'],['hyb','Hybrid (grid + battery)'],['off','Off-grid (battery, no grid)']])}
+  ${grid(F.site)}<p id="tiltHint" class="text-xs text-slate-400"></p></div>
+ <div class="${CARD} md:col-span-2"><div class="flex items-center justify-between"><h2 class="${H}">Appliance inventory & load profile</h2>
+  <button onclick="A.push({n:'New load',p:100,q:1,h:4});drawA();go()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold">+ Add load</button></div>
+  <p class="text-[11px] text-slate-500">List every load you will run. Power = nameplate watts per unit; Qty = number of units; Hrs/day = average hours actually running (a fridge compressor runs about 8 to 10 h, not 24). Motor loads (pump, AC) also need inverter surge capacity.</p><div class="overflow-x-auto max-h-72 overflow-y-auto"><table class="w-full min-w-[540px] text-left text-sm"><thead class="bg-slate-950/80 text-slate-400 uppercase text-xs sticky top-0"><tr><th class="p-2">Load</th><th class="p-2">Power (W)</th><th class="p-2">Qty</th><th class="p-2">Hrs/day</th><th class="p-2">kWh/day</th><th></th></tr></thead><tbody id="ab" class="divide-y divide-slate-800/60"></tbody></table></div>
+  <div id="rLoad" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div></div>
+</div>
+<div id="tab-pv" class="tab-content ${G} hidden">
+ <div class="${CARD}"><h2 class="${H}">Module (STC datasheet)</h2>${grid(F.mod)}</div>
+ <div class="${CARD}"><h2 class="${H}">Strings & losses</h2>${grid(F.arr)}<div id="rSug"></div></div>
+ <div id="rPv" class="${CARD} md:col-span-2 lg:col-span-1"></div>
+</div>
+<div id="tab-inv" class="tab-content grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
+ <div class="space-y-6"><div class="${CARD}"><h2 class="${H}">Inverter (datasheet)</h2>${grid(F.inv)}<div id="rInv" class="space-y-3"></div></div>
+ <div class="${CARD}"><h2 class="${H}">AC side</h2>${sel('ph','Phases',[['1','Single-phase'],['3','Three-phase']])}${grid(F.ac)}<div id="rAc" class="space-y-3"></div></div></div>
+ <div class="${CARD}"><h2 class="${H}">Battery bank</h2><p class="text-xs text-slate-400">Used for hybrid and off-grid systems. Grid-tied systems ignore this section.</p>${grid(F.bess)}<div id="rBess" class="space-y-3"></div></div>
+</div>
+<div id="tab-prot" class="tab-content ${G} hidden">
+ <div class="${CARD} md:col-span-2 lg:col-span-1"><h2 class="${H}">DC string cable</h2>
+  ${sel('ins','NEC insulation rating',[['90','THWN-2 / USE-2 / PV wire (90°C)'],['75','THW (75°C)']])}${sel('mat','NEC conductor',[['cu','Copper'],['al','Aluminum']])}${grid(F.nec)}
+  <p class="text-xs text-slate-400">Insulation and material apply to NEC mode. IEC mode uses tinned-copper EN 50618 PV cable (mm²) for DC and PVC copper (mm²) for AC. IEC grouping uses circuits = conductors ÷ 2.</p></div>
+ <div id="rNec" class="${CARD} md:col-span-2"></div>
+</div>
+<div id="tab-buy" class="tab-content hidden"><div id="rBuy" class="${CARD} sm:!p-8"></div></div>
+<div id="tab-rep" class="tab-content hidden"><div id="rRep" class="${CARD} sm:!p-8 space-y-8"></div></div>`;
+
+function tab(id){window.scrollTo(0,0);
+ document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden'));$('tab-'+id).classList.remove('hidden');
+ document.querySelectorAll('.tb').forEach(b=>{const on=b.dataset.t===id;b.className='tb px-4 py-2.5 rounded-lg text-sm font-medium transition whitespace-nowrap '+(on?'bg-slate-800 text-white border border-slate-700':'text-slate-400 hover:text-white hover:bg-slate-900')});
+}
+
+/* ---- calculation engine ---- */
+function calc(){
+ const r={},sd=$('std').value,nec=sd==='nec',sys=$('sys').value,ph=+$('ph').value;r.nec=nec;r.sd=sd;r.sn={nec:'NEC 690',iec:'IEC 62548 / 60364',bd:'Bangladesh (SREDA, BDS IEC, IEC 62548)'}[sd];r.sys=sys;r.ph=ph;
+ let kwh=0,w=0;A.forEach(a=>{kwh+=a.p*a.q*a.h/1000;w+=a.p*a.q});
+ r.kwh=kwh;r.conn=w/1000;r.peak=w/1000*N('dem',.8);
+ const pmp=N('pmp',450),vmp=N('vmp',41.5),imp=N('imp',10.84),voc=N('voc',49.6),isc=N('isc',11.52),bv=Math.abs(N('bvoc',-.27)),gp=Math.abs(N('gpm',-.35));
+ const ns=Math.max(1,Math.round(N('nmod',12))),np=Math.max(1,Math.round(N('nstr',2))),tmin=N('tmin',-10),tmax=N('tmax',45);
+ Object.assign(r,{pmp,vmp,imp,isc,ns,np,nmod:ns*np,kwp:pmp*ns*np/1000});
+ const cf=1+bv*(25-tmin)/100,hf=1-Math.max(bv,gp)*tmax/100;
+ r.vocC=voc*ns*cf;r.vmpC=vmp*ns*cf;r.vmpH=vmp*ns*hf;
+ r.lt=Math.max(0,gp*((tmin+tmax)/2+20-25)/100);
+ r.pr=(1-r.lt)*(1-N('soil',2)/100)*(1-N('wire',2)/100)*(1-N('oth',4)/100)*N('ieff',97.5)/100;
+ r.day=r.kwp*N('psh',5.2)*r.pr;r.yr=r.day*365;
+ const cov=Math.max(0,N('cover',100))/100;r.kwpReq=kwh*cov/(N('psh',5.2)*r.pr)/(sys==='off'?N('beff',92)/100:1);r.modReq=Math.ceil(r.kwpReq*1000/pmp);
+ const ip=N('ipow',10),nm=Math.max(1,Math.round(N('nmppt',2))),vdc=N('vdc',1000),mmin=N('mmin',200),mmax=N('mmax',850),imppt=N('imppt',26);
+ r.ip=ip;r.ratio=r.kwp/ip;r.iM=isc*Math.ceil(np/nm);
+ // string design assistant
+ const maxN=Math.floor(Math.min(vdc/(voc*cf),mmax/(vmp*cf),N('msys',1500)/(voc*cf))),minN=Math.ceil(mmin/(vmp*hf)),spm=Math.floor(imppt/isc),maxS=nm*spm;
+ const sg={minN,maxN,maxS,ok:minN<=maxN&&maxS>=1};
+ if(sg.ok){let best=null;const mid=(mmin+mmax)/2/vmp;
+  for(let n=minN;n<=maxN;n++)for(let t=1;t<=Math.min(maxS,400);t++){const k=pmp*n*t/1000,q=k/ip,sc=Math.abs(q-1.15)+(t>nm&&t%nm?.15:0)+Math.abs(n-mid)*.002+(q<1||q>1.35?.5:0);if(!best||sc<best.sc)best={sc,n,s:t,kwp:k}}
+  Object.assign(sg,best)}
+ r.sg=sg;
+ // battery
+ const bat=sys!=='grid',au=N('baut',0);
+ r.bat=bat;r.bess=bat?kwh*au/(N('bdod',80)/100*N('beff',92)/100):0;
+ r.bs=Math.max(1,Math.round(N('bvolt',48)/Math.max(.1,N('bu',12.8))));r.bv=r.bs*N('bu',12.8);
+ r.bah=r.bess*1000/r.bv;r.bp=r.bess>0?Math.ceil(r.bah/Math.max(1,N('bah',200))):0;r.bunits=r.bess>0?r.bs*r.bp:0;r.binst=r.bunits*N('bu',12.8)*N('bah',200)/1000;
+ r.chgI=r.kwp*1000*.95/r.bv;
+ const INV=[1,2,3,3.6,4,5,6,8,10,12,15,20,25,30,40,50,60,80,100,125,150,250,500];r.invRec=INV.find(x=>x>=Math.max(r.kwpReq/1.15,bat?r.peak:0))||Math.ceil(r.kwpReq/1.15);
+ // DC string protection & cable
+ const imax=1.25*isc;r.imax=imax;let fuseIn=null,fuseReq;
+ if(nec){fuseReq=np>2;if(fuseReq)fuseIn=STD.find(x=>x>=1.25*imax)||Math.ceil(1.25*imax)}
+ else{fuseReq=(np-1)*isc>N('fuse',20);if(fuseReq)fuseIn=IECF.find(x=>x>=1.5*isc)||Math.ceil(1.5*isc)}
+ r.fuseReq=fuseReq;r.fuseIn=fuseIn;r.fuseMax=nec?N('fuse',20):Math.min(2.4*isc,N('fuse',20));
+ const amb=N('amb',40),ccc=N('ccc',4),len=N('len',30),vdmax=N('vdmax',2),ins=+$('ins').value,al=nec&&$('mat').value==='al';
+ let dcRows,dcNeed,dcNote;
+ if(nec){const T1=tf(amb,ins),F1=ff(ccc);dcRows=necRows(al,ins,T1,F1,2);dcNeed=imax;dcNote=`NEC: 75°C terminal ≥ 1.25 × ${f(imax,1)} A and derated ampacity ≥ ${f(imax,1)} A (temp factor ${T1}, fill factor ${F1})`}
+ else{const tfa=amb<120?Math.sqrt((120-amb)/60):0,gf=gfi(Math.ceil(ccc/2));dcRows=DCI.map(x=>({n:x[0]+' mm²',a:x[1]*tfa*gf,r:x[2]*1.25}));dcNeed=Math.max(imax,fuseIn||0);dcNote=`IEC: ampacity ≥ ${f(dcNeed,1)} A (1.25 × Isc${fuseIn?', or the fuse rating if larger':''}); datasheet 60°C rating derated by temperature ${f(tfa,2)} and grouping ${gf}`}
+ const dc=pick(dcRows,dcNeed,len,vmp*ns,1,vdmax,imp);r.dc=dc;r.dcNote=dcNote;r.dcLen=len;
+ // AC side
+ const acv=N('acv',230),Iac=ip*1000/(acv*(ph===3?1.732:1)),aamb=N('aamb',35),agrp=N('agrp',1),alen=N('aclen',15),avd=N('avd',2);
+ r.Iac=Iac;r.acv=acv;
+ let acRows,acNeed;
+ if(nec){r.brk=STD.find(x=>x>=1.25*Iac)||Math.ceil(1.25*Iac);acRows=necRows(al,ins,tf(aamb,ins),ff((ph===3?3:2)*agrp),1);acNeed=Iac}
+ else{r.brk=IECB.find(x=>x>=Iac)||Math.ceil(Iac);const t=tfp(aamb),g=gfi(agrp);acRows=ACI.slice(1).map(x=>({n:x[0]+' mm²',a:(ph===3?x[2]:x[1])*t*g,r:x[3]*1.2}));acNeed=r.brk}
+ r.ac=pick(acRows,acNeed,alen,acv,ph,avd,Iac);
+ // checks
+ const c=[],S=nec?'NEC 690.7':'IEC 62548';
+ c.push([`Cold string Voc ≤ inverter max DC voltage (${S}); warns within 3 %`,r.vocC>vdc?'fail':r.vocC>.97*vdc?'warn':'ok',`${f(r.vocC)} V vs ${f(vdc,0)} V`]);
+ c.push(['Cold string Voc ≤ module max system voltage',r.vocC<=N('msys',1500)?'ok':'fail',`${f(r.vocC)} V vs ${f(N('msys',1500),0)} V`]);
+ c.push(['Cold string Vmp ≤ MPPT max',r.vmpC<=mmax?'ok':'fail',`${f(r.vmpC)} V vs ${f(mmax,0)} V`]);
+ c.push(['Hot string Vmp ≥ MPPT min (10 % margin advised)',r.vmpH>=mmin*1.1?'ok':r.vmpH>=mmin?'warn':'fail',`${f(r.vmpH)} V vs ${f(mmin,0)} V`]);
+ c.push(['Isc per MPPT input ≤ inverter limit',r.iM<=imppt?'ok':'fail',`${f(r.iM,2)} A vs ${f(imppt,1)} A`]);
+ c.push(['Strings spread evenly over MPPT inputs',np>nm&&np%nm!==0?'warn':'ok',`${np} strings on ${nm} inputs`]);
+ c.push([`String overcurrent protection (${nec?'NEC 690.9':'IEC 62548'})`,!fuseReq?'ok':fuseIn<=r.fuseMax?'ok':'fail',!fuseReq?(nec?'Not required for 2 or fewer parallel strings':'Not required: reverse current stays below module rating'):`${fuseIn} A gPV fuse, limit ${f(r.fuseMax,1)} A`]);
+ c.push(['DC string cable: ampacity & voltage drop',dc.row&&dc.vd<=vdmax?'ok':'fail',dc.row?`${dc.row.n}, ${f(dc.vd,2)} % drop`:'No listed size fits: shorten the run, reduce grouping or split the conduit']);
+ c.push(['DC/AC ratio 1.0 to 1.35',r.ratio>=1&&r.ratio<=1.35?'ok':'warn',f(r.ratio,2)]);
+ c.push(['AC breaker and cable',r.ac.row?'ok':'fail',r.ac.row?`${r.brk} A breaker, ${r.ac.row.n}, ${f(r.ac.vd,2)} % drop`:'No single cable fits: use parallel runs or a larger size']);
+ if(sd==='bd'&&sys!=='off')c.push(['Inverter AC capacity ≤ sanctioned load (net metering limit, 100%)',ip<=N('sload',10)?'ok':'fail',`${f(ip)} kW vs ${f(N('sload',10))} kW`]);
+ if(bat)c.push(['Inverter kW ≥ demand-adjusted peak load',ip>=r.peak?'ok':'fail',`${f(ip)} kW vs ${f(r.peak)} kW (add motor starting surge separately)`]);
+ if(bat)c.push(['Battery charge current ≤ charger limit (all PV into battery)',r.chgI<=N('chg',200)?'ok':sys==='off'?'fail':'warn',`${f(r.chgI,0)} A vs ${f(N('chg',200),0)} A`]);
+  if(sys==='off'){c.push(['Array energy covers daily load (design month)',r.day>=kwh/(N('beff',92)/100)?'ok':'warn',`${f(r.day)} kWh vs ${f(kwh/(N('beff',92)/100))} kWh needed`])}
+ const dsN=Math.abs(vmp*imp-pmp)/Math.max(pmp,1)*100;r.area=r.nmod*N('mlen',0)*N('mwid',0)/1e6;
+ c.push(['Datasheet check: Vmp × Imp within 3 % of Pmp',dsN<=3?'ok':'warn',`${f(vmp*imp,0)} W vs ${f(pmp,0)} W`]);
+ c.push(['Input sanity: Vmp < Voc, Imp < Isc, MPPT min < max ≤ max DC, min < max temp',vmp<voc&&imp<isc&&mmin<mmax&&mmax<=vdc&&tmin<tmax?'ok':'fail','Re-check the datasheet entries']);
+ if(N('roof',0)>0)c.push(['Array area (+25 % for spacing and access) fits available area',r.area*1.25<=N('roof',0)?'ok':'warn',`${f(r.area*1.25,0)} m² vs ${f(N('roof',0),0)} m²`]);
+ r.ck=c;r.fail=c.filter(x=>x[1]==='fail').length;r.warn=c.filter(x=>x[1]==='warn').length;
+ return r;
+}
+
+/* ---- rendering ---- */
+function sld(r){
+ const b=(x,y,a,c,col)=>`<rect x="${x}" y="${y}" width="124" height="58" rx="10" fill="none" stroke="${col}"/><text x="${x+62}" y="${y+25}" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">${a}</text><text x="${x+62}" y="${y+43}" text-anchor="middle" font-size="10" fill="#94a3b8">${c}</text>`;
+ const ar=x=>`<line x1="${x}" y1="45" x2="${x+26}" y2="45" stroke="#64748b" stroke-width="2"/>`;
+ const grid=r.sys!=='off';
+ return `<svg viewBox="0 0 740 160" class="w-full min-w-[640px]"><g>${b(6,16,'PV array',`${r.ns} × ${r.np} · ${f(r.kwp,1)} kWp`,'#eab308')}${ar(130)}${b(156,16,'DC disconnect',r.fuseReq?`${r.fuseIn} A string fuses`:'No string fuses','#60a5fa')}${ar(280)}${b(306,16,'Inverter',`${f(r.ip)} kW · ${r.ph===3?'3-ph':'1-ph'}`,'#c084fc')}${ar(430)}${b(456,16,'AC breaker',`${r.brk} A · ${r.ac.row?r.ac.row.n:'?'}`,'#60a5fa')}${ar(580)}${b(606,16,grid?'Grid + loads':'Loads',`${f(r.kwh)} kWh/day`,'#34d399')}
+ ${r.bat&&r.bunits?`<line x1="368" y1="74" x2="368" y2="96" stroke="#64748b" stroke-width="2"/>${b(306,96,'Battery bank',`${r.bs}S × ${r.bp}P · ${f(r.binst,1)} kWh`,'#c084fc')}`:''}</g></svg>`;
+}
+function render(){
+ const r=R=calc(),ok=r.fail?'text-red-400':'text-emerald-400',sg=r.sg,S=r.sn;
+ $('status').innerHTML=`<button onclick="tab('prot')" class="w-full text-left ${TILE} flex flex-wrap items-center gap-x-4 gap-y-1 text-xs"><span class="font-semibold text-white">Design status</span><span class="${r.fail?'text-red-400':'text-emerald-400'}">${r.fail?r.fail+' failed':'No failed checks'}</span><span class="text-amber-400">${r.warn} to review</span><span class="text-slate-400">${f(r.kwp,2)} kWp · ${f(r.ip)} kW inverter · ${f(r.day)} kWh/day</span>${r.fail?`<span class="text-slate-400 w-full sm:w-auto">First failure: ${E(r.ck.find(x=>x[1]==='fail')[0])}</span>`:''}</button>`;
+ $('tiltHint').textContent=`Rule-of-thumb fixed tilt for this latitude: about ${f(Math.abs(N('lat'))*.76+3.1,0)}°.`;
+ $('rLoad').innerHTML=[['Daily load',f(r.kwh)+' kWh'],['Connected / demand-adjusted',f(r.conn)+' / '+f(r.peak)+' kW'],['Monthly',f(r.kwh*30,0)+' kWh']].map(x=>`<div class="${TILE}"><span class="text-xs text-slate-400 block">${x[0]}</span><span class="text-lg font-bold text-white mono-font">${x[1]}</span></div>`).join('');
+ const sizeBox=`<div class="${TILE} space-y-1 mb-3"><div class="text-xs font-semibold text-white">Size from your load</div><div class="text-xs text-slate-400">Array needed: <span class="mono-font text-white">${f(r.kwpReq,2)} kWp</span> (about <span class="mono-font text-white">${r.modReq}</span> modules of ${r.pmp} W)<br>Suggested inverter: <span class="mono-font text-white">${r.invRec} kW</span>${r.bat?' (also covers your peak load)':''}<br>Choose an inverter near this size, enter its datasheet on tab 3, then use the string assistant below.</div></div>`;
+ $('rSug').innerHTML=sizeBox+(sg.ok?`<div class="${TILE} space-y-2"><div class="text-xs font-semibold text-white">String design assistant</div>
+  <div class="text-xs text-slate-400">Valid modules per string: <span class="mono-font text-white">${sg.minN} to ${sg.maxN}</span><br>Max parallel strings on this inverter: <span class="mono-font text-white">${sg.maxS}</span><br>Suggested: <span class="mono-font text-white">${sg.n} × ${sg.s} = ${f(sg.kwp,1)} kWp (DC/AC ${f(sg.kwp/r.ip,2)})</span></div>
+  <button onclick="applySug()" class="bg-slate-800 hover:bg-slate-700 border border-solar-500/40 px-3 py-1.5 rounded-lg text-xs font-semibold">Apply suggestion</button></div>`
+  :`<div class="${TILE} text-xs text-red-400">No valid string length: the cold Voc limit and the hot Vmp minimum cannot both be met. Check the inverter voltage window, module data and temperatures, or choose another inverter.</div>`);
+ $('rPv').innerHTML=`<h2 class="${H}">Array summary</h2><div class="space-y-3 text-sm">
+ ${row('Installed capacity',f(r.kwp,2)+' kWp')}${row('Cold Voc (string)',f(r.vocC)+' V')}${row('Cold / hot Vmp',f(r.vmpC,0)+' / '+f(r.vmpH,0)+' V')}
+ ${row('Performance ratio',f(r.pr*100)+' %')}${row('Daily AC energy',f(r.day)+' kWh','text-emerald-400')}${row('Annual AC energy',f(r.yr,0)+' kWh','text-emerald-400')}
+ ${row('Specific yield',f(r.yr/Math.max(r.kwp,1e-9),0)+' kWh/kWp/yr')}${row('Solar covers daily load',f(r.day/Math.max(r.kwh,1e-9)*100,0)+' %')}${row('Module area / with spacing',f(r.area,0)+' / '+f(r.area*1.25,0)+' m²')}</div>
+ <p class="text-xs text-slate-400">Hot Vmp uses cell temperature = ambient + 25 K and the larger of the Voc and Pmax coefficients (conservative); cold Vmp uses the Voc coefficient. Annual = daily × 365 from the PSH entered, so use a PVGIS / PVWatts monthly profile for final yield.</p>`;
+ $('rInv').innerHTML=row('DC/AC ratio',f(r.ratio,2),r.ratio>=1&&r.ratio<=1.35?'text-emerald-400':'text-amber-400')+row('Max Isc on one MPPT',f(r.iM,2)+' A')+row('Demand-adjusted peak load',f(r.peak)+' kW');
+ $('rAc').innerHTML=row('AC output current',f(r.Iac,1)+' A')+row('Breaker',r.brk+' A')+row('AC cable',r.ac.row?r.ac.row.n+' · '+f(r.ac.vd,2)+' % drop':'No size fits','text-emerald-400')+`<p class="text-xs text-slate-400">${r.nec?'Breaker = next standard size ≥ 1.25 × inverter current. Cable: 75°C terminal ≥ 1.25 × I and derated ampacity ≥ I.':'Breaker = next standard size ≥ inverter current. Cable ampacity (PVC, method C, derated) ≥ breaker rating.'}</p>`;
+ $('rBess').innerHTML=!r.bat?'<p class="text-sm text-slate-400">Grid-tied: no battery sized.</p>':r.bess?row('Required capacity',f(r.bess)+' kWh')+row('Amp-hours at '+f(r.bv,1)+' V',f(r.bah,0)+' Ah')+row('Bank configuration',`${r.bs}S × ${r.bp}P (${r.bunits} units)`,'text-emerald-400')+row('Installed energy (nominal)',f(r.binst,1)+' kWh')+row('PV charge current (peak)',f(r.chgI,0)+' A')+'<p class="text-xs text-slate-400">Capacity = daily load × days ÷ (DoD × round-trip efficiency). Check the battery C-rate, BMS and inverter surge rating against datasheets.</p>':'<p class="text-sm text-slate-400">Set days of autonomy above 0.</p>';
+ $('rNec').innerHTML=`<h2 class="${H}">${r.sn} design checks</h2>
+ <div class="grid grid-cols-2 md:grid-cols-4 gap-3">${row('Isc × 1.25',f(r.imax,2)+' A')}${row('String OCPD',r.fuseReq?r.fuseIn+' A':'None')}${row('DC cable',r.dc.row?r.dc.row.n:'None fits','text-emerald-400')}${row('AC breaker',r.brk+' A')}</div>
+ <p class="text-xs text-slate-400">${r.dcNote}. Ampacity result: ${r.dc.nA}; voltage-drop result: ${r.dc.nV}. The larger governs. Smallest DC size considered: ${r.nec?'10 AWG':'4 mm²'}.</p>
+ <div class="space-y-2">${r.ck.map(c=>`<div class="flex items-center justify-between gap-3 ${TILE}"><div><div class="text-sm text-white">${c[0]}</div><div class="text-xs text-slate-400 mono-font">${c[2]}</div></div>${badge(c[1])}</div>`).join('')}</div>
+ <h3 class="text-sm font-semibold text-white pt-2">Not calculated here: verify on the drawings</h3>
+ <div class="grid md:grid-cols-2 gap-2">${MAN[r.sd].map(m=>`<div class="flex items-center justify-between gap-2 ${TILE} text-xs">${m}${badge('info')}</div>`).join('')}</div>`;
+ const bom=[['PV modules',`${r.pmp} W`,r.nmod],['String configuration',`${r.ns} modules × ${r.np} strings`,'Set'],['Inverter',`${f(r.ip)} kW, ${r.ph===3?'three':'single'}-phase, ${N('nmppt')} MPPT`,1],
+  ['String fuses / holders',r.fuseReq?`${r.fuseIn} A gPV, both poles`:'Not required',r.fuseReq?r.np*2:0],['DC string cable',r.dc.row?r.dc.row.n+' PV cable':'-',f(2*r.dcLen*r.np,0)+' m'],
+  ['AC breaker',`${r.brk} A`,1],['AC cable',r.ac.row?r.ac.row.n:'-',f(N('aclen',15),0)+' m run'],['Battery units',r.bunits?`${N('bu')} V / ${N('bah')} Ah, ${r.bs}S × ${r.bp}P`:'None',r.bunits]]
+  .map(x=>`<tr><td class="p-3">${x[0]}</td><td class="p-3 text-slate-400">${x[1]}</td><td class="p-3 text-right mono-font">${x[2]}</td></tr>`).join('');
+ $('rRep').innerHTML=`<div class="flex flex-wrap justify-between items-start gap-4 border-b border-slate-800 pb-6"><div><h2 class="text-2xl font-bold text-white">${E($('siteName').value)}</h2><p class="text-sm text-slate-400">PV design & protection pre-check · ${S} · Electra Lab SolarPro</p></div>
+  <div class="text-sm text-slate-400 text-right">Date: <span class="text-white">${new Date().toLocaleDateString()}</span><br>Design check: <span class="font-semibold ${ok}">${r.fail?r.fail+' failed':'no failed checks'}${r.warn?', '+r.warn+' to review':''}</span></div></div>
+ <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${[['PV capacity',f(r.kwp,2)+' kWp'],['Daily AC yield',f(r.day)+' kWh'],['Inverter',f(r.ip)+' kW'],['Battery',r.bunits?f(r.binst,1)+' kWh':'None']].map(x=>`<div class="${TILE}"><span class="text-xs text-slate-400">${x[0]}</span><div class="text-xl font-bold text-white mono-font">${x[1]}</div></div>`).join('')}</div>
+ <div><h3 class="${H} mb-3">Single-line diagram</h3><div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 overflow-x-auto">${sld(r)}</div></div>
+ <div><h3 class="${H} mb-3">Design checks</h3><table class="w-full text-left text-sm"><tbody class="divide-y divide-slate-800">${r.ck.map(c=>`<tr><td class="p-2">${c[0]}</td><td class="p-2 text-slate-400 mono-font text-xs">${c[2]}</td><td class="p-2 text-right">${badge(c[1])}</td></tr>`).join('')}</tbody></table></div>
+ <div><h3 class="${H} mb-3">Equipment list</h3><table class="w-full text-left text-sm"><thead class="bg-slate-950 text-slate-400 uppercase text-xs"><tr><th class="p-3">Item</th><th class="p-3">Specification</th><th class="p-3 text-right">Qty</th></tr></thead><tbody class="divide-y divide-slate-800">${bom}</tbody></table></div>
+ <div class="border-t border-slate-800 pt-6 grid md:grid-cols-2 gap-6 text-sm text-slate-400"><p>Preliminary design calculation. It must be reviewed by a qualified engineer and the local authority or utility, and checked against the standard edition in force and the actual equipment datasheets.</p>
+  <div class="grid grid-cols-2 gap-4"><div class="border-b border-slate-700 pt-8">Prepared by</div><div class="border-b border-slate-700 pt-8">Reviewed by</div></div></div>`;
+}
+function buy(r){
+ const bd=r.sd==='bd',grid=r.sys!=='off',nm=Math.max(1,Math.round(N('nmppt',2))),used=Math.min(nm,r.np),sn={grid:'Grid-tied',hyb:'Hybrid',off:'Off-grid'}[r.sys],pick=(a,b)=>bd?a:b;
+ const t=[];
+ t.push(['PV modules',`One model and one power bin for all. Datasheet must match your entries: ${r.pmp} W, Voc ${f(N('voc'),1)} V, Isc ${f(r.isc,2)} A, max system voltage at least ${f(r.vocC,0)} V. Test reports: ${pick('BDS IEC 61215 and BDS IEC 61730-1/-2','IEC 61215 and IEC 61730')}${bd&&grid?'. Model must be on the SREDA approved list if you export to the grid':''}. Get product and power warranty terms in writing.`,r.nmod]);
+ t.push(['Inverter',`${sn} inverter, ${f(r.ip)} kW, ${r.ph===3?'three':'single'}-phase ${f(r.acv,0)} V. Datasheet must show: max DC voltage at least ${f(r.vocC,0)} V; MPPT range covering ${f(r.vmpH,0)} to ${f(r.vmpC,0)} V; at least ${nm} MPPT input(s), each taking at least ${f(r.iM,1)} A short-circuit current.${r.bat?` Battery port for a ${f(r.bv,0)} V bank${r.sys==='off'?`, charge current at least ${f(r.chgI,0)} A`:''}. Continuous output at least ${f(r.peak)} kW, with a surge rating for motor starts (pump, AC compressor).`:''} Standards: ${pick('BDS IEC 62109-1/-2'+(grid?', BDS IEC 61727 and BDS IEC 62116 (anti-islanding)':''),'IEC 62109-1/-2'+(grid?', IEC 61727 and IEC 62116 (anti-islanding)':''))}.`,1]);
+ if(r.bat&&r.bunits)t.push(['Battery',`Nominal capacity at least ${f(r.bess)} kWh. Your bank: ${r.bs} in series × ${r.bp} in parallel of ${N('bu')} V / ${N('bah')} Ah units (${f(r.binst,1)} kWh). Lithium iron phosphate with a BMS that communicates with the chosen inverter (ask the inverter maker for its compatibility list). Continuous discharge power at least ${f(r.peak)} kW. Ask for IEC 62619 and UN 38.3 reports.`,r.bunits+' units']);
+ t.push(['DC string cable',r.dc.row?`${r.dc.row.n} solar PV cable (EN 50618 / IEC 62930), red and black, for ${r.np} string(s).`:'No cable size fits your inputs. Shorten the run or reduce grouping.',f(2*r.dcLen*r.np,0)+' m']);
+ t.push(['Connectors','MC4-type connectors from one manufacturer on every string. Mixed brands are a fire risk.','As needed']);
+ t.push(['String fuses',r.fuseReq?`${r.fuseIn} A gPV fuses with holders, both poles.`:'Not required for this string layout (2 strings or reverse current below the module rating).',r.fuseReq?r.np*2:0]);
+ t.push(['DC isolator',`DC-rated, at least ${Math.ceil(r.vocC/100)*100} V and ${f(1.25*r.iM,0)} A per inverter input.`,used]);
+ t.push(['DC surge protection',`Type 2 DC SPD, voltage rating above your cold Voc (${f(r.vocC,0)} V).`,used]);
+ t.push(['AC breaker and RCD',`${r.brk} A ${r.ph===3?'3-pole':'2-pole'} MCB${r.nec?'':' (curve C)'}, plus an RCD or RCBO of the type the inverter manual requires.`,1]);
+ t.push(['AC cable',r.ac.row?`${r.ac.row.n} copper, inverter to distribution board.`:'No size fits. Use parallel runs or a larger size.',f(N('aclen',15),0)+' m']);
+ t.push(['AC surge protection','Type 2 AC SPD at the distribution board.',1]);
+ t.push(['Earthing',`Earth electrode(s) and equipotential bonding of every module frame and rail. Copper, 6 mm² is typical; follow local rules. Record the measured earth resistance.${bd?' Show panel frame earthing and inverter earthing as separate conductors on the earthing diagram.':''}`,'1 set']);
+ t.push(['Mounting structure',`For ${r.nmod} modules, hot-dip galvanised or aluminium, checked for roof load and wind${bd?' (BNBC)':''}.`,'1 set']);
+ if(bd&&grid)t.push(['Net meter','Bi-directional meter, installed by the utility after approval, only if you export to the grid.','Utility']);
+ const rows=t.map(x=>`<tr><td class="p-3 align-top font-medium text-white">${x[0]}</td><td class="p-3 text-slate-300">${x[1]}</td><td class="p-3 text-right mono-font align-top whitespace-nowrap">${x[2]}</td></tr>`).join('');
+ const li=a=>a.map(x=>`<div class="${TILE} text-sm">${x}</div>`).join('');
+ const Q=[`Send datasheets for the module, inverter and battery. Do they match the numbers above?`,`Send the single-line diagram with ${r.ns} modules per string × ${r.np} string(s), DC/AC ratio ${f(r.ratio,2)}, cable sizes and fuse ratings.`,bd?'Which entry on the SREDA approved list is each module and inverter? Ask for the BSTI or BUET lab report reference.':'Which test certificates cover each module and inverter?',`What sun hours and performance ratio did the yield estimate assume? This design uses ${f(N('psh'),1)} h and ${f(r.pr*100,0)} %, giving about ${f(r.day,1)} kWh/day.`,'Which earthing layout and surge protection are included?','Who handles warranty claims for modules, inverter and battery? Get it in writing.','Will you hand over commissioning test records: insulation resistance, polarity, and Voc and Isc per string?',`Each quote line must show brand, model and quantity. Expected string Voc at 25°C is about ${f(N('voc')*r.ns,0)} V; expected Isc is about ${f(r.isc,1)} A in full sun.`];
+ const X=['A quote with no brand or model, or datasheets that differ from the numbers above.',`Array size far from ${f(r.kwp,1)} kWp, or an inverter smaller than ${f(r.ip)} kW, with no explanation.`,r.dc.row?`DC cable thinner than ${r.dc.row.n}.`:'DC cable size not stated.','No DC isolator, surge protection or earthing in the scope.',r.bat?`Battery below ${f(r.bess)} kWh nominal, or lead-acid offered without saying so.`:'',grid?(bd?'Any advice to connect to the utility supply and export without the utility\'s approval.':'Any advice to connect to the utility supply without approval.'):''].filter(Boolean);
+ return `<h2 class="${H}">What to buy</h2><p class="text-xs text-slate-400 mt-1">Minimum specifications from your design (${r.sn}). Give this list to each company and ask for brand, model and quantity per line.${bd&&grid?' If you export to the grid, Bangladesh net metering applies: inverter AC capacity within your sanctioned load, SREDA-approved equipment and utility inspection.':''}</p>
+ <div class="overflow-x-auto mt-4"><table class="w-full text-left text-sm"><thead class="bg-slate-950 text-slate-400 uppercase text-xs"><tr><th class="p-3">Item</th><th class="p-3">Minimum specification</th><th class="p-3 text-right">Qty</th></tr></thead><tbody class="divide-y divide-slate-800">${rows}</tbody></table></div>
+ <h3 class="text-sm font-semibold text-white pt-6 pb-2">Questions to ask each company</h3><div class="space-y-2">${li(Q)}</div>
+ <h3 class="text-sm font-semibold text-white pt-6 pb-2">Red flags</h3><div class="space-y-2">${li(X)}</div>`;
+}
+function go(){render();$('rBuy').innerHTML=buy(R)}
+function applySug(){const s=R.sg;if(!s.ok)return;$('nmod').value=s.n;$('nstr').value=s.s;$('pre').value='x';go()}
+
+/* ---- presets, save/load ---- */
+const BDA=[['Ceiling fans',75,4,10],['LED lights',10,10,6],['Refrigerator (average duty)',150,1,12],['TV',100,1,5],['Wi-Fi router',15,1,24],['Laptop / phone charging',60,2,6],['Water pump',750,1,1],['Split AC, inverter 1.5 ton',1200,1,4]];
+const BDM={lat:23.8,lon:90.4,psh:4.5,tilt:20,tmin:5,tmax:40,mlen:2278,mwid:1134,pmp:550,vmp:42.1,imp:13.06,voc:50.2,isc:13.85,fuse:25,nmod:5,nstr:2,ipow:5,vdc:500,mmin:125,mmax:425,nmppt:2,imppt:20,acv:230,ph:'1',aclen:15,amb:50,soil:3,sload:5,A:BDA};
+const PRE={bdh:['Bangladesh home 5.5 kWp, grid-tied (example values)',{...BDM,siteName:'Home, Bangladesh',sys:'grid'}],
+ bdy:['Bangladesh home 5.5 kWp, hybrid + battery (example values)',{...BDM,siteName:'Home, Bangladesh (hybrid)',sys:'hyb',baut:.5}],
+ res:['Residential 10.8 kWp, grid-tied',{siteName:'Residential home',sys:'grid'}],
+ hyb:['Residential 10.8 kWp, hybrid',{siteName:'Residential hybrid',sys:'hyb',baut:.5}],
+ com:['Commercial 59 kWp rooftop',{siteName:'Commercial rooftop',sys:'grid',sload:60,psh:5.5,mlen:2278,mwid:1134,pmp:550,vmp:42.1,imp:13.06,voc:50.2,isc:13.85,fuse:25,nmod:18,nstr:6,ipow:50,vdc:1100,mmax:1000,nmppt:6,imppt:30,acv:400,ph:'3',aclen:30,ccc:6,ls:8}],
+ utl:['Utility 288 kWp ground-mount',{siteName:'Utility solar Phase I',sys:'grid',sload:300,psh:6,mlen:2384,mwid:1303,pmp:600,vmp:43.5,imp:13.79,voc:51.8,isc:14.5,fuse:25,nmod:24,nstr:20,ipow:250,vdc:1500,mmin:500,mmax:1300,nmppt:10,imppt:60,acv:800,ph:'3',aclen:20,ccc:6,ls:100}],
+ off:['Off-grid 9.6 kWp + battery',{siteName:'Off-grid outpost',sys:'off',psh:4.8,mlen:1722,mwid:1134,pmp:400,vmp:39.8,imp:10.05,voc:47.5,isc:10.65,nmod:8,nstr:3,ipow:8,vdc:500,mmin:120,mmax:450,nmppt:3,imppt:20,baut:2}]};
+const LS='electralab.solar.presets';
+const usr=()=>{try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return[]}};
+const setUsr=l=>{try{localStorage.setItem(LS,JSON.stringify(l))}catch(e){alert('Browser storage is blocked, so the preset could not be saved.')}};
+function fillSel(v){$('pre').innerHTML=Object.entries(PRE).map(([k,p])=>`<option value="${k}">${p[0]}</option>`).join('')+usr().map((p,i)=>`<option value="u:${i}">★ ${E(p.name)}</option>`).join('')+'<option value="x">Custom (edited)</option>';if(v)$('pre').value=v}
+function setS(s){Object.keys(DEF).forEach(k=>{if(s[k]!==undefined&&$(k))$(k).value=s[k]});if(Array.isArray(s.A))A=s.A;drawA();go()}
+function getS(){const s={};Object.keys(DEF).forEach(k=>s[k]=$(k).value);s.A=A;return s}
+function loadPre(v){
+ if(v==='x')return;
+ if(v.startsWith('u:')){const p=usr()[+v.slice(2)];if(p)setS(p.state);return}
+ const o=PRE[v][1],keep=$('std').value;A=(o.A||A0).map(a=>({n:a[0],p:a[1],q:o.ls||a[2]||1,h:a[3]}));
+ setS({...DEF,...o,std:keep});
+}
+function savePre(){const n=prompt('Preset name');if(!n)return;const l=usr();l.push({name:n,state:getS()});setUsr(l);fillSel('u:'+(l.length-1))}
+function delPre(){const v=$('pre').value;if(!v.startsWith('u:'))return alert('Only saved presets can be deleted.');const l=usr();l.splice(+v.slice(2),1);setUsr(l);fillSel('bdh');loadPre('bdh')}
+document.addEventListener('input',e=>{if(e.target.closest('#tabs')&&!e.target.closest('#ab')&&$('pre').value!=='x')$('pre').value='x'});
+fillSel('bdh');tab('site');loadPre('bdh');
+</script>
+</body>
+</html>

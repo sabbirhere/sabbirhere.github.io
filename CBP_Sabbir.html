@@ -133,6 +133,7 @@
     <button id="btn-zoom-in" title="Zoom in">+</button>
     <button id="btn-zoom-fit" title="Fit to view">Fit</button>
     <div class="sep"></div>
+    <button id="btn-validate" style="background-color: #FFC107; border-color: #FFC107; color: #000;" title="Check wiring, protection and control-logic (interlocks) for mistakes">✔ Validate</button>
     <button id="btn-save" title="Export project as JSON">💾 Save</button>
     <button id="btn-load" title="Import project JSON">📂 Load</button>
     <button id="btn-pdf" title="Print / Save the diagram as PDF">🖨 PDF</button>
@@ -157,15 +158,15 @@
     <div id="drag-ghost"></div>
   </div>
   <div id="app-footer">
-    <span class="brand">⚡ ElectraLab</span><span class="sub">Electrical Engineering Toolbox</span>
-    <div class="disclaimer">Preliminary design aid only — verify against nameplate data, applicable standards, and a qualified engineer before construction.</div>
+    <span class="brand">⚡ ElectraLab </span><span class="sub">Circuit Builder Pro By- Sabbir Ahamed</span>
+    <div class="disclaimer">Preliminary design aid with advanced Validation Engine. (The engine is still under developement awaiting further improvement and component integration)</div>
   </div>
 
 <script>
 (function(){
 'use strict';
 
-/* ============================== CANVAS SETUP ============================== */
+/* ============================== CANVAS SETUP BY SABBIR AHAMED ============================== */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const wrap = document.getElementById('canvas-wrap');
@@ -180,7 +181,7 @@ function resize(){
 }
 window.addEventListener('resize', resize);
 
-/* ============================== STATE ============================== */
+/* ============================== STATE BY SABBIR AHAMED ============================== */
 let grid = 20, showGrid = true, snap = true, ortho = true;
 let zoom = 1, panX = 0, panY = 0;
 let tool = 'select';
@@ -203,7 +204,7 @@ let clipboard = null;
 
 const PORT_PICK_PX = 12;   // screen px radius for port snapping
 
-/* ============================== COORDS ============================== */
+/* ============================== COORDS BY SABBIR AHAMED ============================== */
 function screenToWorld(sx,sy){ return {x:(sx-panX)/zoom, y:(sy-panY)/zoom}; }
 function worldToScreen(wx,wy){ return {x: wx*zoom+panX, y: wy*zoom+panY}; }
 function snapVal(v){ return snap ? Math.round(v/grid)*grid : v; }
@@ -222,7 +223,7 @@ function T(c,txt,x,y,font,align,base){
   c.fillText(txt,x,y);
 }
 
-/* ============================== PORT TEMPLATES ============================== */
+/* ============================== PORT TEMPLATES BY SABBIR AHAMED ============================== */
 function polesX(n){ return Array.from({length:n},(_,i)=>(i-(n-1)/2)*20); }
 function portsFor(spec,w,h){
   if(typeof spec==='string'){
@@ -256,7 +257,7 @@ function portsFor(spec,w,h){
   }
 }
 
-/* ============================== SYMBOL LIBRARY ============================== */
+/* ============================== SYMBOL LIBRARY BY SABBIR AHAMED ============================== */
 const SYMLIB = [
 // -- Power Source --
 {id:'ac_1ph',name:'AC Supply 1φ',cat:'Power Source',w:40,h:56,ports:'v',kind:'source',glyph:'~',r:16},
@@ -312,7 +313,6 @@ const SYMLIB = [
 {id:'relay_25',name:'Sync Check (25)',cat:'Protection Relays',w:38,h:46,ports:'v',kind:'ansiRelay',num:'25'},
 {id:'relay_79',name:'Auto-Reclose (79)',cat:'Protection Relays',w:38,h:46,ports:'v',kind:'ansiRelay',num:'79'},
 {id:'relay_86',name:'Lockout (86)',cat:'Protection Relays',w:38,h:46,ports:'v',kind:'ansiRelay',num:'86'},
-{id:'numerical_relay',name:'Numerical Relay (IED)',cat:'Protection Relays',w:46,h:56,ports:'v',kind:'plcBlock',label:'IED',stub:'both'},
 // -- Coils & Actuators --
 {id:'contactor_coil',name:'Contactor Coil (KM)',cat:'Coils & Actuators',w:34,h:34,ports:'h',kind:'coil',label:'KM'},
 {id:'mc_coil',name:'MC Coil (Magnetic Contactor)',cat:'Coils & Actuators',w:34,h:34,ports:'h',kind:'coil',label:'MC'},
@@ -503,14 +503,7 @@ const CAT_ORDER = ['Power Source','Grounding','Transformers','Switching & Protec
   'Motors','Coils & Actuators','Indicators & Alarms','Contacts','Control Switches','Position Switches','Controls & Sensors','Power Electronics',
   'Measurement','Basic'];
 
-/* ============================== SYMBOL RENDERING ============================== */
-function stubLines(c,sym){
-  const stub = sym.stub;
-  const hw=sym.w/2, hh=sym.h/2;
-  if(stub==='left'){ L(c,[[-hw,0],[-hw-8,0]]); }
-  else if(stub==='both'){ L(c,[[0,-hh],[0,-hh-8]]); L(c,[[0,hh],[0,hh+8]]); }
-}
-
+/* ============================== SYMBOL RENDERING BY SABBIR AHAMED ============================== */
 function contactBase(c,w,h,nc,arc,delay){
   const hw=w/2, bw=6, half=h/2-2;
   L(c,[[-hw,0],[-bw,0]]);
@@ -804,12 +797,6 @@ function drawSymbol(c, sym){
       L(c,[[0,15],[0,h/2]]);
       break;
     }
-    case 'plcBlock': {
-      R(c,-w/2,-h/2,w,h);
-      T(c,sym.label,0,0,'8.5px sans-serif');
-      stubLines(c,sym);
-      break;
-    }
     case 'distro': {
       const v = sym.variant;
       if(v==='socket'){
@@ -977,7 +964,7 @@ function renderPreview(cvs, sym){
   cx.restore();
 }
 
-/* ============================== SYMBOL PANEL BUILD ============================== */
+/* ============================== SYMBOL PANEL BUILD BY SABBIR AHAMED ============================== */
 const symContainer = document.getElementById('sym-container');
 CAT_ORDER.forEach(cat=>{
   const items = SYMLIB.filter(s=>s.cat===cat);
@@ -1016,7 +1003,7 @@ document.getElementById('sym-search').oninput = function(){
   });
 };
 
-/* ============================== DRAG-FROM-LIBRARY TO CANVAS ============================== */
+/* ============================== DRAG-FROM-LIBRARY TO CANVAS BY SABBIR AHAMED ============================== */
 const ghost = document.getElementById('drag-ghost');
 let libDrag = null; // {sym, pointerId, moved, startX, startY}
 
@@ -1068,7 +1055,7 @@ window.addEventListener('pointerup', e=>{
   libDrag = null;
 });
 
-/* ============================== PORT / HIT-TEST HELPERS ============================== */
+/* ============================== PORT / HIT-TEST HELPERS BY SABBIR AHAMED CHOWDHURY============================== */
 function getComp(uid){ return components.find(c=>c.uid===uid); }
 
 function portWorldPos(comp, portId){
@@ -1173,7 +1160,7 @@ function computeJunctions(){
   return out;
 }
 
-/* ============================== HISTORY ============================== */
+/* ============================== HISTORY BY SABBIR AHAMED============================== */
 function snapshot(){ return JSON.stringify({components, wires, labels}); }
 function pushHistory(){
   history = history.slice(0, historyIdx+1);
@@ -1190,7 +1177,7 @@ function loadSnapshot(s){
 function undo(){ if(historyIdx>0){ historyIdx--; loadSnapshot(history[historyIdx]); draw(); } }
 function redo(){ if(historyIdx<history.length-1){ historyIdx++; loadSnapshot(history[historyIdx]); draw(); } }
 
-/* ============================== SELECTION ACTIONS ============================== */
+/* ============================== SELECTION ACTIONS BY SABBIR AHAMED ============================== */
 function rotateSelection(){
   if(!selection.size) return;
   selection.forEach(uid=>{ const c=getComp(uid); if(c) c.rot=((c.rot||0)+90)%360; });
@@ -1237,7 +1224,7 @@ function selectAll(){
   draw();
 }
 
-/* ============================== ZOOM / FIT ============================== */
+/* ============================== ZOOM / FIT BY SABBIR AHAMED============================== */
 function zoomFit(){
   if(!components.length && !wires.length){ fitSheet(); return; }
   let mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
@@ -1256,7 +1243,7 @@ function zoomFit(){
   draw();
 }
 
-/* ============================== DRAW ============================== */
+/* ============================== DRAW BY SABBIR AHAMED============================== */
 const SHEET = {x:0, y:0, w:1680, h:1188};   // A3-proportion drawing sheet (world units)
 function fitSheet(){
   zoom = Math.max(0.1, Math.min((W-200)/SHEET.w, (H-30)/SHEET.h, 2));
@@ -1425,7 +1412,7 @@ function draw(target){
   if(target===ctx) updateInfoBar();
 }
 
-/* ============================== TOOLBAR / MODE ============================== */
+/* ============================== TOOLBAR / MODE BY SABBIR AHAMED ============================== */
 function updateToolbar(){
   document.querySelectorAll('#toolbar button').forEach(b=>b.classList.remove('active'));
   const map = {select:'btn-select', wire:'btn-wire', erase:'btn-erase', label:'btn-label', pan:'btn-pan'};
@@ -1481,7 +1468,7 @@ fileInput.addEventListener('change', e=>{
   reader.onload = ()=>{
     try{
       const data = JSON.parse(reader.result);
-      components = data.components||[]; wires = data.wires||[]; labels = data.labels||[];
+      components = (data.components||[]).filter(c=>SYMLIB_MAP[c.symbolId]); wires = data.wires||[]; labels = data.labels||[];
       let maxUid=0;
       [...components,...wires,...labels].forEach(o=>{ if(o.uid>maxUid) maxUid=o.uid; });
       uidCounter = maxUid+1;
@@ -1492,6 +1479,25 @@ fileInput.addEventListener('change', e=>{
   reader.readAsText(f);
   fileInput.value = '';
 });
+document.getElementById('btn-validate').onclick = ()=>{
+  const api = {
+    get components(){ return components; }, get wires(){ return wires; },
+    SYM: SYMLIB_MAP, portsWorld: compPortsWorld, wirePts: resolveWirePoints,
+    focus:(uids,pos)=>{
+      const cs=(uids||[]).map(getComp).filter(Boolean);
+      selection=new Set(cs.map(c=>c.uid)); wireSelection=new Set();
+      let x,y;
+      if(cs.length){ x=cs.reduce((a,c)=>a+c.x,0)/cs.length; y=cs.reduce((a,c)=>a+c.y,0)/cs.length; }
+      else if(pos){ x=pos.x; y=pos.y; } else { draw(); return; }
+      zoom=Math.max(zoom,0.8); panX=W/2-x*zoom-210; panY=H/2-y*zoom; draw();
+    }
+  };
+  if(window.CBPValidator) return window.CBPValidator.run(api);
+  const sc=document.createElement('script'); sc.src='cbp_validator.js';
+  sc.onload=()=>window.CBPValidator.run(api);
+  sc.onerror=()=>alert('cbp_validator.js was not found. Keep it in the same folder as this file.');
+  document.head.appendChild(sc);
+};
 document.getElementById('btn-back').onclick = ()=>{ window.location.href = 'Advanced.html'; };
 document.getElementById('btn-pdf').onclick = ()=>{
   const savedZ=zoom, savedX=panX, savedY=panY;
@@ -1529,7 +1535,7 @@ document.getElementById('btn-pdf').onclick = ()=>{
   });
 };
 
-/* ============================== CANVAS EVENTS ============================== */
+/* ============================== CANVAS EVENTS SABBIR AHAMED ============================== */
 let mouse = {x:0,y:0};
 
 canvas.addEventListener('contextmenu', e=> e.preventDefault());
@@ -1728,7 +1734,7 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#context-menu')) document.getElementById('context-menu').style.display='none';
 });
 
-/* ============================== KEYBOARD ============================== */
+/* ============================== KEYBOARD BY SABBIR AHAMED ============================== */
 document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA') return;
   if(e.key===' '){ spaceDown=true; e.preventDefault(); return; }
@@ -1756,7 +1762,7 @@ document.addEventListener('keydown', e=>{
 });
 document.addEventListener('keyup', e=>{ if(e.key===' ') spaceDown=false; });
 
-/* ============================== INIT ============================== */
+/* ============================== INIT BY SABBIR AHAMED ============================== */
 (function init(){
   let restored=false;
   try{
