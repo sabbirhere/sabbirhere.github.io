@@ -1,0 +1,444 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>ElectraLab — Lightning Protection Designer | Air terminals, down conductors, separation distance and earthing per IEC 62305-3; risk screening uses the simplified NC method</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#E8ECF0;--pn:#F7F9FA;--ink:#15202B;--mu:#5A6672;--ln:#C2CBD4;--ac:#1D5FBF;--air:#C0392B;--dn:#16825A;--ea:#8B5E34;--soil:#E3DACB}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E151C;--pn:#16202A;--ink:#E5ECF2;--mu:#93A1AF;--ln:#2B3947;--ac:#6AA5F0;--air:#F0705F;--dn:#3FC48F;--ea:#C99A66;--soil:#222B33}}
+:root[data-theme="dark"]{--bg:#0E151C;--pn:#16202A;--ink:#E5ECF2;--mu:#93A1AF;--ln:#2B3947;--ac:#6AA5F0;--air:#F0705F;--dn:#3FC48F;--ea:#C99A66;--soil:#222B33}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Archivo,"Segoe UI",system-ui,sans-serif}
+header{max-width:1200px;margin:0 auto;padding:18px 16px 0}
+h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.01em}
+header p{margin:2px 0 0;color:var(--mu)}
+.app{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;max-width:1200px;margin:0 auto;padding:16px}
+@media(max-width:860px){.app{grid-template-columns:1fr}}
+.pn{background:var(--pn);border:1px solid var(--ln);border-radius:6px;padding:14px;margin-bottom:14px}
+h2{margin:0 0 8px;font-size:16px;font-weight:600}
+label{display:block;font-size:13px;color:var(--mu);margin:9px 0 2px}
+input,select{width:100%;padding:7px 8px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:4px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 16px;margin:0}
+dl div{border-left:3px solid var(--ln);padding-left:8px}
+dt{font-size:12px;color:var(--mu)}dd{margin:0;font-weight:600}
+.big{border-left-color:var(--ac)}
+.msg{padding:9px 11px;border-radius:4px;border:1px solid var(--ln);margin:10px 0 0;font-size:14px}
+.ok{border-color:var(--dn)}.bad{border-color:var(--air)}
+svg{width:100%;height:auto;display:block}
+.sv text{fill:var(--ink);font:600 14px Archivo,sans-serif;paint-order:stroke;stroke:var(--pn);stroke-width:4px;stroke-linejoin:round}.sv text.tg{fill:#fff;stroke:none;font-size:12px;font-weight:800}.sv .dm line{stroke:var(--mu);stroke-width:1.5}.sv .dm text{font-size:13px;fill:var(--mu)}
+.lg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:13px}.lg i{display:inline-block;width:20px;height:4px;vertical-align:middle;margin-right:6px}.lg i.c{height:14px;width:14px;border-radius:50%}.lg i.d{height:0;border-top:3px dashed var(--ea)}
+label{font-weight:600;color:var(--ink)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.sum div{border:2px solid var(--ln);border-left-width:8px;border-radius:6px;padding:10px 12px;background:var(--bg)}.sum b{display:block;font-size:26px;line-height:1.15}.sum em{display:block;font-style:normal;font-weight:600}.sum span{display:block;font-size:13px;color:var(--mu)}
+small{display:block;margin:2px 0 0;line-height:1.35}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--ln)}th{color:var(--mu);font-weight:600}
+button{font:inherit;padding:8px 14px;border-radius:4px;border:1px solid var(--ac);background:var(--ac);color:var(--bg);cursor:pointer}
+small{color:var(--mu)}
+@media print{.in,button{display:none}.app{display:block}body{background:#fff}}
+
+/* ElectraLab visual layer — UI only; BY Sabbir Ahamed. */
+:root,:root[data-theme="dark"],:root:not([data-theme="light"]){
+  --el-bg:#F4F7FA;--el-pn:#FFFFFF;--el-ink:#17212B;--el-mu:#667482;
+  --el-ln:#D7DEE5;--el-ac:#1769E0;--el-shadow:0 8px 24px rgba(20,35,50,.07);
+  --el-radius:12px;
+}
+:root[data-theme="dark"]{
+  --el-bg:#0B1117;--el-pn:#121B24;--el-ink:#E8EEF3;--el-mu:#9AA8B5;
+  --el-ln:#2B3947;--el-ac:#70A7F7;--el-shadow:0 10px 28px rgba(0,0,0,.24);
+}
+body{background:var(--el-bg);color:var(--el-ink);min-width:0}
+header{
+  max-width:1240px;margin:0 auto;padding:16px 20px 6px;
+}
+.brandline{
+  display:flex;align-items:center;min-height:42px;padding:9px 14px;
+  font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--el-ac);background:var(--el-pn);border:1px solid var(--el-ln);
+  border-radius:12px;box-shadow:var(--el-shadow);margin-bottom:10px
+}
+.header-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+header h1{font-size:clamp(24px,3vw,30px);letter-spacing:-.025em}
+header p{max-width:850px}
+.back-toolbox{position:static}
+.top-actions{display:flex;align-items:center;gap:8px}
+html,body,header,.app,.pn,input,select,button,.top-action,.el-footer,.sum div,.msg,table,th,td{
+  transition:
+    background-color .32s ease,
+    color .28s ease,
+    border-color .28s ease,
+    box-shadow .32s ease;
+}
+.theme-toggle{
+  transition:background-color .28s ease,color .28s ease,border-color .28s ease,
+             transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease;
+}
+.theme-toggle:active{transform:rotate(18deg) scale(.92)}
+.theme-toggle.theme-switching{transform:rotate(180deg) scale(1.05)}
+
+.top-action{
+  min-height:40px;padding:8px 12px;border:1px solid var(--el-ln);border-radius:10px;
+  background:var(--el-pn);color:var(--el-ink);font-weight:700;box-shadow:0 3px 12px rgba(20,35,50,.06);
+  text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px
+}
+.top-action:hover{border-color:var(--el-ac);color:var(--el-ac)}
+.theme-toggle{width:40px;padding:8px}
+.app{
+  max-width:1240px;grid-template-columns:300px minmax(0,1fr);gap:18px;padding:18px 20px 28px
+}
+.pn{
+  background:var(--el-pn);border-color:var(--el-ln);border-radius:var(--el-radius);
+  padding:16px;box-shadow:var(--el-shadow)
+}
+input,select{
+  min-height:40px;padding:8px 10px;border-radius:8px;background:var(--el-bg);
+  border-color:var(--el-ln);color:var(--el-ink)
+}
+button{min-height:40px;border-radius:9px;font-weight:700}
+.msg{border-radius:9px;background:var(--el-bg)}
+.sum div{border-radius:10px;background:var(--el-bg)}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+@media(max-width:600px){
+  header{padding:12px 14px 4px}
+  .brandline{min-height:40px;padding:8px 12px;margin-bottom:8px}
+  .header-actions{margin-bottom:8px}
+  .app{padding:14px 14px 24px}
+  .pn{padding:14px;margin-bottom:12px}
+  .row{grid-template-columns:1fr 1fr}
+  .row>div:last-child{grid-column:1/-1}
+  dl{grid-template-columns:1fr}
+  .sum{grid-template-columns:1fr}
+}
+@media(max-width:390px){
+  .row{grid-template-columns:1fr}
+  .row>div:last-child{grid-column:auto}
+  .top-action{min-height:38px;padding:7px 10px;font-size:13px}
+  .theme-toggle{width:38px}
+}
+@media print{
+  @page{size:auto;margin:14mm}
+  :root,:root[data-theme="dark"],:root:not([data-theme="light"]){
+    color-scheme:light;
+    --bg:#fff!important;--pn:#fff!important;--ink:#111!important;--mu:#444!important;--ln:#bbb!important;
+    --ac:#1769E0!important;--air:#C0392B!important;--dn:#16825A!important;--ea:#8B5E34!important;--soil:#fff!important;
+    --el-bg:#fff!important;--el-pn:#fff!important;--el-ink:#111!important;--el-mu:#444!important;--el-ln:#bbb!important;
+  }
+  .sv svg [fill="var(--pn)"],.sv svg [fill="var(--soil)"]{fill:#fff!important}
+  html,body{background:#fff!important;color:#111!important;font:10pt/1.35 Arial,sans-serif}
+  header{max-width:none;padding:0 0 8mm}
+  header h1{display:none}
+  .brandline,.header-actions,.in,button,.report-disclaimer{display:none!important}
+  header p{display:none}
+  .app{display:block;max-width:none;padding:0}
+  main{display:block}
+  .pn{break-inside:avoid;background:#fff!important;border:1px solid #bbb;border-radius:0;box-shadow:none;padding:8px;margin:0 0 8px}
+  h2{font-size:12pt}
+  dl{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 10px}
+  .sum{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .sum div{background:#fff!important;padding:7px;border-width:1px 1px 1px 5px}
+  .sum b{font-size:16pt}
+  .sv svg{max-height:170mm}
+  .msg{background:#fff!important}
+  .scroll{overflow:visible}
+  table{font-size:9pt}
+  tr{break-inside:avoid}
+  th,td{padding:4px 6px}
+  .print-title{display:block!important}
+}
+.print-title{display:none}
+
+</style></head><body>
+<header>
+  <div class="brandline">⚡ ElectraLab- Lightning Protection Designer</div>
+  <div class="header-actions">
+    <a class="top-action back-toolbox" href="Advanced.html" aria-label="Back to ElectraLab Toolbox">← Back to Toolbox</a>
+    <div class="top-actions" aria-label="Page controls">
+      <button class="top-action theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">☾</button>
+    </div>
+  </div>
+  
+  <p>IEC 62305-3 sizing aid; formal IEC 62305-2 and BNBC risk assessments are not implemented</p>
+</header>
+<div class="app">
+<aside class="in"><div class="pn"><h2>Building</h2>
+<div class="row"><div><label for="L">Length m</label><input id="L" type="number" value="60" min="3"></div><div><label for="W">Width m</label><input id="W" type="number" value="30" min="3"></div><div><label for="H">Eave m</label><input id="H" type="number" value="8" min="2"></div></div>
+<small>Plan length and width of the roof, and height from ground to the eave. These set the collection area, mesh and down-conductor count.</small>
+<label for="roof">Roof</label><select id="roof"><option value="g">Gable shed (ridge along length)</option><option value="f">Flat roof</option></select>
+<small>Gable: a ridge conductor is added and the mesh is laid on the sloping surface.</small>
+<label for="rise">Ridge rise above eave m</label><input id="rise" type="number" value="2" min="0"><small>Vertical height from eave to ridge (gable only).</small>
+<label for="roofline">Reference length l m</label><input id="roofline" type="number" value="8" min="1" step="0.5"><small>Length along the LPS from the point under review down to the nearest equipotential bonding or earth point. Used for separation distance s.</small>
+<label for="atm">Air terminal rods</label><select id="atm"><option value="0" selected>Corners and ridge ends only (mesh method)</option><option value="1">Add intermediate rods at rolling-sphere spacing</option></select><small>With the mesh method the roof conductors are the air termination, so rods are needed only at exposed corners and ends. Extra rods are optional.</small></div>
+<div class="pn"><h2>Legacy risk screen (not code-compliance assessment)</h2>
+<small>This simplified NC screen is not a formal IEC 62305-2 risk assessment and must not determine a compliance LPL. Set the LPL only from the governing code or a documented project risk assessment. Applicability of NFPA 780 under BNBC depends on the adopted code edition and authority having jurisdiction; this tool does not establish that basis or implement BNBC/NFPA calculations.</small>
+<label for="ng">Ground-flash density NSG, flashes/km²/year</label><input id="ng" type="number" value="6" step="0.5" min="0.01">
+<small>Use local lightning-density data for the site. Bangladesh is a high-lightning region; the default is a placeholder, not an authority-certified value. Enter ground strike-point density NSG, which is higher than the older flash density NG.</small>
+<label for="loc">Location factor Cd</label><select id="loc"><option value="0.25">0.25 — surrounded by taller structures</option><option value="0.5" selected>0.5 — surrounded by similar height</option><option value="1">1 — isolated</option><option value="2">2 — isolated on hilltop</option></select><small>How exposed the building is to direct strikes (IEC 62305-2 Cd).</small>
+<label for="c2">C2 — structure construction / roof</label><select id="c2"><option value="0.5">0.5 — metal structure, metal roof</option><option value="1" selected>1 — common (RCC / brick, non-metal roof)</option><option value="2">2 — flammable roof or mixed</option><option value="3">3 — flammable structure</option></select>
+<label for="c3">C3 — contents</label><select id="c3"><option value="0.5">0.5 — low value, non-combustible</option><option value="1" selected>1 — standard value</option><option value="2">2 — high value / vulnerable</option><option value="3">3 — exceptional / flammable</option></select>
+<label for="c4">C4 — occupancy</label><select id="c4"><option value="0.5">0.5 — unoccupied</option><option value="1" selected>1 — normally occupied</option><option value="3">3 — hard to evacuate / panic risk</option></select>
+<label for="c5">C5 — consequence of loss</label><select id="c5"><option value="1" selected>1 — service continuity not needed</option><option value="5">5 — continuity needed, no environmental harm</option><option value="10">10 — environmental consequences</option></select>
+<small>C2–C5 give the tolerable frequency NC = 5.5×10⁻³ / (C2·C3·C4·C5). If ND &gt; NC, LPS efficiency E = 1 − NC/ND selects the class.</small>
+<label for="lvl">Protection class / LPL</label><select id="lvl"><option value="0">Automatic legacy-screen indication</option><option value="1">I</option><option value="2">II</option><option value="3">III</option><option value="4">IV</option></select><small>Use only the manually selected class when it is established by the governing code or a documented risk assessment.</small></div>
+<div class="pn"><h2>Materials, separation and earthing</h2>
+<label for="mat">Air-termination / down-conductor material</label><select id="mat"><option value="Cu">Copper / tin-plated copper</option><option value="St">Hot-dip galvanised steel</option><option value="Al">Aluminium (air side only)</option></select><small>Sets the minimum above-ground conductor sizes. Aluminium must not be buried or used in contact with soil/concrete.</small>
+<label for="form">Conductor form</label><select id="form"><option value="t" selected>Tape (flat strip)</option><option value="r">Solid round</option></select><small>Solid round is a solid wire, not a pipe. Sizes below follow the form selected here.</small>
+<label for="earthMat">Buried earth-electrode material</label><select id="earthMat"><option value="Cu" selected>Copper / copper-bonded</option><option value="St">Hot-dip galvanised steel</option></select><small>Used independently from the above-ground conductor material; use compatible, corrosion-controlled transitions.</small>
+<label for="km">Separation medium km</label><select id="km"><option value="1" selected>Air (km = 1.0)</option><option value="0.5">Concrete / brick (km = 0.5)</option></select><small>Insulating material between the LPS and metalwork at the separation point.</small>
+<label for="kc">Current-sharing factor kc</label><select id="kc"><option value="1" selected>1.00 — conservative (single / unknown)</option><option value="0.66">0.66 — two down conductors</option><option value="0.44">0.44 — three or more, Type B ring</option></select><small>Share of lightning current in the nearest down conductor. Use 0.44 only with an interconnected Type B ring.</small>
+<label for="rho">Soil resistivity ρ Ω·m</label><input id="rho" type="number" value="60" min="1"><small>From a Wenner 4-pin test. Measure in the dry season; wet-monsoon readings are lower and not conservative.</small>
+<label for="targetR">Project electrode-resistance target Ω</label><input id="targetR" type="number" value="10" min="0.1" step="0.1"><small>User-selected target for this preliminary sizing model; 10 Ω is only the starting value and is not a universal IEC or BNBC acceptance limit. Set the value required by the project and authority.</small>
+<label for="earth">Earth termination arrangement</label><select id="earth"><option value="B" selected>Type B — ring / foundation electrode</option><option value="A">Type A — individual rods / radials</option></select><small>Type B is preferred with several down conductors.</small>
+<label for="rodD">Earth rod diameter mm</label><input id="rodD" type="number" value="16" min="8" step="1"><small>Minimum 16 mm galvanised steel or 15 mm copper (IEC 62305-3 Table 7).</small>
+<label for="bond">Lightning equipotential bonding</label><select id="bond"><option value="1" selected>Provided at service / main bonding point</option><option value="0">Not confirmed</option></select>
+<label for="spd">Internal SPM / SPD coordination</label><select id="spd"><option value="1" selected>Planned / coordinated</option><option value="0">Not confirmed</option></select>
+<label for="metal">External conductive services / metalwork</label><select id="metal"><option value="1" selected>Present — bonding assessment required</option><option value="0">None / not known</option></select>
+<button style="margin-top:14px;width:100%" onclick="window.print()">Print report</button></div></aside>
+<main>
+<h1 class="print-title">Lightning Protection Design Report</h1>
+<div class="pn"><h2>Design summary</h2><div id="sum" class="sum"></div></div>
+<div class="pn"><h2>Risk and protection level</h2><dl id="risk"></dl><div id="rmsg"></div></div>
+<div class="pn"><h2>Roof plan</h2><div id="plan" class="sv"></div></div>
+<div class="pn"><h2>End elevation</h2><div id="elev" class="sv"></div></div>
+<div class="pn"><h2>Design results</h2><dl id="res"></dl><div id="emsg"></div></div>
+<div class="pn scroll"><h2>Material takeoff</h2><table id="tk"></table></div>
+<p class="report-disclaimer"><small>⚡ ElectraLab Advanced Suite · Preliminary engineering calculation aid. Verify against manufacturer nameplate data and local codes before installation.</small></p>
+</main></div>
+<script>
+const $=id=>document.getElementById(id),
+      g=id=>parseFloat($(id).value)||0,
+      f=(x,d=1)=>Number.isFinite(x)?x.toFixed(d):'—',
+      esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+const LV={
+  1:{R:20,M:5,D:10,Imax:200,Imin:3,ki:.08,eta:.98,label:'I'},
+  2:{R:30,M:10,D:10,Imax:150,Imin:5,ki:.06,eta:.95,label:'II'},
+  3:{R:45,M:15,D:15,Imax:100,Imin:10,ki:.04,eta:.90,label:'III'},
+  4:{R:60,M:20,D:20,Imax:100,Imin:16,ki:.04,eta:.80,label:'IV'}
+};
+
+const MAT={Cu:{rod:15},St:{rod:16},Al:{rod:0}};
+const FORM={
+  Cu:{t:{air:'25×2 mm tape (50 mm²)',ring:'25×2 mm tape (50 mm²)'},r:{air:'Ø8 mm solid round (50 mm²)',ring:'Ø8 mm solid round (50 mm²)'}},
+  St:{t:{air:'20×2.5 mm tape (50 mm²)',ring:'30×3 mm tape (90 mm²)'},r:{air:'Ø8 mm solid round (50 mm²)',ring:'Ø10 mm solid round (78 mm²)'}},
+  Al:{t:{air:'25×3 mm tape (75 mm²)',ring:'Not permitted underground'},r:{air:'Ø10 mm solid round (78 mm²)',ring:'Not permitted underground'}}
+};
+const kv=(k,v,c='')=>`<div class="${c}"><dt>${k}</dt><dd>${v}</dd></div>`;
+function rodResistance(rho,l,d){
+  if(l<=0 || d<=0) return NaN;
+  return rho/(2*Math.PI*l)*(Math.log(8*l/d)-1);
+}
+
+function minL1Estimate(rho,lv){
+  // IEC 62305-3:2024 Figure 5 is graphical. This is a transparent linear interpolation
+  // between the published graph endpoints and is explicitly flagged as an estimate.
+  if(rho<=500) return 5;
+  const max=lv<=1?80:(lv===2?40:5);
+  if(max===5) return 5;
+  return Math.min(max,5+(rho-500)/(3000-500)*(max-5));
+}
+
+function typeBRe(L,W){
+  // Ring ~1 m outside the structure: enclosed rectangular area approximation.
+  return Math.sqrt(((L+2)*(W+2))/Math.PI);
+}
+
+function lpsLabel(lv){return ['','I','II','III','IV'][lv]||'—';}
+
+const DEFS='<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--mu)"/></marker></defs>';
+const dimH=(x1,x2,y,t)=>`<g class="dm"><line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" marker-start="url(#ar)" marker-end="url(#ar)"/><text x="${(x1+x2)/2}" y="${y-7}" text-anchor="middle">${t}</text></g>`;
+const dimV=(x,y1,y2,t)=>`<g class="dm"><line x1="${x}" x2="${x}" y1="${y1}" y2="${y2}" marker-start="url(#ar)" marker-end="url(#ar)"/><text transform="translate(${x-8} ${(y1+y2)/2}) rotate(-90)" text-anchor="middle">${t}</text></g>`;
+const legend=a=>'<div class="lg">'+a.map(r=>`<span><i class="${r[1]||''}" style="${r[2]}"></i>${r[0]}</span>`).join('')+'</div>';
+
+function run(){
+  const L=Math.max(3,g('L')),W=Math.max(3,g('W')),H=Math.max(2,g('H')),gb=$('roof').value==='g',
+        rise=gb?Math.max(0,g('rise')):0,Hm=H+rise,nsg=Math.max(0.01,g('ng')),Cd=+$('loc').value,
+        Cf=g('c2')*g('c3')*g('c4')*g('c5'),rho=Math.max(1,g('rho')),mat=$('mat').value,earthMat=$('earthMat').value,earth=$('earth').value,
+        bond=+$('bond').value,spd=+$('spd').value,metal=+$('metal').value,rodDmm=Math.max(8,g('rodD')),rodD=rodDmm/1000,
+        targetR=Math.max(0.1,parseFloat($('targetR').value)||10),
+        lref=Math.max(1,g('roofline')),km=+$('km').value||1,kc=+$('kc').value||1;
+
+  // Legacy NC heuristic only; this is not the IEC 62305-2 risk assessment method.
+  const Ad=L*W+6*Hm*(L+W)+9*Math.PI*Hm*Hm,Nd=nsg*Ad*Cd*1e-6,Nc=5.5e-3/Cf,E=Math.max(0,1-Nc/Math.max(Nd,1e-12));
+  let lv=+$('lvl').value,txt;
+  if(!lv){
+    if(Nd<=Nc){lv=4;txt='ND ≤ NC: an LPS is not required by this screen. LPL IV is shown only for reference if one is installed anyway.';}
+    else if(E>0.98){lv=1;txt='E > 0.98: LPL I plus additional protection measures.';}
+    else if(E>0.95){lv=1;txt='0.95 < E ≤ 0.98: LPL I.';}
+    else if(E>0.90){lv=2;txt='0.90 < E ≤ 0.95: LPL II.';}
+    else if(E>0.80){lv=3;txt='0.80 < E ≤ 0.90: LPL III.';}
+    else{lv=4;txt='E ≤ 0.80: LPL IV.';}
+  }else txt='Manual LPL selected; the screen does not override it.';
+  const P=LV[lv];
+
+  // Geometry. Mesh is laid on the sloping surface; down conductors follow spacing D (corner at each corner).
+  const sl=gb?Math.hypot(W/2,rise):0,Wd=gb?2*sl:W,
+        nx=Math.max(1,Math.ceil(L/P.M)),ny0=Math.max(1,Math.ceil(Wd/P.M)),ny=gb?Math.max(2,ny0+ny0%2):ny0,
+        meshX=L/nx,meshY=Wd/ny,sL=Math.max(1,Math.ceil(L/P.D)),sW=Math.max(1,Math.ceil(W/P.D)),n=2*(sL+sW),
+        dMax=Math.max(L/sL,W/sW),air=2*L+2*Wd+(nx-1)*Wd+(ny-1)*L,
+        downLength=H+1.5,ring=2*(L+2)+2*(W+2),
+        xov=(nx-1)*(ny-1)+2*(nx-1)+2*(ny-1),
+        supports=Math.ceil(air)+n*Math.ceil(downLength);
+  const s=P.ki*kc*lref/km;
+  const sz=FORM[mat][$('form').value].air,rsz=FORM[earthMat][$('form').value].ring;
+  // Air terminals: mesh conductors are the air termination; rods at exposed corners / ridge ends, optional intermediate rods
+  const smax=2*Math.sqrt(2*P.R-1),full=$('atm').value==='1',aL=full?Math.ceil(L/smax):1,aW=full?Math.ceil(W/smax):1,at=[];
+  if(gb){for(let i=0;i<=aL;i++)at.push([i*L/aL,0],[i*L/aL,W]);at.push([0,W/2],[L,W/2]);if(full)for(let i=1;i<aL;i++)at.push([i*L/aL,W/2]);}
+  else{for(let i=0;i<aL;i++)at.push([i*L/aL,0]);for(let j=0;j<aW;j++)at.push([L,j*W/aW]);for(let i=0;i<aL;i++)at.push([L-i*L/aL,W]);for(let j=0;j<aW;j++)at.push([0,W-j*W/aW]);}
+
+  // Earthing
+  const l1=minL1Estimate(rho,lv),re=typeBRe(L,W),ringOK=re>=l1,dl=Math.max(0,l1-re),
+        rodL=Math.max(3,0.5*l1),R1=rodResistance(rho,rodL,rodD),grp=(N,length=rodL)=>{const Lp=L+2,Wp=W+2,pr=2*(Lp+Wp),q=[];for(let i=0;i<N;i++){const t=i*pr/N;q.push(t<Lp?[t,0]:t<Lp+Wp?[Lp,t-Lp]:t<2*Lp+Wp?[Lp-(t-Lp-Wp),Wp]:[0,Wp-(t-2*Lp-Wp)]);}
+          const Rone=rodResistance(rho,length,rodD);let sm=0;for(let i=0;i<N;i++)for(let j=0;j<N;j++)if(i!==j)sm+=rho/(2*Math.PI*Math.max(Math.hypot(q[i][0]-q[j][0],q[i][1]-q[j][1]),0.3));return (Rone+sm/N)/N;},
+        nRodA=n,Dr=2*re,Rring=rho/(2*Math.PI*Math.PI*Dr)*(Math.log(8*Dr/0.01)+Math.log(4*Dr/1)),
+        rodMin=MAT[earthMat].rod,rodBad=rodDmm<rodMin;
+  const resistanceWithRods=(count,length)=>1/(1/Rring+1/grp(count,length));
+  const sizeRodCount=(minimum,resistance)=>{
+    const maximum=Math.max(400,minimum);
+    if(resistance(minimum)<=targetR)return minimum;
+    if(resistance(maximum)>targetR)return maximum;
+    let low=minimum,high=maximum;
+    while(high-low>1){
+      const middle=Math.floor((low+high)/2);
+      if(resistance(middle)<=targetR)high=middle;
+      else low=middle;
+    }
+    return high;
+  };
+  const nRodARequired=sizeRodCount(n,count=>grp(count,rodL));
+  const nRodBRequired=(()=>{
+    if(ringOK&&Rring<=targetR)return 0;
+    const minimum=ringOK?2:Math.max(n,2);
+    return sizeRodCount(minimum,count=>resistanceWithRods(count,Math.max(dl/2,rodL)));
+  })();
+  const nRod=earth==='A'?nRodARequired:nRodBRequired,
+        rodLen=earth==='A'?rodL:(nRodBRequired>0?Math.max(dl/2,rodL):0),
+        Rarr=grp(nRodARequired,rodL),
+        Rtot=earth==='B'?(nRodBRequired>0?resistanceWithRods(nRodBRequired,rodLen):Rring):Rarr,
+        spc=2*((L+2)+(W+2))/Math.max(nRod,1);
+
+  $('risk').innerHTML=kv('Roof footprint',f(L*W,0)+' m²')+kv('Collection area Ad',f(Ad/1e6,5)+' km²')+
+    kv('Dangerous events / year ND',f(Nd,5))+kv('Tolerable frequency NC',f(Nc,5))+kv('C = C2·C3·C4·C5',f(Cf,2))+
+    kv('LPS efficiency E = 1 − NC/ND',Nd>Nc?'1 − '+f(Nc,5)+' / '+f(Nd,5)+' = '+f(E*100,1)+' %':'not required')+    kv('Screen indication / selected class','LPL '+lpsLabel(lv),'big');
+  $('rmsg').innerHTML=`<div class="msg ${Nd<=Nc?'ok':'bad'}">${esc(txt)}</div>`;
+
+  $('res').innerHTML=kv('Rolling sphere radius',P.R+' m')+kv('Air terminals (1 m rods)',at.length+' nos'+(full?', ≤ '+f(smax,1)+' m apart':' (corners / ridge ends)'),'big')+kv('Maximum mesh',P.M+' × '+P.M+' m')+kv('Mesh on roof',f(meshX,2)+' × '+f(meshY,2)+' m')+
+    kv('Down-conductor spacing (max)',P.D+' m')+kv('Down conductors',n,'big')+kv('Achieved max spacing',f(dMax,2)+' m')+
+    kv('Lightning current',`Imax ${P.Imax} kA / Imin ${P.Imin} kA`)+kv('Air / down conductor',sz)+
+    kv('Separation s = ki·kc·l/km',f(s,2)+' m (ki '+P.ki+', kc '+kc+', km '+km+')','big')+
+    kv('Approx. electrode length screen (not for design)',f(l1,1)+' m')+kv('Type B mean radius re',f(re,1)+' m')+
+    kv('Project electrode-resistance target',f(targetR,2)+' Ω')+
+    kv('Earth rods required',nRod>0?nRod+' nos × '+f(rodLen,1)+' m':'none','big')+kv('Single rod model',f(R1,2)+' Ω')+kv('Rod group model',f(Rarr,2)+' Ω')+
+    kv('Ring electrode model',f(Rring,2)+' Ω')+
+    kv('Rod head burial',nRod>0?'≥ 0.5 m below finished grade':'Not applicable')+
+    kv('Rod tip depth',nRod>0?f(rodLen+0.5,1)+' m below grade ('+f(rodLen,1)+' m rod + 0.5 m cover)':'No rods selected')+
+    kv('Earth ring burial','Top of ring ≥ 0.5 m below grade; about 1 m outside wall')+
+    kv('Calculated electrode resistance model',f(Rtot,2)+' Ω ('+(Rtot<=targetR?'meets':'exceeds')+' project target)','big');
+
+  const m=[];
+  m.push(`<div class="msg ${meshX<=P.M+1e-9&&meshY<=P.M+1e-9?'ok':'bad'}">Mesh ${f(meshX,2)} × ${f(meshY,2)} m versus limit ${P.M} m.</div>`);
+  m.push(`<div class="msg ${dMax<=P.D+1e-9?'ok':'bad'}">Down-conductor spacing max ${f(dMax,2)} m versus ${P.D} m; one down conductor at every corner.</div>`);
+  m.push(`<div class="msg ${Rtot<=targetR?'ok':'bad'}">${earth==='B'?(nRod===0?'Type B ring model meets the selected resistance target and minimum-radius screen; no supplemental rods were sized.':'Type B ring plus '+nRod+' supplemental rods sized against the electrode-length screen and selected resistance target.'):'Type A: '+nRodARequired+' rods (at least one per down conductor), each '+f(rodLen,1)+' m long, sized against the electrode-length screen and selected resistance target.'} Soil resistivity input: ${f(rho,0)} Ω·m; selected target: ${f(targetR,2)} Ω. If vertical rods are used, this drawing sets the rod head 0.5 m below finished grade; tip depth is rod length + 0.5 m. Confirm the model, burial, and electrode-length requirements against site testing and the adopted code.</div>`);
+  if(Rtot>targetR)m.push(`<div class="msg bad">The resistance model remains above the selected target at the maximum evaluated group of ${nRod} rods. Revise electrode geometry or use a specialist ground-grid analysis.</div>`);
+  m.push('<div class="msg bad">Factory design scope: this simplified tool does not perform a complete IEC 62305-2 / BNBC risk assessment or assess process hazards, explosive atmospheres, multiple zones/buildings, incoming-service risk, or touch/step voltages. Do not use its auto-screen as the factory design basis.</div>');
+  if(nRod>0&&spc<rodL)m.push(`<div class="msg bad">Rod spacing about ${f(spc,1)} m is less than the rod length ${f(rodL,1)} m; use longer or fewer rods.</div>`);
+  if(rodBad)m.push(`<div class="msg bad">Rod diameter ${rodDmm} mm is below the ${rodMin} mm minimum for this material.</div>`);
+  if(mat==='Al')m.push('<div class="msg">Aluminium is used only for the above-ground air/down conductors. The buried electrode material is selected separately.</div>');
+  if(rho>3000)m.push('<div class="msg bad">ρ above 3000 Ω·m is outside the l1 curve (value capped); a project-specific earthing design is needed.</div>');
+  if(Hm>20)m.push('<div class="msg bad">Height above 20 m: check horizontal ring conductors interconnecting the down conductors (IEC 62305-3 §5.3).</div>');
+  if(Hm>60)m.push('<div class="msg bad">Above 60 m: assess lateral flashes on the upper facade.</div>');
+  if(!bond)m.push('<div class="msg bad">Equipotential bonding not confirmed: add a bonding review.</div>');
+  if(!spd)m.push('<div class="msg bad">SPD coordination not confirmed: add an SPM/SPD study.</div>');
+  if(metal)m.push('<div class="msg">External conductive services/metalwork are indicated: verify bonding, routing and separation distance at each relevant point; the single entered reference length does not replace a route-by-route check.</div>');
+  $('emsg').innerHTML=m.join('');
+
+  const dlen=downLength,tot=air+n*dlen;
+  $('tk').innerHTML='<tr><th>Item</th><th>Quantity</th><th>Size / requirement</th></tr>'+[
+    ['Roof air-termination conductor (perimeter + mesh'+(gb?', ridge included':'')+')',f(air,0)+' m',sz],
+    ['Down conductors (incl. 1.5 m to the earth ring)',n+' × '+f(dlen,1)+' m = '+f(n*dlen,0)+' m',sz],
+    ['<b>Total roof + down conductor</b>','<b>'+f(tot,0)+' m</b> ('+f(tot*1.1,0)+' m with 10 % for bends and laps)',sz],
+    ['Earth ring (Type B)',earth==='B'?f(ring,0)+' m':'—',earth==='B'?esc(rsz)+' '+earthMat+'; top ≥ 0.5 m below grade, about 1 m from wall':'—'],
+    ['Earth rods',nRod>0?nRod+' × '+f(rodLen,1)+' m':'None required',nRod>0?earthMat+'; Ø'+rodDmm+' mm (min '+(rodMin||'n/a')+' mm); rod head ≥ 0.5 m below finished grade; tip depth '+f(rodLen+0.5,1)+' m below grade':'—'],
+    ['Air terminals',at.length+' nos','1 m rod: Ø10 mm (Ø16 mm if taller); larger than the mesh conductor'],
+    ['Test joints',n+' nos','One per down conductor, near the earth connection'],
+    ['Conductor supports',supports+' nos','Approx. 1 m along roof conductors and down conductors'],
+    ['Crossover / T clamps',xov+' nos','IEC 62561-1']
+  ].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+
+  window.CSZ=sz;window.CNDC=n;window.CSHORT=sz.split(' (')[0];
+  const card=(c,t,b,l1,l2)=>`<div style="border-left-color:var(--${c})"><em>${t}</em><b>${b}</b>${l1?`<span>${l1}</span>`:''}${l2?`<span>${l2}</span>`:''}</div>`;
+  $('sum').innerHTML=
+    card('dn','Down conductors',n+' nos',sz,'Each '+f(downLength,1)+' m, total '+f(n*downLength,0)+' m; spacing ≤ '+f(dMax,1)+' m (limit '+P.D+' m)')+
+    card('air','Air terminals',at.length+' nos','1 m rods, Ø10 mm (Ø16 mm if taller)',(gb?'Eave corners and ridge ends':'Corners')+(full?' plus intermediate rods':''))+
+    card('air','Roof conductor',f(air,0)+' m',sz,'Mesh '+f(meshX,1)+' × '+f(meshY,1)+' m (limit '+P.M+' m); roof + down total '+f(tot,0)+' m')+
+    card('ea','Earthing',earth==='B'?f(ring,0)+' m ring':nRod+' rods',earth==='B'?earthMat+' '+esc(rsz)+', 0.5 m cover, about 1 m from the wall'+(nRod>0?'; plus '+nRod+' '+earthMat+' rods, tip depth '+f(rodLen+0.5,1)+' m':''):' '+earthMat+' Ø'+rodDmm+' mm × '+f(rodLen,1)+' m rods, head 0.5 m below grade; tip depth '+f(rodLen+0.5,1)+' m','Calculated model '+f(Rtot,2)+' Ω; project target '+f(targetR,2)+' Ω');
+  plan(L,W,nx,ny,gb,P,sL,sW,meshX,meshY,at,smax);elev(W,H,rise,gb,nRod>0?rodLen:0,at.length,nRod,earth);
+  document.title="ElectraLab — Lightning Protection Designer | Air terminals, down conductors, separation distance and earthing per IEC 62305-3; risk screening uses the simplified NC method";
+}
+
+function plan(L,W,nx,ny,gb,P,sL,sW,mx,my,at,smax){
+  const A=760,sc=Math.min(600/(L+4),320/(W+4)),ox=(A-L*sc)/2,oy=96,h=W*sc+oy+56,X=x=>ox+x*sc,Y=y=>oy+y*sc;
+  let s=DEFS+`<rect x="${X(-1)}" y="${Y(-1)}" width="${(L+2)*sc}" height="${(W+2)*sc}" fill="none" stroke="var(--ea)" stroke-dasharray="8 5" stroke-width="2.5"/><rect x="${X(0)}" y="${Y(0)}" width="${L*sc}" height="${W*sc}" fill="var(--pn)" stroke="var(--ink)"/>`;
+  for(let i=1;i<nx;i++)s+=`<line x1="${X(i*L/nx)}" x2="${X(i*L/nx)}" y1="${Y(0)}" y2="${Y(W)}" stroke="var(--air)" opacity=".7"/>`;
+  for(let j=1;j<ny;j++)s+=`<line y1="${Y(j*W/ny)}" y2="${Y(j*W/ny)}" x1="${X(0)}" x2="${X(L)}" stroke="var(--air)" opacity=".7"/>`;
+  s+=`<rect x="${X(0)}" y="${Y(0)}" width="${L*sc}" height="${W*sc}" fill="none" stroke="var(--air)" stroke-width="3.5"/>`;
+  if(gb)s+=`<line x1="${X(0)}" x2="${X(L)}" y1="${Y(W/2)}" y2="${Y(W/2)}" stroke="var(--air)" stroke-width="3.5"/>`;
+  // down conductors: green circles pushed outside the wall with a leader, so they never hide a terminal
+  const d=[];for(let i=0;i<sL;i++)d.push([i*L/sL,0,0,-1]);for(let j=0;j<sW;j++)d.push([L,j*W/sW,1,0]);for(let i=0;i<sL;i++)d.push([L-i*L/sL,W,0,1]);for(let j=0;j<sW;j++)d.push([0,W-j*W/sW,-1,0]);
+  d.forEach((p,i)=>{const x=X(p[0]),y=Y(p[1]),cx=x+p[2]*30,cy=y+p[3]*30;
+    s+=`<line x1="${x}" y1="${y}" x2="${cx}" y2="${cy}" stroke="var(--dn)" stroke-width="2.5"/><circle cx="${cx}" cy="${cy}" r="14" fill="var(--dn)" stroke="var(--pn)" stroke-width="2"/><text class="tg" x="${cx}" y="${cy+4}" text-anchor="middle">D${i+1}</text>`});
+  // air terminals: red labelled squares on the roof conductor
+  at.forEach((p,i)=>s+=`<rect x="${X(p[0])-15}" y="${Y(p[1])-10}" width="30" height="20" rx="4" fill="var(--air)" stroke="var(--pn)" stroke-width="2"/><text class="tg" x="${X(p[0])}" y="${Y(p[1])+4}" text-anchor="middle">T${i+1}</text>`);
+  s+=dimH(X(0),X(L),oy-62,f(L,1)+' m')+dimV(X(0)-70,Y(0),Y(W),f(W,1)+' m');
+  if(gb)s+=`<text x="${X(L)+4}" y="${Y(W/2)-14}" text-anchor="end">Ridge</text>`;
+  $('plan').innerHTML=`<svg viewBox="0 0 ${A} ${h}" role="img" aria-label="Roof plan with ${at.length} numbered air terminals and ${d.length} numbered down conductors">${s}</svg>`+
+    legend([['Air terminal rod T1–T'+at.length+' ('+at.length+' nos, 1 m high)','','background:var(--air);height:12px;width:22px;border-radius:3px'],['Down conductor D1–D'+d.length+': '+d.length+' nos, '+window.CSHORT,'c','background:var(--dn)'],['Roof mesh conductor','','background:var(--air);opacity:.7'],['Earth ring, 1 m outside wall','d','']])+
+    `<small>${at.length} air terminals (${gb?'eave corners and ridge ends':'corners'}${at.length>(gb?6:4)?', plus intermediate rods ≤ '+f(smax,1)+' m apart':''}). Mesh cell ${f(mx,2)} × ${f(my,2)} m (limit ${P.M} m). Down conductors: 2 × (${sL} along length + ${sW} along width) = ${d.length} nos, ${window.CSHORT}, numbered D1–D${d.length} clockwise from the top-left corner.</small>`;
+}
+
+function elev(W,H,r,gb,rl,nAT,nRods,earth){
+  const A=760,Hm=H+r,sc=Math.min(420/(W+6),300/(Hm+rl+3)),ox=(A-W*sc)/2,top=62,gy=top+(Hm+1)*sc,h=gy+(rl+2)*sc+24,X=x=>ox+x*sc,Y=y=>gy-y*sc;
+  let s=DEFS+`<rect x="0" y="${gy}" width="${A}" height="${h-gy}" fill="var(--soil)"/><line x1="0" x2="${A}" y1="${gy}" y2="${gy}" stroke="var(--ink)" stroke-width="2"/><text x="10" y="${gy-8}">Ground level</text>`;
+  const roof=gb?`${X(0)},${Y(H)} ${X(W/2)},${Y(Hm)} ${X(W)},${Y(H)}`:`${X(0)},${Y(H)} ${X(W)},${Y(H)}`;
+  s+=`<polygon points="${X(0)},${Y(0)} ${roof} ${X(W)},${Y(0)}" fill="var(--pn)" stroke="var(--ink)" stroke-width="1.5"/><polyline points="${roof}" fill="none" stroke="var(--air)" stroke-width="4"/>`;
+  [[0,H],[W,H]].concat(gb?[[W/2,Hm]]:[]).forEach(p=>s+=`<line x1="${X(p[0])}" x2="${X(p[0])}" y1="${Y(p[1])}" y2="${Y(p[1]+1)}" stroke="var(--air)" stroke-width="4"/><circle cx="${X(p[0])}" cy="${Y(p[1]+1)}" r="4" fill="var(--air)"/>`);
+  [0,W].forEach(x=>{const rx=x?W+1:-1;
+    s+=`<line x1="${X(x)}" x2="${X(x)}" y1="${Y(H)}" y2="${Y(-0.5)}" stroke="var(--dn)" stroke-width="4"/><rect x="${X(x)-7}" y="${Y(1.5)-6}" width="14" height="12" fill="var(--pn)" stroke="var(--dn)" stroke-width="2.5"/>`+
+       `<line x1="${X(x)}" x2="${X(rx)}" y1="${Y(-0.5)}" y2="${Y(-0.5)}" stroke="var(--ea)" stroke-width="3" stroke-dasharray="6 4"/><circle cx="${X(rx)}" cy="${Y(-0.5)}" r="6" fill="var(--ea)" stroke="var(--pn)" stroke-width="1.5"/>`+
+       (rl?`<line x1="${X(rx)}" x2="${X(rx)}" y1="${Y(-0.5)}" y2="${Y(-0.5-rl)}" stroke="var(--ea)" stroke-width="5"/>`:'')});
+  s+=(gb?`<text x="${X(W/2)}" y="${top-6}" text-anchor="middle">Air terminal rod, 1 m</text>`:`<text x="${X(W)+14}" y="${Y(H+0.5)}">Air terminal rod, 1 m</text>`)+`<text x="${X(W)+12}" y="${Y(1.5)+5}">Test joint</text><text x="${X(W)+12}" y="${Y(H/2)}">Down conductor, ${window.CNDC} nos in total</text><text x="${X(W)+12}" y="${Y(H/2)+17}">${window.CSHORT}</text>`+
+     (rl?`<text x="${X(W)+14}" y="${Y(-0.5)+22}">Rod length ${f(rl,1)} m; head 0.5 m below grade</text>`:'')+
+     dimV(X(0)-70,Y(0),Y(H),'Eave '+f(H,1)+' m')+(gb?dimV(X(W)+78,Y(H),Y(Hm),'Rise '+f(r,1)+' m'):'')+
+     dimH(X(0),X(W),top-30,'Width '+f(W,1)+' m')+(rl?dimV(X(W+1)+34,Y(-0.5),Y(-0.5-rl),'Rod '+f(rl,1)+' m')+dimV(X(W+1)+72,Y(0),Y(-0.5-rl),'Tip '+f(rl+0.5,1)+' m below grade'):'');
+  $('elev').innerHTML=`<svg viewBox="0 0 ${A} ${h}" role="img" aria-label="End elevation with air termination, down conductors and earth electrodes">${s}</svg>`+
+    legend([['Air terminals and roof conductor: '+nAT+' air terminals','','background:var(--air)'],['Down conductors: '+window.CNDC+' total; two shown in elevation ('+window.CSHORT+')','','background:var(--dn)'],[earth==='B'?'Type B ring, about 1 m outside wall':'Type A earth electrodes','d',''],...(nRods>0?[[earth==='A'?nRods+' rods total; two symbols shown schematically':nRods+' supplemental rods total; two symbols shown schematically','','background:var(--ea)']]:[])]);
+}
+
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',run));
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('change',run));
+
+
+/* ElectraLab theme control — BY SABBIR AHAMED. */
+(function(){
+  const root=document.documentElement, btn=document.getElementById('themeToggle');
+  const saved=localStorage.getItem('electralab-theme');
+  if(saved==='light'||saved==='dark') root.dataset.theme=saved;
+  function syncTheme(){
+    const dark=root.dataset.theme==='dark';
+    btn.textContent=dark?'☀':'☾';
+    btn.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');
+    btn.title=dark?'Switch to light mode':'Switch to dark mode';
+  }
+  syncTheme();
+  btn.addEventListener('click',function(){
+    btn.classList.add('theme-switching');
+    const dark=root.dataset.theme==='dark';
+    root.dataset.theme=dark?'light':'dark';
+    localStorage.setItem('electralab-theme',root.dataset.theme);
+    syncTheme();
+    setTimeout(()=>btn.classList.remove('theme-switching'),340);
+  });
+})();
+
+run();
+</script>
+</body></html>

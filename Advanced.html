@@ -82,6 +82,15 @@
             transition: color 0.2s, border-color 0.2s;
         }
         .back-btn:hover, .nav-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+        .back-btn:active, .nav-btn:active {
+            color: #fff;
+            background: var(--amber);
+            border-color: var(--amber);
+        }
+        .back-btn:focus-visible {
+            outline: 2px solid var(--amber);
+            outline-offset: 3px;
+        }
 
         .page-title {
             font-size: clamp(1.5rem, 5vw, 2.25rem);
@@ -873,6 +882,26 @@
                     </div>
                     <p>Build and explore electrical circuits with the Electra Circuit Builder Pro module.</p>
                     <div class="desk-note">(Desktop tool)</div>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile: Lightning Protection System Designer -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='LPSdbS.html'" onkeydown="cardLink(event,'LPSdbS.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon blue">⚡</div>
+                        <h3>Lightning Protection System Designer</h3>
+                    </div>
+                    <p>Roof air-termination layout, down conductors, separation distance, earthing model, and material takeoff.</p>
+                    <div class="card-arrow">Open module →</div>
+                </div>
+
+                <!-- Tile: Solar System Designer -->
+                <div class="tool-card" role="button" tabindex="0" onclick="window.location.href='solar_pro.html'" onkeydown="cardLink(event,'solar_pro.html')">
+                    <div class="tool-header">
+                        <div class="tool-icon">☀</div>
+                        <h3>Solar System Designer</h3>
+                    </div>
+                    <p>Plan a solar PV system and review the key equipment and design outputs.</p>
                     <div class="card-arrow">Open module →</div>
                 </div>
 
