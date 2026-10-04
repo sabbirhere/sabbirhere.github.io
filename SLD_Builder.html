@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=1280, user-scalable=yes">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ElectraLab | SLD Builder</title>
 <style>
 :root{--bg:#020617;--p:#07111f;--p2:#0b1b2d;--bd:rgba(34,211,238,.22);--tx:#cbd5e1;--mu:#64748b;--ac:#22d3ee;--cv:#06101d;--gr:#1a3347;--gm:#28506a;--ink:#a5f3fc;--wr:#67e8f9;--rd:#f87171;--am:#fbbf24;--hv:#102942}
 body.light{--bg:#f1f5f9;--p:#fff;--p2:#f1f5f9;--bd:#cbd5e1;--tx:#1e293b;--mu:#64748b;--ac:#0891b2;--cv:#fff;--gr:#e8eef4;--gm:#cbd5e1;--ink:#0f172a;--wr:#0369a1;--rd:#c1121f;--am:#d97706;--hv:#e0f2fe}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font:13px Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body{font:13px Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tx);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer}
 header{height:50px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--p);border-bottom:1px solid var(--bd)}
 .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:1px}
@@ -48,6 +48,16 @@ svg{display:block;width:100%;height:100%}
 .bt{opacity:.2}.wiring .bt{opacity:1}
 .lb{fill:var(--tx);font:700 11px Arial;pointer-events:none}.pr{fill:var(--mu);font:10px Arial;pointer-events:none}
 .em{fill:var(--mu);font:14px Arial;text-anchor:middle}
+@media(max-width:1024px) and (min-width:761px){main{grid-template-columns:140px 1fr}.tb button{padding:7px 9px}}
+@media(max-width:760px){
+header{height:46px;gap:8px;padding:0 8px}.logo div,header h1{display:none}
+main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 92px}
+aside{order:2;display:flex;flex-direction:row;align-items:stretch;gap:6px;overflow-x:auto;overflow-y:hidden;border-right:0;border-top:1px solid var(--bd);padding:6px}
+aside h4{writing-mode:vertical-rl;transform:rotate(180deg);margin:0;flex:none;font-size:9px;text-align:center}
+.pal{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-template-rows:1fr;grid-auto-columns:64px;flex:none}
+.pal button{height:100%}
+.tb{flex-wrap:nowrap;overflow-x:auto;padding:6px}.tb button{flex:none;padding:9px 11px}.tb .sp{display:none}
+#msg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 @page{size:landscape;margin:8mm}
 @media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,main{display:none!important}#pv{display:block!important}#pv svg{width:100%;height:auto;max-height:190mm;display:block}}
 </style></head><body>
@@ -72,7 +82,7 @@ svg{display:block;width:100%;height:100%}
 <input type="file" id="fi" accept=".json" hidden>
 </div>
 <div id="st" tabindex="0"><svg id="sv"></svg></div>
-<div id="msg">Drag a symbol onto the canvas · click a terminal, then another to wire · double-click a switch to open/close</div>
+<div id="msg">Drag or tap a symbol to place it · click a terminal, then another to wire · double-click a switch to open/close</div>
 </div>
 </main>
 <div id="pv"></div>
@@ -241,7 +251,8 @@ function zoom(k,mx,my){const nz=Math.min(3,Math.max(.2,Z*k));P.x=mx-(mx-P.x)*nz/
 function fit(){if(!N.length){Z=1;P={x:40,y:40};return render()}const xs=N.flatMap(n=>[n.x-(n.type=='bus'?n.len/2:40),n.x+(n.type=='bus'?n.len/2:80)]),ys=N.flatMap(n=>[n.y-60,n.y+60]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);Z=Math.min(1.6,st.clientWidth/(x1-x0),st.clientHeight/(y1-y0));P={x:(st.clientWidth-(x1+x0)*Z)/2,y:(st.clientHeight-(y1+y0)*Z)/2};render()}
 function link(w){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([snap()],{type:'application/json'}));a.download='sld.json';a.click();URL.revokeObjectURL(a.href)}
 /* pointer */
-st.addEventListener('pointerdown',e=>{
+const ptr=new Map();let pinch=null;const pd=()=>{const a=[...ptr.values()];return{d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1,x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2}};
+st.addEventListener('pointerdown',e=>{ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptr.size==2){drag=pan=null;ws=null;wd=0;pinch=pd();return render()}if(ptr.size>2)return;
  const q=e.target,tm=q.closest('[data-t]'),nd=q.closest('[data-n]'),w=q.closest('[data-w]');st.focus();st.setPointerCapture(e.pointerId);
  if(tm){const r={n:tm.dataset.n,t:tm.dataset.t};
   if(ws&&(ws.n!=r.n||ws.t!=r.t)){commit();Wr.push({a:[ws.n,ws.t],b:[r.n,r.t]});ws=null;sel=null;wd=0;ms('Connected')}
@@ -252,11 +263,12 @@ st.addEventListener('pointerdown',e=>{
   ln=n.id;lt=now;drag={n,p0:pt(e),ox:n.x,oy:n.y,m:0};return render()}
  if(w){sel='w'+w.dataset.w;ws=null;return render()}
  sel=null;ws=null;pan={x:e.clientX,y:e.clientY};render()});
-st.addEventListener('pointermove',e=>{
+st.addEventListener('pointermove',e=>{if(ptr.has(e.pointerId))ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&ptr.size==2){const c=pd(),r=st.getBoundingClientRect();P.x+=c.x-pinch.x;P.y+=c.y-pinch.y;zoom(c.d/pinch.d,c.x-r.left,c.y-r.top);pinch=c;return}
  if(drag){const p=pt(e),x=sn(drag.ox+p.x-drag.p0.x),y=sn(drag.oy+p.y-drag.p0.y);if(x!=drag.n.x||y!=drag.n.y){if(!drag.m){commit();drag.m=1}drag.n.x=x;drag.n.y=y;render()}}
  else if(pan){P.x+=e.clientX-pan.x;P.y+=e.clientY-pan.y;pan={x:e.clientX,y:e.clientY};render()}
  else if(ws){draft=pt(e);render()}});
-st.addEventListener('pointerup',e=>{
+st.addEventListener('pointercancel',e=>{ptr.delete(e.pointerId);pinch=null;drag=pan=null});
+st.addEventListener('pointerup',e=>{ptr.delete(e.pointerId);if(pinch){if(ptr.size<2)pinch=null;return}
  if(wd&&ws){const t=document.elementFromPoint(e.clientX,e.clientY),tm=t&&t.closest&&t.closest('[data-t]');
   if(tm&&(tm.dataset.n!=ws.n||tm.dataset.t!=ws.t)){commit();Wr.push({a:[ws.n,ws.t],b:[tm.dataset.n,tm.dataset.t]});ws=null;sel=null;ms('Connected')}}
  wd=0;if(drag&&drag.m)persist();drag=pan=null;render()});
