@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=1280, user-scalable=yes">
+<title>ElectraLab | SLD Builder</title>
+<style>
+:root{--bg:#020617;--p:#07111f;--p2:#0b1b2d;--bd:rgba(34,211,238,.22);--tx:#cbd5e1;--mu:#64748b;--ac:#22d3ee;--cv:#06101d;--gr:#1a3347;--gm:#28506a;--ink:#a5f3fc;--wr:#67e8f9;--rd:#f87171;--am:#fbbf24;--hv:#102942}
+body.light{--bg:#f1f5f9;--p:#fff;--p2:#f1f5f9;--bd:#cbd5e1;--tx:#1e293b;--mu:#64748b;--ac:#0891b2;--cv:#fff;--gr:#e8eef4;--gm:#cbd5e1;--ink:#0f172a;--wr:#0369a1;--rd:#c1121f;--am:#d97706;--hv:#e0f2fe}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:13px Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+header{height:50px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--p);border-bottom:1px solid var(--bd)}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:18px;letter-spacing:1px}
+.logo i{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;font-style:normal;background:linear-gradient(135deg,#00ffff,#6366f1);color:#020617;box-shadow:0 0 12px rgba(0,255,255,.4)}
+.logo b{color:var(--ac)}
+header h1{font-size:14px;font-weight:600;color:var(--mu)}
+header a{color:var(--ac);text-decoration:none;font-size:12px}
+.back{display:flex;align-items:center;padding:7px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--p2);font-weight:600;white-space:nowrap}.back:hover{border-color:var(--ac);background:var(--hv)}
+#pv{display:none}
+.sp{flex:1}
+#th{width:36px;height:36px;border-radius:50%;border:1px solid var(--bd);background:var(--p2);font-size:17px}
+#th:hover{border-color:var(--ac)}
+main{flex:1;display:grid;grid-template-columns:168px 1fr;min-height:0}
+aside{background:var(--p);border-right:1px solid var(--bd);overflow-y:auto;padding:4px 8px 10px;scrollbar-width:thin}
+h4{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);margin:12px 2px 5px}
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pal button{height:56px;padding:4px 2px;border:1px solid var(--bd);border-radius:8px;background:var(--p2);display:flex;flex-direction:column;align-items:center;justify-content:space-between;cursor:grab}
+.pal button:hover{border-color:var(--ac);background:var(--hv)}
+.pal svg{width:100%;height:32px;overflow:visible}
+.pal span{font-size:9.5px;line-height:1.1;text-align:center}
+.col{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tb{display:flex;flex-wrap:wrap;gap:5px;padding:7px 9px;background:var(--p);border-bottom:1px solid var(--bd)}
+.tb button{padding:6px 9px;border:1px solid var(--bd);border-radius:7px;background:var(--p2);font-size:12px}
+.tb button:hover,.tb button[aria-pressed=true]{border-color:var(--ac)}
+.tb .sp{flex:1}
+#st{flex:1;min-height:0;position:relative;background:var(--cv);cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none;outline:none}
+#msg{padding:6px 12px;font-size:11px;color:var(--mu);background:var(--p);border-top:1px solid var(--bd)}
+svg{display:block;width:100%;height:100%}
+.a{fill:none;stroke:var(--ink);stroke-width:2}
+.r{fill:none;stroke:var(--rd);stroke-width:2.5}.k{stroke-width:5}
+.fb{fill:var(--cv)}.f{fill:var(--ink);stroke:var(--ink)}
+.bus{fill:none;stroke:var(--ink);stroke-width:6}
+.tx{fill:var(--ink);font:bold 15px Arial;text-anchor:middle}
+.gr{fill:none;stroke:var(--gr);stroke-width:.7}.gm{fill:none;stroke:var(--gm);stroke-width:1}
+.w{fill:none;stroke:var(--wr);stroke-width:2.5;pointer-events:none}.w.s{stroke:var(--am);stroke-width:3.5}.w.dr{stroke:var(--am);stroke-dasharray:6 4}
+.wh{fill:none;stroke:transparent;stroke-width:14;cursor:pointer}
+.jn{fill:var(--wr)}
+.n{cursor:move}.hit{fill:transparent}.n.s{filter:drop-shadow(0 0 4px var(--am))}.n:hover .a{stroke:var(--ac)}
+.tm{fill:var(--am);stroke:var(--p);pointer-events:none}.tm.on{fill:#fff}.th{fill:transparent;cursor:crosshair}
+.bt{opacity:.2}.wiring .bt{opacity:1}
+.lb{fill:var(--tx);font:700 11px Arial;pointer-events:none}.pr{fill:var(--mu);font:10px Arial;pointer-events:none}
+.em{fill:var(--mu);font:14px Arial;text-anchor:middle}
+@page{size:landscape;margin:8mm}
+@media print{html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}header,main{display:none!important}#pv{display:block!important}#pv svg{width:100%;height:auto;max-height:190mm;display:block}}
+</style></head><body>
+<header>
+<a class="back" href="index.html" title="Back to Toolbox">← Back to Toolbox</a>
+<div class="logo"><i>⚡</i><div>Electra<b>Lab</b></div></div>
+<h1>SLD Builder</h1>
+<span class="sp"></span>
+<button id="th" aria-label="Toggle dark / light mode" title="Dark / light mode">☾</button>
+</header>
+<main>
+<aside id="pal"></aside>
+<div class="col">
+<div class="tb" id="tb">
+<button data-a="undo" title="Ctrl+Z">↶ Undo</button><button data-a="redo" title="Ctrl+Y">↷ Redo</button>
+<button data-a="rot" title="R">⟳ Rotate</button><button data-a="tog" title="Double-click a switch">Open/Close</button>
+<button data-a="edit">✎ Edit</button><button data-a="del" title="Delete">⌫ Delete</button>
+<button data-a="bl">Bus −</button><button data-a="bm">Bus +</button>
+<button data-a="zo">−</button><button data-a="zi">+</button><button data-a="fit">Fit</button><button data-a="grid" aria-pressed="true">Grid</button>
+<span class="sp"></span>
+<button data-a="save">Save</button><button data-a="load">Load</button><button data-a="print">Print</button><button data-a="clear">Clear</button>
+<input type="file" id="fi" accept=".json" hidden>
+</div>
+<div id="st" tabindex="0"><svg id="sv"></svg></div>
+<div id="msg">Drag a symbol onto the canvas · click a terminal, then another to wire · double-click a switch to open/close</div>
+</div>
+</main>
+<div id="pv"></div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),sv=$('#sv'),st=$('#st'),pal=$('#pal');
+const sn=v=>Math.round(v/20)*20,esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ms=t=>$('#msg').textContent=t;
+/* theme */
+const tb=$('#th'),setT=l=>{document.body.classList.toggle('light',l);tb.textContent=l?'☀':'☾'};
+try{setT(localStorage.getItem('electraTheme')=='light')}catch(e){setT(0)}
+tb.onclick=()=>{const l=!document.body.classList.contains('light');setT(l);try{localStorage.setItem('electraTheme',l?'light':'dark')}catch(e){}};
+let pl=0;addEventListener('beforeprint',()=>{pl=document.body.classList.contains('light');document.body.classList.add('light');printBuild()});
+addEventListener('afterprint',()=>{document.body.classList.toggle('light',pl);$('#pv').innerHTML=''});
+/* symbols: vertical by default, terminals [id,x,y,dx,dy] */
+const T=['t',0,-20,0,-1],B=['b',0,20,0,1],E=y=>`M-9 ${y}H9M-5 ${y+4}H5M-2 ${y+8}H2`;
+const Yt=`<path class="a" d="M-7-22L0-14L7-22M0-14V-6"/>`,Yb=`<path class="a" d="M-7 6L0 14L7 6M0 14V22"/>`,Dt=`<path class="a" d="M0-23L-9-7H9Z"/>`;
+const TR=[['t',0,-40,0,-1],['b',0,40,0,1]],trf=a=>()=>`<path class="a" d="M0-40V-34M0 34V40"/><circle class="a" cy="-14" r="20"/><circle class="a" cy="14" r="20"/>${a}${Yb}`;
+const D={
+inc:{n:'Incoming line',g:0,t:[B],s:()=>`<path class="a" d="M0 20V-8"/><path class="f" d="M-6-8L0-18L6-8Z"/>`},
+out:{n:'Outgoing feeder',g:0,t:[T],s:()=>`<path class="a" d="M0-20V8"/><path class="f" d="M-6 8L0 18L6 8Z"/>`},
+src:{n:'Grid source',g:0,t:[B],s:()=>`<path class="a" d="M0 18V20"/><circle class="a" r="18"/><path class="a" d="M-9 0Q-4.5-9 0 0T9 0"/>`},
+gen:{n:'Generator',g:0,t:[T],s:()=>`<path class="a" d="M0-20V-18"/><circle class="a" r="18"/><text class="tx" y="5">G</text>`},
+bus:{n:'Busbar',g:1,s:n=>`<path class="bus" d="M${-n.len/2} 0H${n.len/2}"/>`},
+cb:{n:'Circuit breaker',g:2,sw:1,t:[T,B],s:n=>`<path class="a" d="M0-20V-18M0 18V20"/><circle class="r" r="18"/><path class="r k" d="${n.open?'M-10 0H10':'M0-10V10'}"/>`},
+iso:{n:'Isolator',g:2,sw:1,t:[T,B],s:n=>`<path class="a" d="M0-20V-10M0 10V20M0 10${n.open?'L9-9':'V-10'}"/><circle class="a" r="3" cy="-10"/><circle class="a" r="3" cy="10"/>`},
+es:{n:'Earth switch',g:2,sw:1,t:[T],s:n=>`<path class="a" d="M0-20V-8M0 4${n.open?'L8-8':'V-8'}M0 4V10${E(10)}"/>`},
+fuse:{n:'Fuse',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V20"/><rect class="a fb" x="-5" y="-11" width="10" height="22"/>`},
+ct:{n:'Current transf. (CT)',g:3,t:[T,B],s:()=>`<path class="a" d="M0-20V20"/><circle class="a fb" r="8"/>`},
+pt:{n:'Voltage transf. (PT)',g:3,t:[T],s:()=>`<path class="a" d="M0-20V-9"/><circle class="a" r="9"/><circle class="a" cy="12" r="9"/>`},
+la:{n:'Lightning arrester',g:3,t:[T],s:()=>`<path class="a" d="M0-20V-8M-9-8Q0-2 9-8M-9 0Q0-6 9 0M0 0V8${E(8)}"/>`},
+gnd:{n:'Earth',g:3,t:[T],s:()=>`<path class="a" d="M0-20V0M-12 0H12M-8 5H8M-4 10H4"/>`},
+trf:{n:'Transformer Y-Y',g:5,hh:44,t:TR,s:trf(Yt)},
+trd:{n:'Transformer Δ-Y',g:5,hh:44,t:TR,s:trf(Dt)},
+cap:{n:'Capacitor bank',g:4,t:[T],s:()=>`<path class="a" d="M0-20V-3M-12-3H12M-12 3H12M0 3V8${E(8)}"/>`},
+mot:{n:'Motor',g:4,t:[T],s:()=>`<path class="a" d="M0-20V-18"/><circle class="a" r="18"/><text class="tx" y="5">M</text>`},
+load:{n:'Load',g:4,t:[T],s:()=>`<path class="a" d="M0-20V-6M-9-6H9L0 14Z"/>`}
+};
+const cx=(t,fs=13,r=18)=>`<path class="a" d="M0-20V${-r}"/><circle class="a" r="${r}"/><text class="tx" style="font-size:${fs}px" y="${fs*.35}">${t}</text>`;
+const rl=t=>()=>`<path class="a" d="M0-20V-12M0 12V20"/><rect class="a fb" x="-15" y="-12" width="30" height="24" rx="2"/><text class="tx" style="font-size:${t.length>3?9:11}px" y="4">${t}</text>`;
+const Db=`<path class="a" d="M0 5L-9 21H9Z"/>`,tfx=(a,b,x='')=>()=>`<path class="a" d="M0-40V-34M0 34V40"/><circle class="a" cy="-14" r="20"/><circle class="a" cy="14" r="20"/>${a}${b}${x}`;
+const cv=(a,b)=>()=>`<path class="a" d="M0-20V-14M0 14V20"/><rect class="a fb" x="-14" y="-14" width="28" height="28"/><path class="a" d="M-14 14L14-14"/><text class="tx" style="font-size:11px" x="-6" y="-3">${a}</text><text class="tx" style="font-size:11px" x="6" y="11">${b}</text>`;
+const blade=n=>`M0-20V-10M0 20V10M0 10${n.open?'L9-9':'V-10'}`;
+Object.assign(D,{
+cable:{n:'Cable',g:0,t:[T,B],s:()=>`<path class="a" d="M0-20V20" style="stroke-width:4"/>`},
+ohl:{n:'Overhead line',g:0,t:[T,B],s:()=>`<path class="a" d="M0-20V20" style="stroke-dasharray:6 3"/>`},
+cbx:{n:'CB (IEC cross)',g:2,sw:1,t:[T,B],s:n=>`<path class="a" d="M0-20V-10M0 20V10M0 10${n.open?'L-8-10':'V-10'}M-4-14L4-6M4-14L-4-6"/>`},
+acb:{n:'Air CB (ACB)',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V-12M0 12V20"/><rect class="a fb" x="-10" y="-12" width="20" height="24"/><path class="a" d="M-10-12L10 12M10-12L-10 12"/>`},
+lbs:{n:'Load break switch',g:2,sw:1,t:[T,B],s:n=>`<path class="a" d="${blade(n)}"/><path class="f" d="M-4-10H4L0-3Z"/>`},
+fsw:{n:'Fuse switch',g:2,sw:1,t:[T,B],s:n=>`<rect class="a fb" x="-4" y="-6" width="8" height="12"/><path class="a" d="${blade(n)}"/>`},
+con:{n:'Contactor',g:2,sw:1,t:[T,B],s:n=>`<path class="a" d="${blade(n)}M-6 8Q0 14 6 8"/>`},
+rec:{n:'Recloser',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V-18M0 18V20"/><circle class="a" r="18"/><text class="tx" style="font-size:13px" y="5">R</text>`},
+amm:{n:'Ammeter',g:3,t:[T],s:()=>cx('A',13,14)},
+vm:{n:'Voltmeter',g:3,t:[T],s:()=>cx('V',13,14)},
+wm:{n:'Wattmeter',g:3,t:[T],s:()=>cx('W',13,14)},
+kwh:{n:'Energy meter',g:3,t:[T],s:()=>cx('kWh',8,14)},
+hz:{n:'Frequency meter',g:3,t:[T],s:()=>cx('Hz',10,14)},
+ner:{n:'Earthing resistor',g:3,t:[T],s:()=>`<path class="a" d="M0-20V-10M0 10V12${E(12)}"/><rect class="a fb" x="-5" y="-10" width="10" height="20"/>`},
+im:{n:'Induction motor',g:4,t:[T],s:()=>cx('M',13)+`<text class="tx" style="font-size:8px" y="14">3~</text>`},
+sm:{n:'Synchronous motor',g:4,t:[T],s:()=>cx('SM',12)},
+res:{n:'Resistor',g:4,t:[T,B],s:()=>`<path class="a" d="M0-20V-10M0 20V10"/><rect class="a fb" x="-5" y="-10" width="10" height="20"/>`},
+ind:{n:'Reactor',g:4,t:[T,B],s:()=>`<path class="a" d="M0-20V-16a4 4 0 0 1 0 8a4 4 0 0 1 0 8a4 4 0 0 1 0 8a4 4 0 0 1 0 8V20"/>`},
+cap1:{n:'Capacitor',g:4,t:[T,B],s:()=>`<path class="a" d="M0-20V-3M-12-3H12M-12 3H12M0 3V20"/>`},
+tyd:{n:'Transformer Y-Δ',g:5,hh:44,t:TR,s:tfx(Yt,Db)},
+tdd:{n:'Transformer Δ-Δ',g:5,hh:44,t:TR,s:tfx(Dt,Db)},
+tol:{n:'OLTC transformer',g:5,hh:44,t:TR,s:tfx(Yt,Yb,`<path class="a" d="M-26 24L26-24M26-24l-8 2M26-24l-2 8"/>`)},
+atr:{n:'Auto-transformer',g:5,hh:44,t:[...TR,['m',20,0,1,0]],s:()=>`<path class="a" d="M0-40V-24a6 6 0 0 1 0 12a6 6 0 0 1 0 12a6 6 0 0 1 0 12a6 6 0 0 1 0 12V40M0 0H20"/>`},
+r51:{n:'Overcurrent 50/51',g:6,t:[T,B],s:rl('51')},
+r51n:{n:'Earth fault 50N/51N',g:6,t:[T,B],s:rl('51N')},
+r67:{n:'Directional OC 67',g:6,t:[T,B],s:rl('67')},
+r87:{n:'Differential 87',g:6,t:[T,B],s:rl('87')},
+r21:{n:'Distance 21',g:6,t:[T,B],s:rl('21')},
+r27:{n:'Voltage 27/59',g:6,t:[T,B],s:rl('27/59')},
+r81:{n:'Frequency 81',g:6,t:[T,B],s:rl('81')},
+r86:{n:'Lockout 86',g:6,t:[T,B],s:rl('86')},
+r63:{n:'Buchholz 63',g:6,t:[T,B],s:rl('63')},
+coil:{n:'Relay coil',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-12M0 12V20"/><rect class="a fb" x="-7" y="-12" width="14" height="24"/>`},
+kno:{n:'Contact NO',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-8"/>`},
+knc:{n:'Contact NC',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8V-8M-6 0L6-8"/>`},
+pbn:{n:'Push button NO',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-4M-8-4V-15M-12-15H-4"/>`},
+pbc:{n:'Push button NC',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8V-8M-9 0H-3M-9-6V6"/>`},
+estop:{n:'Emergency stop',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8V-8M-9 0H-3M-9-6V6"/><path class="a fb" d="M-17-12Q-9-24-1-12Z"/>`},
+rect:{n:'Rectifier AC/DC',g:7,t:[T,B],s:cv('~','=')},
+inv:{n:'Inverter DC/AC',g:7,t:[T,B],s:cv('=','~')},
+vfd:{n:'VFD (AC/AC)',g:7,t:[T,B],s:cv('~','~')},
+ups:{n:'UPS',g:7,t:[T,B],s:rl('UPS')},
+dio:{n:'Diode',g:7,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M-8-8H8"/><path class="f" d="M-8 8H8L0-8Z"/>`},
+scr:{n:'Thyristor (SCR)',g:7,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M-8-8H8M3 3L11 11"/><path class="f" d="M-8 8H8L0-8Z"/>`},
+svc:{n:'SVC / STATCOM',g:7,t:[T],s:()=>cx('SVC',9)},
+pv:{n:'Solar PV',g:7,t:[T],s:()=>`<path class="a" d="M0-20V-14"/><rect class="a" x="-14" y="-14" width="28" height="28"/><path class="a" d="M-14 14L14-14"/>`},
+bat:{n:'Battery',g:7,t:[T],s:()=>`<path class="a" d="M0-20V-6M-12-6H12M-7-1H7M-12 4H12M-7 9H7"/>`},
+wind:{n:'Wind turbine',g:7,t:[T],s:()=>cx('WT',11)},
+t3w:{n:'3-winding transformer',g:5,hh:44,t:[...TR,['m',40,0,1,0]],s:()=>tfx(Yt,Yb)()+`<circle class="a" cx="14" r="14"/><path class="a" d="M28 0H40"/>`},
+tzz:{n:'Earthing transformer (ZZ)',g:5,t:[T],s:()=>`<path class="a" d="M0-20V-18M0-10V0M0 0L-8 8M0 0L8 8"/><circle class="a" r="18"/><text class="tx" style="font-size:7px" y="16">ZZ</text>`},
+cvt:{n:'Capacitor VT (CVT)',g:5,t:[T],s:()=>`<path class="a" d="M0-20V-12M-9-12H9M-9-8H9M0-8V-4"/><circle class="a" cy="4" r="8"/><circle class="a" cy="12" r="8"/>`},
+vt3:{n:'3-phase VT',g:5,t:[T],s:()=>cx('3VT',9)},
+dof:{n:'Drop-out fuse',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V-12M0 12V20"/><rect class="a fb" x="-4" y="-12" width="8" height="24" transform="rotate(20)"/>`},
+rmu:{n:'Ring main unit',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V-16M0 16V20"/><rect class="a fb" x="-14" y="-16" width="28" height="32"/><text class="tx" style="font-size:9px" y="3">RMU</text>`},
+sw3:{n:'3-position switch',g:2,t:[T,B],s:()=>`<path class="a" d="M0-20V-10M0 20V10M0 10L-9-9M0 10L9-9"/><circle class="a" r="3" cy="10"/>`},
+bc:{n:'Bus coupler',g:2,t:[T,B],s:rl('BC')},
+spd:{n:'Surge protective device',g:2,t:[T],s:()=>`<path class="a" d="M0-20V-12M0 4V8${E(8)}"/><rect class="a fb" x="-5" y="-12" width="10" height="16"/><path class="f" d="M-3-6L3-6L0 0Z"/>`},
+tor:{n:'Thermal overload 49',g:6,t:[T,B],s:rl('49')},
+tmr:{n:'Timer relay 62',g:6,t:[T,B],s:rl('62')},
+lsw:{n:'Limit switch',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-8M-8-8L-14-2"/>`},
+sel:{n:'Selector switch',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-8M-12-2H-5"/>`},
+flt:{n:'Float switch',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-8M-8-8L-14 0"/><circle class="a" cx="-16" cy="3" r="3"/>`},
+prs:{n:'Pressure switch',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-8M0 20V8M0 8L-8-8"/><text class="tx" style="font-size:9px" x="-14" y="-2">P</text>`},
+lmp:{n:'Indicator lamp',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-10M0 10V20M-7-7L7 7M7-7L-7 7"/><circle class="a" r="10"/>`},
+buz:{n:'Buzzer',g:6,t:[T,B],s:()=>`<path class="a" d="M0-20V-10M0 12V20"/><path class="a fb" d="M-10 12V0a10 10 0 0 1 20 0V12Z"/>`},
+ss:{n:'Soft starter',g:7,t:[T,B],s:rl('SS')},
+shr:{n:'Shunt reactor',g:4,t:[T],s:()=>`<path class="a" d="M0-20V-16a4 4 0 0 1 0 8a4 4 0 0 1 0 8a4 4 0 0 1 0 8V10${E(10)}"/>`},
+scap:{n:'Series capacitor',g:4,t:[T,B],s:()=>`<path class="a" d="M0-20V-3M-10-3H10M-10 3H10M0 3V20"/><rect class="a" x="-15" y="-9" width="30" height="18" style="stroke-dasharray:3 2"/>`},
+hf:{n:'Harmonic filter',g:4,t:[T],s:()=>`<path class="a" d="M0-20V-12M-10-12H10M-10-8H10M0-8V-4a4 4 0 0 1 0 8a4 4 0 0 1 0 8V12${E(12)}"/>`},
+tcr:{n:'TCR',g:7,t:[T],s:()=>cx('TCR',9)},
+hvdc:{n:'HVDC converter',g:7,t:[T,B],s:rl('HVDC')},
+tdc:{n:'Transducer',g:3,t:[T,B],s:()=>`<path class="a" d="M0-20V-14M0 14V20"/><path class="a fb" d="M0-14L14 0L0 14L-14 0Z"/>`}
+});
+const G=['Lines & sources','Busbar','Switchgear','Instruments','Power & loads','Transformers','Relays & controls','Converters & DER'];
+G.forEach((g,i)=>pal.insertAdjacentHTML('beforeend',`<h4>${g}</h4><div class="pal">`+Object.keys(D).filter(k=>D[k].g==i).map(k=>`<button draggable="true" data-ty="${k}" title="${D[k].n}"><svg viewBox="${D[k].hh?'-26 -46 52 92':'-26 -26 52 52'}">${D[k].s({len:40})}</svg><span>${D[k].n}</span></button>`).join('')+'</div>'));
+/* state */
+let N=[],Wr=[],sel=null,ws=null,Z=1,P={x:40,y:40},grid=1,U=[],R=[],drag=null,pan=null,draft=null,wd=0,lt=0,ln=null;
+const snap=()=>JSON.stringify({N,Wr}),KEY='sldBuilderData';
+const persist=()=>{try{localStorage.setItem(KEY,snap())}catch(e){}};
+const commit=()=>{U.push(snap());if(U.length>80)U.shift();R=[];persist()};
+const apply=s=>{const o=JSON.parse(s);N=o.N||[];Wr=o.Wr||[];sel=ws=null};
+try{const s=localStorage.getItem(KEY);if(s)apply(s)}catch(e){}
+const terms=n=>n.type=='bus'?Array.from({length:n.len/40+1},(_,i)=>{const j=i-n.len/80;return['p'+j,j*40,0,0,0]}):D[n.type].t;
+const tp=n=>{const a=n.r*Math.PI/180,c=Math.round(Math.cos(a)),s=Math.round(Math.sin(a));return terms(n).map(([id,x,y,dx,dy])=>({id,bus:n.type=='bus',h:n.r%180!=0,x:n.x+x*c-y*s,y:n.y+x*s+y*c,dx:dx*c-dy*s,dy:dx*s+dy*c}))};
+function rt(a,b){
+ const v=(p,q)=>p.dx||p.dy?p.dy!=0:!p.h,av=v(a,b),bv=v(b,a);
+ if(av&&bv){const m=sn((a.y+b.y)/2);return`M${a.x} ${a.y}V${m}H${b.x}V${b.y}`}
+ if(!av&&!bv){const m=sn((a.x+b.x)/2);return`M${a.x} ${a.y}H${m}V${b.y}H${b.x}`}
+ return av?`M${a.x} ${a.y}V${b.y}H${b.x}`:`M${a.x} ${a.y}H${b.x}V${b.y}`}
+const pt=e=>{const r=st.getBoundingClientRect();return{x:(e.clientX-r.left-P.x)/Z,y:(e.clientY-r.top-P.y)/Z}};
+const node=id=>N.find(n=>n.id==id);
+function content(o){
+ const M={},NM={};N.forEach(n=>{M[n.id]=tp(n);NM[n.id]=n});
+ const gt=e=>M[e[0]]&&M[e[0]].find(t=>t.id==e[1]);let h='';
+ if(o.grid)h+=`<rect x="-4000" y="-4000" width="8000" height="8000" fill="url(#g)"/><rect x="-4000" y="-4000" width="8000" height="8000" fill="url(#G)"/>`;
+ Wr.forEach((w,i)=>{const a=gt(w.a),b=gt(w.b);if(!a||!b)return;const d=rt(a,b);h+=(o.tm?`<path class="wh" data-w="${i}" d="${d}"/>`:'')+`<path class="w${o.sel&&sel=='w'+i?' s':''}" d="${d}"/>`;[a,b].forEach(p=>{if(p.bus)h+=`<circle class="jn" cx="${p.x}" cy="${p.y}" r="4"/>`})});
+ if(o.tm&&ws&&draft){const a=gt([ws.n,ws.t]);if(a)h+=`<path class="w dr" d="M${a.x} ${a.y}L${draft.x} ${draft.y}"/>`}
+ N.forEach(n=>{const d=D[n.type],b=n.type=='bus',hh=d.hh||24,lx=b?-n.len/2:28,ly=b?-26:-2;
+  h+=`<g class="n${o.sel&&sel==n.id?' s':''}" data-n="${n.id}" transform="translate(${n.x} ${n.y})"><g transform="rotate(${n.r})">${b?`<rect class="hit" x="${-n.len/2-6}" y="-12" width="${n.len+12}" height="24"/>`:`<rect class="hit" x="-24" y="${-hh}" width="48" height="${hh*2}"/>`}${d.s(n)}</g><text class="lb" x="${lx}" y="${ly}">${esc(n.label)}</text>${n.par?`<text class="pr" x="${lx}" y="${ly+12}">${esc(n.par)}</text>`:''}</g>`});
+ if(o.tm)N.forEach(n=>M[n.id].forEach(t=>{const on=ws&&ws.n==n.id&&ws.t==t.id;h+=`<circle class="tm${t.bus?' bt':''}${on?' on':''}" cx="${t.x}" cy="${t.y}" r="${on?5:3.5}"/><circle class="th" data-n="${n.id}" data-t="${t.id}" cx="${t.x}" cy="${t.y}" r="9"/>`}));
+ return h}
+function render(){
+ let h=`<defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path class="gr" d="M20 0H0V20"/></pattern><pattern id="G" width="100" height="100" patternUnits="userSpaceOnUse"><path class="gm" d="M100 0H0V100"/></pattern></defs><g transform="translate(${P.x} ${P.y}) scale(${Z})">`+content({grid,tm:1,sel:1})+'</g>';
+ if(!N.length)h+=`<text class="em" x="50%" y="50%">Drag a symbol here to begin</text>`;
+ sv.classList.toggle('wiring',!!ws);sv.innerHTML=h}
+/* print: fit drawing to page, grid drawn as explicit lines (patterns/backgrounds print unreliably) */
+function printBuild(){
+ const pv=$('#pv');if(!N.length){pv.innerHTML='';return}
+ const t=document.createElementNS('http://www.w3.org/2000/svg','svg');t.style.cssText='position:absolute;left:-9999px;width:10px;height:10px';
+ t.innerHTML='<g>'+content({})+'</g>';document.body.appendChild(t);const b=t.querySelector('g').getBBox();t.remove();
+ const x0=Math.floor((b.x-40)/20)*20,y0=Math.floor((b.y-40)/20)*20,x1=Math.ceil((b.x+b.width+40)/20)*20,y1=Math.ceil((b.y+b.height+40)/20)*20;
+ let g1='',g2='';
+ if(grid){for(let x=x0;x<=x1;x+=20){const l=`M${x} ${y0}V${y1}`;x%100?g1+=l:g2+=l}for(let y=y0;y<=y1;y+=20){const l=`M${x0} ${y}H${x1}`;y%100?g1+=l:g2+=l}}
+ pv.innerHTML=`<svg viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" preserveAspectRatio="xMidYMid meet"><path d="${g1}" fill="none" stroke="#d5dee8" stroke-width=".6"/><path d="${g2}" fill="none" stroke="#a9b8c9" stroke-width="1"/><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="none" stroke="#0f172a" stroke-width="1.5"/>${content({})}</svg>`}
+/* editing */
+function add(type,p){commit();const id='n'+Date.now().toString(36)+N.length;N.push({id,type,x:sn(p.x),y:sn(p.y),r:0,len:320,open:0,label:D[type].n,par:''});sel=id;render();ms(D[type].n+' placed')}
+function edit(n){const l=prompt('Label:',n.label);if(l===null)return;const p=prompt('Rating / parameters (optional):',n.par||'');if(p===null)return;commit();n.label=l.trim()||D[n.type].n;n.par=p.trim();render()}
+function dbl(n){if(D[n.type].sw){commit();n.open=n.open?0:1;render();ms(D[n.type].n+(n.open?' OPEN':' CLOSED'))}else edit(n)}
+function del(){if(!sel)return;commit();if(sel[0]=='w')Wr.splice(+sel.slice(1),1);else{Wr=Wr.filter(w=>w.a[0]!=sel&&w.b[0]!=sel);N=N.filter(n=>n.id!=sel)}sel=null;render()}
+const cur=()=>sel&&sel[0]!='w'?node(sel):null;
+function zoom(k,mx,my){const nz=Math.min(3,Math.max(.2,Z*k));P.x=mx-(mx-P.x)*nz/Z;P.y=my-(my-P.y)*nz/Z;Z=nz;render()}
+function fit(){if(!N.length){Z=1;P={x:40,y:40};return render()}const xs=N.flatMap(n=>[n.x-(n.type=='bus'?n.len/2:40),n.x+(n.type=='bus'?n.len/2:80)]),ys=N.flatMap(n=>[n.y-60,n.y+60]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);Z=Math.min(1.6,st.clientWidth/(x1-x0),st.clientHeight/(y1-y0));P={x:(st.clientWidth-(x1+x0)*Z)/2,y:(st.clientHeight-(y1+y0)*Z)/2};render()}
+function link(w){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([snap()],{type:'application/json'}));a.download='sld.json';a.click();URL.revokeObjectURL(a.href)}
+/* pointer */
+st.addEventListener('pointerdown',e=>{
+ const q=e.target,tm=q.closest('[data-t]'),nd=q.closest('[data-n]'),w=q.closest('[data-w]');st.focus();st.setPointerCapture(e.pointerId);
+ if(tm){const r={n:tm.dataset.n,t:tm.dataset.t};
+  if(ws&&(ws.n!=r.n||ws.t!=r.t)){commit();Wr.push({a:[ws.n,ws.t],b:[r.n,r.t]});ws=null;sel=null;wd=0;ms('Connected')}
+  else{ws=r;sel=r.n;draft=pt(e);wd=1;ms('Terminal selected · drag to, or click, another terminal')}
+  return render()}
+ if(nd){const n=node(nd.dataset.n);ws=null;sel=n.id;const now=Date.now();
+  if(ln==n.id&&now-lt<350){lt=0;dbl(n);return}
+  ln=n.id;lt=now;drag={n,p0:pt(e),ox:n.x,oy:n.y,m:0};return render()}
+ if(w){sel='w'+w.dataset.w;ws=null;return render()}
+ sel=null;ws=null;pan={x:e.clientX,y:e.clientY};render()});
+st.addEventListener('pointermove',e=>{
+ if(drag){const p=pt(e),x=sn(drag.ox+p.x-drag.p0.x),y=sn(drag.oy+p.y-drag.p0.y);if(x!=drag.n.x||y!=drag.n.y){if(!drag.m){commit();drag.m=1}drag.n.x=x;drag.n.y=y;render()}}
+ else if(pan){P.x+=e.clientX-pan.x;P.y+=e.clientY-pan.y;pan={x:e.clientX,y:e.clientY};render()}
+ else if(ws){draft=pt(e);render()}});
+st.addEventListener('pointerup',e=>{
+ if(wd&&ws){const t=document.elementFromPoint(e.clientX,e.clientY),tm=t&&t.closest&&t.closest('[data-t]');
+  if(tm&&(tm.dataset.n!=ws.n||tm.dataset.t!=ws.t)){commit();Wr.push({a:[ws.n,ws.t],b:[tm.dataset.n,tm.dataset.t]});ws=null;sel=null;ms('Connected')}}
+ wd=0;if(drag&&drag.m)persist();drag=pan=null;render()});
+st.addEventListener('wheel',e=>{e.preventDefault();const r=st.getBoundingClientRect();zoom(e.deltaY<0?1.1:1/1.1,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+/* palette */
+pal.addEventListener('click',e=>{const b=e.target.closest('[data-ty]');if(b)add(b.dataset.ty,{x:(st.clientWidth/2-P.x)/Z,y:(st.clientHeight/2-P.y)/Z})});
+pal.addEventListener('dragstart',e=>{const b=e.target.closest('[data-ty]');if(b)e.dataTransfer.setData('text/plain',b.dataset.ty)});
+st.addEventListener('dragover',e=>e.preventDefault());
+st.addEventListener('drop',e=>{e.preventDefault();const t=e.dataTransfer.getData('text/plain');if(D[t])add(t,pt(e))});
+/* toolbar */
+$('#fi').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{commit();apply(r.result);render();fit()}catch(x){ms('Invalid file')}};r.readAsText(f);e.target.value=''};
+$('#tb').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,n=cur(),cx=st.clientWidth/2,cy=st.clientHeight/2;
+ if(a=='undo'&&U.length){R.push(snap());apply(U.pop());render();persist()}
+ else if(a=='redo'&&R.length){U.push(snap());apply(R.pop());render();persist()}
+ else if(a=='rot'&&n){commit();n.r=(n.r+90)%360;render()}
+ else if(a=='tog'){if(!n)ms('Select a switch first, then press Open/Close');else if(!D[n.type].sw)ms(D[n.type].n+' has no open/close state - use a breaker, isolator, earth switch, load break switch, fuse switch or contactor');else{commit();n.open=n.open?0:1;render();ms(D[n.type].n+(n.open?' OPEN':' CLOSED'))}}
+ else if(a=='edit'&&n)edit(n);
+ else if(a=='del')del();
+ else if((a=='bl'||a=='bm')&&n&&n.type=='bus'){commit();n.len=Math.max(80,Math.min(1600,n.len+(a=='bm'?80:-80)));render()}
+ else if(a=='zi')zoom(1.2,cx,cy);else if(a=='zo')zoom(1/1.2,cx,cy);else if(a=='fit')fit();
+ else if(a=='grid'){grid=!grid;b.setAttribute('aria-pressed',grid);render()}
+ else if(a=='save')link();else if(a=='load')$('#fi').click();else if(a=='print'){if(N.length)print();else ms('Nothing to print')}
+ else if(a=='clear'&&confirm('Clear the entire diagram?')){commit();N=[];Wr=[];sel=ws=null;render()}});
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey,n=cur(),bt=a=>$(`[data-a=${a}]`).click();
+ if(c&&k=='z'){e.preventDefault();bt('undo')}else if(c&&k=='y'){e.preventDefault();bt('redo')}
+ else if(k=='r'&&!c)bt('rot');else if(k=='escape'){ws=sel=null;render()}
+ else if(k=='delete'||k=='backspace'){e.preventDefault();del()}
+ else if(n&&k.startsWith('arrow')){e.preventDefault();commit();n.x+=k=='arrowleft'?-20:k=='arrowright'?20:0;n.y+=k=='arrowup'?-20:k=='arrowdown'?20:0;render()}});
+render();
+})();
+</script></body></html>
