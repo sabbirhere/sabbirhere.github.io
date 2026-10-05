@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earthing Designer | ElectraLab</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1520;--panel:#142130;--panel2:#1a2b3d;--line:#27394b;--txt:#e6edf3;--mute:#8ea3b5;--yel:#e9c43c;--grn:#35a853;--cu:#c9803f;--bad:#e5645a;--soil:#2a2118;--bf:#0b0b0b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Barlow,system-ui,Segoe UI,Arial,sans-serif;font-size:15px}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header .bar{width:6px;height:36px;background:repeating-linear-gradient(var(--yel) 0 6px,var(--grn) 6px 12px);border-radius:2px}
+h1{font-size:22px;margin:0;font-weight:700}
+header p{margin:2px 0 0;color:var(--mute);font-size:13px}
+header a{margin-left:0;white-space:nowrap;color:var(--yel);text-decoration:none;font-size:13px;border:1px solid var(--line);padding:6px 12px;border-radius:6px}
+main{display:grid;grid-template-columns:380px 1fr;gap:18px;padding:18px 22px;max-width:1280px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:12px}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel h2{margin:0 0 12px;font-size:16px}
+label{display:block;font-size:13px;color:var(--mute);margin:11px 0 4px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:9px 10px;border-radius:6px;font:inherit}
+input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--yel);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--mute);margin-top:4px}
+button{background:var(--yel);color:#111;border:0;border-radius:6px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--grn);border-radius:8px;padding:12px 14px}
+.card.warn{border-left-color:var(--bad)}.card.cu{border-left-color:var(--cu)}.card.y{border-left-color:var(--yel)}
+.card small{color:var(--mute);font-size:12px;display:block}
+.card b{font-size:20px;display:block;margin:2px 0}
+.card span{font-size:13px;color:var(--mute)}
+.draw{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:1100px){.draw{grid-template-columns:1fr}}
+.draw .panel{padding:10px}
+svg{width:100%;height:auto;display:block}
+svg text{fill:#1b1b1b;font-family:Barlow,system-ui,sans-serif}svg text.d{fill:#0b5aa8}.draw .panel{padding:6px;background:#f5f6f4}.draw .wide{grid-column:1/-1}.draw .panel{overflow-x:auto}.rec{background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--grn);border-radius:10px;padding:14px 16px;margin-bottom:14px}.rec.bad{border-left-color:var(--bad)}.rec small{color:var(--mute);font-size:13px}.rec b{display:block;font-size:24px;margin:2px 0 6px}.rec div{font-size:15px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:6px 4px;border-bottom:1px solid var(--line)}td:last-child{text-align:right}
+.msg{background:#2b1b1b;border:1px solid #5a2b2b;color:#f1b3ae;padding:10px 12px;border-radius:8px;margin-bottom:10px;font-size:12px}
+.note{font-size:12px;color:var(--mute);line-height:1.5}
+.sec{margin-top:16px}
+
+#side{display:flex;flex-direction:column;gap:14px;min-width:0}main>section{min-width:0}
+#secp{background:#f5f6f4;padding:6px;border-radius:10px;border:1px solid var(--line)}#secp .hint{color:#555;padding:0 6px 4px}
+.draw .panel.sum{background:var(--panel);padding:16px}
+.eng{border:1px solid #5a4a14;background:#2a2410;border-left:5px solid var(--yel);border-radius:8px;padding:12px 14px;margin:0 0 16px;font-size:14px;line-height:1.5}
+.det{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.det summary{cursor:pointer;font-weight:600;padding:13px 14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.det summary::-webkit-details-marker{display:none}.det summary::after{content:"\25BE";color:var(--yel);transition:transform .2s}.det[open] summary::after{transform:rotate(180deg)}
+.det .db{padding:0 14px 14px;font-size:13.5px;line-height:1.5;color:var(--txt)}.det ul{margin:0;padding-left:18px}.det li{margin-bottom:6px}.det li b{color:var(--yel);font-weight:600}
+#lb{display:none;position:fixed;inset:0;background:rgba(5,10,16,.92);z-index:50;overflow:auto;padding:14px}#lbx{position:sticky;top:0;float:right;z-index:2;margin-bottom:8px}
+#lbc{clear:both}#lbc svg{width:min(1200px,max(100%,820px));height:auto;display:block;cursor:default}
+@media(max-width:900px){main{gap:14px}#side{display:contents}#det{order:0}#inputs{order:1}main>section{order:2}.band{order:4}main>.sum{order:5}header{padding:14px 12px}h1{font-size:19px}}
+@media(max-width:560px){input,select{font-size:16px}.res{grid-template-columns:1fr}.rec b{font-size:20px}button{flex:1;padding:12px}td{font-size:13px}header a{margin-left:0}.panel{padding:12px}}
+
+main>.band,main>.sum{grid-column:1/-1}.band{grid-template-columns:minmax(0,5fr) minmax(0,8fr)!important;align-items:start}
+#tab{columns:2 380px;column-gap:28px}.kv{display:flex;justify-content:space-between;gap:14px;padding:8px 4px;border-bottom:1px solid var(--line);break-inside:avoid;font-size:14px}.kv span{color:var(--mute)}.kv b{font-weight:500;text-align:right}
+@media(max-width:700px){.band{grid-template-columns:1fr!important}}
+.drawing-layout{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+main>.drawing-layout{grid-column:1/-1}
+.drawing-layout .panel{min-width:0;background:#f5f6f4;padding:6px}
+.drawing-layout .drawing-top svg{width:100%;height:420px;object-fit:contain}
+.drawing-layout .drawing-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.drawing-layout .drawing-bottom .panel{min-width:0}
+.drawing-layout .drawing-bottom svg{width:100%;height:420px;object-fit:contain}
+@media(max-width:900px){
+  main>.drawing-layout{grid-column:1/-1;order:4}
+  .drawing-layout .drawing-top svg,.drawing-layout .drawing-bottom svg{height:auto}
+  .drawing-layout .drawing-bottom{grid-template-columns:1fr}
+}
+.el-footer{border-top:1px solid var(--line);padding:16px 22px;margin-top:18px;text-align:center;color:var(--mute);font-size:12px}
+.el-footer b{color:var(--yel);font-weight:600}
+@media print{
+@page{size:A4 portrait;margin:10mm}
+html,body{background:#fff!important;color:#000!important;font-size:12px}
+*{box-shadow:none!important}
+header{border-bottom:1px solid #999;padding:0 0 8px;margin-bottom:8px}
+header a,button,#inputs,#det,#lb{display:none!important}
+main{display:flex!important;flex-direction:column;padding:0;max-width:none;gap:8px}
+#side{display:contents!important}
+main>section{order:1;min-width:0}.band{order:2}main>.sum{order:3}#secp{padding:0!important;border:0!important}.kv{border-color:#ccc!important}.kv span{color:#333!important}
+.panel,.card,.rec,.eng,.msg{background:#fff!important;color:#000!important;border-color:#999!important}
+.card small,.card span,.rec small,.hint,.note{color:#333!important}
+.msg{border-color:#c00!important}
+.res{grid-template-columns:1fr 1fr!important}
+.draw{display:block!important}
+.draw .panel{padding:0!important;margin:0 0 8mm;overflow:visible!important;max-width:none!important;border:0!important;background:#f5f6f4!important}
+.draw .panel.sum{background:#fff!important;padding:4px!important}
+svg{width:100%;height:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#plan,#sec{width:165mm!important;margin:0 auto}
+.panel,.card,.rec,.eng,.msg,table,tr,svg{break-inside:avoid;page-break-inside:avoid}
+td{border-color:#ccc!important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0L8 4L0 8z" fill="#0b5aa8"/></marker><pattern id="sh" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 9L9 0" stroke="#9a8a74" stroke-width=".8"/></pattern><pattern id="bk" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M0 8L8 0" stroke="#a65d3f" stroke-width=".7"/></pattern><pattern id="bfp" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#2a2a2a"/><circle cx="2" cy="2" r="1" fill="#888"/><circle cx="5" cy="5" r=".8" fill="#666"/></pattern></defs></svg>
+<header>
+  <a href="Advanced.html" class="back">&larr; Back To Toolbox</a>
+  <div class="bar"></div>
+  <div><h1>ElectraLab | Earthing designer Pro</h1><p>Rod, pit and conductor sizing with auto drawing. Based on soil resistivity and target resistance.</p></div>
+  
+</header>
+<main>
+<div id="side">
+<div id="det">
+<details class="det"><summary>What should I enter?</summary><div class="db"><ul>
+<li><b>Application:</b> what is being earthed. It sets the target resistance, fault current and whether a pit is mandatory. Edit the target if your spec differs.</li>
+<li><b>Soil resistivity:</b> use a measured value from a 4-pole Wenner test. Without one, pick the nearest soil type as a first estimate.</li>
+<li><b>Soil model:</b> pick Two-layer if your Wenner readings change a lot with spacing. Enter the top layer value above, the bottom layer value and the top layer depth.</li>
+<li><b>Dry-season factor:</b> 1.0 if you measured in the dry season, 1.3 or 1.6 if you measured in the monsoon.</li>
+<li><b>Target resistance:</b> from the project spec or utility. Typical values: substation 1 &Omega;, LPS 10 &Omega;, building 5 &Omega;.</li>
+<li><b>Fault current, share and time:</b> the ground fault current at this installation, from the utility or a fault study, not the 3-phase level. Share into soil is the part returning through the earth rather than cable sheaths or earth wires. Leave 100% if unknown.</li>
+<li><b>Electrode type:</b> copper-bonded rod is the default. GI pipe is common locally.</li>
+<li><b>Pit spacing:</b> leave blank for auto, about twice the rod length up to 6 m.</li>
+<li><b>Backfill and surface layer:</b> choose what you will actually install. Crushed rock raises the tolerable touch voltage.</li>
+<li><b>Down conductors:</b> enter the count for LPS. Each one gets its own pit.</li>
+<li><b>Configuration:</b> leave on Auto, or pick a layout.</li>
+<li><b>Compare configurations:</b> see which layout meets the target with the least metal, then press Use to switch to it.</li></ul></div></details>
+<details class="det"><summary>Calculation method</summary><div class="db"><ul>
+<li><b>Design soil:</b> measured resistivity &times; dry-season factor.</li>
+<li><b>Two-layer soil:</b> rods use L / (h1/&rho;1 + (L &minus; h1)/&rho;2). Strip, ring and grid use the same average over an effective depth of 3 to 15 m.</li>
+<li><b>Rods:</b> Dwight formula. Pits use a backfill column model.</li>
+<li><b>Rod groups:</b> mutual-resistance group factor for rods in a row.</li>
+<li><b>Rod + strip:</b> buried strip formula combined with the rods, 15% interaction penalty.</li>
+<li><b>Ring earth:</b> Sunde ring formula with 4 corner rods.</li>
+<li><b>Earth grid:</b> Sverak formula (IEEE 80), 5 m mesh at 0.5 m depth.</li>
+<li><b>Conductor size:</b> S = I&radic;t / k (Cu 159, steel 58).</li>
+<li><b>Touch and step:</b> ground potential rise = share &times; fault current &times; resistance, compared with IEEE 80 limits for a 70 kg person. Screening only, no decrement factor.</li></ul>
+<p class="note" id="notes" style="margin-top:10px"></p></div></details>
+</div>
+<section class="panel" id="inputs">
+  <h2>Design inputs</h2>
+  <label for="cfg">Configuration</label>
+  <select id="cfg"><option value="auto">Auto (recommended)</option><option value="single">Single rod</option><option value="multi">Multiple rods</option><option value="strip">Rod + strip</option><option value="ring">Ring earth</option><option value="grid">Earth grid</option></select>
+  <label for="app">Application</label>
+  <select id="app"></select>
+  <label for="soil">Soil type (Bangladesh typical)</label>
+  <select id="soil"></select>
+  <div class="row2">
+    <div><label for="rho">Resistivity (Ω·m)</label><input id="rho" type="number" min="1" step="1"></div>
+    <div><label for="season">Dry-season factor</label>
+      <select id="season"><option value="1">1.0 Monsoon</option><option value="1.3" selected>1.3 Normal</option><option value="1.6">1.6 Dry / winter</option></select></div>
+  </div>
+  <div class="hint">Measure with a 4-pole Wenner test. Presets are typical values only.</div>
+  <label for="sm">Soil model</label><select id="sm"><option value="1">Uniform</option><option value="2">Two-layer</option></select>
+  <div id="sm2" style="display:none"><div class="row2"><div><label for="r2">Bottom layer ρ2 (Ω·m)</label><input id="r2" type="number" min="1" value="20"></div><div><label for="h1">Top layer depth (m)</label><input id="h1" type="number" min="0.3" step="0.1" value="2"></div></div><div class="hint">The resistivity field above is the top layer ρ1, and the season factor applies to it only. Rods use a depth-weighted average of the two layers.</div></div>
+  <div class="row2">
+    <div><label for="target">Target resistance (Ω)</label><input id="target" type="number" min="0.1" step="0.1"></div>
+    <div><label for="mat">Electrode type</label>
+      <select id="mat"><option value="cb">Copper-bonded rod</option><option value="cu">Solid copper rod</option><option value="gi">GI pipe (heavy)</option></select></div>
+  </div>
+  <div class="row2">
+    <div><label for="If">Earth fault current (kA, rms)</label><input id="If" type="number" min="0.1" step="0.1"></div>
+    <div><label for="tf">Fault clearing time (s)</label><input id="tf" type="number" min="0.05" step="0.05"></div>
+  </div>
+  <label for="sf">Share flowing into soil (%)</label><input id="sf" type="number" min="5" max="100" value="100">
+  <div class="hint">Use the ground fault current at this installation, from the utility or a fault study, not the 3-phase level. Preset values are placeholders. Lower the share if cable sheaths or overhead earth wires carry part of it. 100% is conservative.</div>
+  <div class="row2">
+    <div><label for="sp">Pit spacing (m)</label><input id="sp" type="number" min="1" step="0.5" placeholder="Auto"></div>
+    <div><label for="bf">Pit backfill</label>
+      <select id="bf"><option value="4">Charcoal + salt + sand</option><option value="2">Bentonite / GEM compound</option></select></div>
+  </div>
+  <div class="row2"><div><label for="kva">Transformer (kVA)</label><input id="kva" type="number" min="0" step="50" placeholder="Optional"></div><div><label for="zp">Impedance %Z</label><input id="zp" type="number" min="1" step=".5" value="6"></div></div>
+  <div class="hint">Optional. Shows an LV fault current estimate that you can apply. For the HT side, use the utility earth fault current.</div>
+  <div class="hint" id="kest"></div>
+  <label for="nd">Down conductors (LPS)</label><input id="nd" type="number" min="0" step="1" placeholder="0 = not used">
+  <div class="hint">One pit per down conductor, minimum 2.</div>
+  <label for="surf">Surface layer (touch voltage)</label><select id="surf"><option value="0">None, natural soil</option><option value="1">100 mm crushed rock</option></select>
+  <label for="pn">Project name</label><input id="pn" value="Earthing system">
+  <label for="pb">Prepared by</label><input id="pb" placeholder="Name / designation">
+  <div class="row2"><div><label for="dn">Drawing no.</label><input id="dn" value="EL-EAR-001"></div><div><label for="rv">Revision</label><input id="rv" value="A"></div></div>
+  <div style="margin-top:14px;display:flex;gap:8px"><button onclick="pdf()">Download PDF</button><button onclick="window.print()" style="background:var(--panel2);color:var(--txt);border:1px solid var(--line)">Print</button></div>
+  <p class="note sec">Targets follow common practice (substation 1 Ω, LPS 10 Ω, building 5 Ω). Confirm against your utility, BNBC and project spec before issue.</p>
+</section>
+
+</div>
+
+<section>
+  <div id="msgs"></div>
+  <div class="rec" id="rec"></div>
+  <div class="res" id="res"></div>
+  <div class="eng" id="eng"></div>
+  <div class="panel" id="cmpp" style="margin-bottom:16px"><h2>Compare configurations</h2><div style="overflow-x:auto"><table id="cmp"></table></div><details class="det" open style="margin:12px 0 0"><summary>How to read this table</summary><div class="db"><ul>
+<li><b>What this shows:</b> all five layouts run on the same soil, target resistance and fault inputs, so you can compare them before choosing.</li>
+<li><b>&#10003; and &#10007;:</b> &#10003; means the target is met. &#10007; shows the best resistance that layout can reach within the tool's limits (up to 12 rods, 6 rods with a 100 m strip, a 150 m ring or grid).</li>
+<li><b>Metal (m):</b> total length of rods, strip and conductor. It is a rough size indicator, not a cost. Deep rods cost more per metre than trench strip, and rings and grids need open ground.</li>
+<li><b>Use:</b> switches the design, results and drawings to that layout. Auto picks the best rod layout and only falls back to a grid when rods cannot reach the target.</li>
+<li><b>Site fit:</b> the comparison does not know your available area, obstructions or local practice. Check the shortlisted layout against the site.</li></ul></div></details></div>
+</section>
+<div class="drawing-layout">
+  <div class="drawing-top panel">
+    <svg id="chm" viewBox="0 0 1000 470" role="img" aria-label="Chamber detail"></svg>
+    <div class="hint" style="color:#555;padding:0 6px 4px">Tap any drawing to enlarge.</div>
+  </div>
+  <div class="drawing-bottom">
+    <div class="panel" id="secp"><svg id="sec" viewBox="0 0 640 640" role="img" aria-label="Earth pit section"></svg></div>
+    <div class="panel"><svg id="plan" viewBox="0 0 640 640" role="img" aria-label="Earthing layout plan"></svg></div>
+  </div>
+</div>
+<div class="panel sum"><h2>Summary and quantities</h2><div id="tab"></div></div>
+</main>
+<footer class="el-footer"><b>ElectraLab</b> &nbsp;•&nbsp; Engineering Toolbox by Sabbir Ahamed</footer>
+
+<div id="lb"><button id="lbx">Close</button><div id="lbc"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const $=id=>document.getElementById(id), PI=Math.PI;
+const APPS={sub:{n:'Substation / transformer',R:1,I:10,t:1,ch:450,pit:2},
+ lps:{n:'Lightning protection (LPS)',R:10,I:10,t:.5,ch:300,pit:1},
+ bld:{n:'Building / distribution board',R:5,I:5,t:1,ch:300,pit:0},
+ gen:{n:'Generator / motor / equipment',R:2,I:10,t:1,ch:450,pit:1},
+ it:{n:'Electronics / UPS / PLC',R:1,I:5,t:.5,ch:450,pit:2}};
+const SOILS=[['Wet alluvial clay / paddy field',25],['Alluvial clay / loam (Dhaka, Comilla)',50],['Sandy loam / silt',100],['Sandy / dry soil',250],['Laterite / Barind / gravel',400],['Hill soil / rocky (Chattogram hill)',800]];
+const MATS={cb:{n:'Copper-bonded steel rod',k:58,dias:[14.2,16,17.2,20,25],min:14.2,pipe:0},
+ cu:{n:'Solid copper rod',k:159,dias:[12,15,16,20,25],min:15,pipe:0},
+ gi:{n:'GI pipe (heavy)',k:58,dias:[40,50,65,80],min:50,pipe:1}};
+const INCH={14.2:'9/16″',15:'5/8″',12:'½″',16:'5/8″',17.2:'11/16″',20:'¾″',25:'1″',40:'1½″',50:'2″',65:'2½″',80:'3″'};
+const LAM=[0,0,1,1.66,2.15,2.55,2.9,3.2,3.4,3.6,3.8];
+const CU=[16,25,35,50,70,95,120,150,185,240], GIS=[[25,3],[25,6],[40,6],[50,6],[50,8]];
+$('app').innerHTML=Object.entries(APPS).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
+$('soil').innerHTML=SOILS.map((s,i)=>`<option value="${i}">${s[0]} (${s[1]} Ω·m)</option>`).join('')+'<option value="c">Custom</option>';
+$('soil').value=1; $('rho').value=50;
+function setApp(){const a=APPS[$('app').value];$('target').value=a.R;$('If').value=a.I;$('tf').value=a.t;calc()}
+$('app').onchange=setApp;
+$('soil').onchange=()=>{if($('soil').value!=='c')$('rho').value=SOILS[$('soil').value][1];calc()};
+$('rho').oninput=()=>{$('soil').value='c';calc()};
+['target','mat','If','tf','sp','bf','season','surf','nd','sf','sm','r2','h1','cfg','pn','pb','dn','rv'].forEach(i=>$(i).addEventListener('input',calc));
+['kva','zp'].forEach(i=>$(i).addEventListener('input',()=>{const k=+$('kva').value,z=+$('zp').value;const v=k>0&&z>0?(k/(1.732*.415*z/100)/1000).toFixed(1):'';$('kest').innerHTML=v?`LV three-phase fault estimate: <b>${v} kA</b> <button type="button" id="kuse" style="padding:3px 10px;font-size:12px">Use as fault current</button>`:'';if(v)$('kuse').onclick=()=>{$('If').value=v;calc()};}));
+
+const dw=(r,L,d)=>r/(2*PI*L)*(Math.log(4*L/d)-1);
+const bfR=(r,rb,L,d,D)=>rb/(2*PI*L)*Math.log(D/d)+r/(2*PI*L)*(Math.log(4*L/D)-1);
+const lam=n=>{let q=0;for(let k=1;k<n;k++)q+=(n-k)/k;return 2*q/n};
+function Rn(r,rb,L,n,s,d,u){r=typeof r==='function'?r(L):r;const D=L>3?.3:.25,R1=u?bfR(r,rb,L,d,D):dw(r,L,d);return n===1?R1:R1/n*(1+lam(n)*r/(2*PI*R1*s))}
+function solve(r,rb,tg,d,u,so,mn,nx){const all=[];for(const L of[3,4.5,6,9])for(let n=Math.max(1,mn);n<=(nx||Math.max(12,mn));n++){const s=so||Math.min(2*L,6);all.push({L,n,s,R:Rn(r,rb,L,n,s,d,u),cost:n*(L+1.5)*(L>6?1.6:L>4.5?1.2:1)})}
+ const ok=all.filter(c=>c.R<=tg).sort((a,b)=>a.cost-b.cost);return ok.length?{...ok[0],ok:true}:{...all.reduce((a,b)=>a.R<b.R?a:b),ok:false}}
+function mesh(r,tg){for(let a=10;a<=150;a+=5){const rr=typeof r==='function'?r(Math.min(15,Math.max(3,a/4))):r,LT=2*a*(a/5+1),A=a*a,R=rr*(1/LT+1/Math.sqrt(20*A)*(1+1/(1+.5*Math.sqrt(20/A))));if(R<=tg||a===150)return{a,LT,R,ok:R<=tg}}}
+const rStrip=(r,l)=>r/(2*PI*l)*Math.log(2*l*l/(.04*.5));
+const rRing=(r,a)=>{const D=4*a/PI;return r/(2*PI*PI*D)*(Math.log(8*D/.02)+Math.log(4*D/.5))};
+function stripSol(r,rb,tg,d,u){let b=null;for(const L of[3,4.5,6])for(let n=1;n<=6;n++)for(const l0 of[10,15,20,30,40,60,80,100]){const s=Math.min(2*L,6),l=Math.max(l0,(n-1)*s),Rr=Rn(r,rb,L,n,s,d,u),Rs=rStrip(typeof r==='function'?r(3):r,l),R=Rr*Rs/(Rr+Rs)*1.15,cost=n*(L+1.5)+l*.35,c={L,n,s,ls:l,R,cost,ok:R<=tg};if(!b||(c.ok&&!b.ok)||(c.ok===b.ok&&(c.ok?c.cost<b.cost:c.R<b.R)))b=c}return b}
+function ringSol(r,rb,tg,d,u){let b;for(let a=6;a<=150;a+=2){const Rr=Rn(r,rb,3,4,a,d,u),Rg=rRing(typeof r==='function'?r(Math.min(15,Math.max(3,a/4))):r,a),R=Rr*Rg/(Rr+Rg)*1.15;b={a,LT:4*a,R,ok:R<=tg,step:a};if(R<=tg)break}return b}
+function compare(A,rx,rb,tg,d0,so,mn){
+ const pick=(P,Q)=>(A.pit===2||!P.ok||P.n>=Q.n+2)?Q:P,r=[];
+ const rod=(nm,k,m1,nx)=>{const c=pick(solve(rx,rb,tg,d0,false,so,m1,nx),solve(rx,rb,tg,d0,true,so,m1,nx));r.push({k,nm,txt:`${c.n} × ${c.L} m rods${c.n>1?', '+c.s+' m apart':''}`,R:c.R,ok:c.ok,m:c.n*c.L})};
+ rod('Single rod','single',1,1);rod('Multiple rods','multi',Math.max(2,mn));
+ const t=stripSol(rx,rb,tg,d0,true);r.push({k:'strip',nm:'Rod + strip',txt:`${t.n} × ${t.L} m rods + ${t.ls} m strip`,R:t.R,ok:t.ok,m:t.n*t.L+t.ls});
+ const g=ringSol(rx,rb,tg,d0,true);r.push({k:'ring',nm:'Ring earth',txt:`${g.a}×${g.a} m ring + 4 corner rods`,R:g.R,ok:g.ok,m:4*g.a+12});
+ const M=mesh(rx,tg);r.push({k:'grid',nm:'Earth grid',txt:`${M.a}×${M.a} m grid, 5 m mesh`,R:M.R,ok:M.ok,m:M.LT+12});return r}
+const area=(m,d)=>m.pipe?PI/4*(d*d-(d-6.4)**2):PI/4*d*d;
+function calc(){
+ const A=APPS[$('app').value],m=MATS[$('mat').value],rho=+$('rho').value*+$('season').value,tg=+$('target').value,I=+$('If').value,t=+$('tf').value,rb=+$('bf').value,so=+$('sp').value||0,nd=+$('nd').value||0,mn=nd>0?Math.max(2,nd):1;
+ if(!(rho>0&&tg>0&&I>0&&t>0))return;
+ const sm=$('sm').value==='2',r2=+$('r2').value||rho,h1=+$('h1').value||2,rx=sm?(L=>L<=h1?rho:L/(h1/rho+(L-h1)/r2)):rho;
+ const d0=m.min/1000,plain=solve(rx,rb,tg,d0,false,so,$('cfg').value==='multi'?Math.max(2,mn):mn),pit=solve(rx,rb,tg,d0,true,so,$('cfg').value==='multi'?Math.max(2,mn):mn);
+ const cfg=$('cfg').value;let usePit,why,c,M=null,SS=null;
+ const dec=(P,Q)=>{if(A.pit===2){usePit=true;why='Required. This load needs a testable, maintainable pit with watering pipe.'}else if(!P.ok){usePit=true;why='Required. Plain driven rods cannot reach the target in this soil.'}else if(P.n>=Q.n+2){usePit=true;why=`Recommended. Saves ${P.n-Q.n} rods compared with plain driven rods.`}else{usePit=false;why='Not needed. Driven rod(s) in a small inspection chamber will do.'}return usePit?Q:P};
+ if(cfg==='strip'){SS=stripSol(rx,rb,tg,d0,true);usePit=true;c=SS;why='Required. Test pits on the rod and strip system.'}
+ else if(cfg==='ring'){M=ringSol(rx,rb,tg,d0,true);usePit=true;c={L:3,n:4,s:M.a};why='Required. Corner test pits on the ring.'}
+ else if(cfg==='grid'){M=mesh(rx,tg);M.step=5;usePit=true;c={L:3,n:Math.max(4,mn),s:6};why='Required. Test pits around the earth grid.'}
+ else{c=cfg==='single'?dec(solve(rx,rb,tg,d0,false,so,1,1),solve(rx,rb,tg,d0,true,so,1,1)):dec(plain,pit);
+  if(!c.ok&&cfg==='auto'){M=mesh(rx,tg);M.step=5;usePit=true;c={L:3,n:Math.max(4,mn),s:6};why='Required. Rods alone cannot reach the target, so perimeter test pits are added to an earth grid.'}}
+ const n=c.n,L=c.L,s=c.s,ls=SS?SS.ls:0,Ig=I*Math.min(1,Math.max(.05,(+$('sf').value||100)/100)),Irod=n>1?Ig*1000/n*1.5:Ig*1000,Sreq=Irod*Math.sqrt(t)/m.k;
+ let dia=m.dias.find(x=>x>=m.min&&area(m,x)>=Sreq),big=false;if(!dia){dia=m.dias[m.dias.length-1];big=true}
+ const R=M?M.R:SS?SS.R:Rn(rx,rb,L,n,s,dia/1000,usePit),ok=M?M.ok:SS?SS.ok:R<=tg,bore=L>3?300:250,ch=usePit?A.ch:300,h=.5,depth=h+L;
+ const Sc=I*1000*Math.sqrt(t)/159,cu=Math.max(CU.find(x=>x>=Sc)||240,A.pit===2?35:16),gi=GIS.find(g=>g[0]*g[1]>=I*1000*Math.sqrt(t)/58)||GIS[GIS.length-1];
+ const lead=M?M.LT:SS?ls+10:(n-1)*s+10,vol=usePit?PI/4*(bore/1000)**2*L*n:0,gpr=Ig*1000*R;
+ const sl=+$('surf').value,Cs=sl?1-.09*(1-rho/3000)/.29:1,rsf=sl?3000:rho,Et=(1000+1.5*Cs*rsf)*.157/Math.sqrt(t),Es=(1000+6*Cs*rsf)*.157/Math.sqrt(t);
+ const msgs=[];
+ if(M&&!M.ok)msgs.push(`Even a ${M.a} × ${M.a} m ${cfg==='ring'?'ring':'grid'} gives ${R.toFixed(2)} Ω. Add chemical treatment, deep bores, or relax the target.`);
+ if(!ok&&!M)msgs.push(`This configuration reaches ${R.toFixed(2)} Ω, above the ${tg} Ω target. Try Rod + strip, Ring earth or Earth grid.`);
+ if(cfg==='single'&&nd>1)msgs.push(`Single rod selected, but ${nd} down conductors need ${nd} separate pits. Use Multiple rods.`);
+ if(big)msgs.push('Fault current is higher than the largest standard electrode here. Use more electrodes or a larger conductor.');
+ if(gpr>Et)msgs.push(`Ground potential rise ${(gpr/1000).toFixed(1)} kV is above the tolerable touch voltage of ${Et.toFixed(0)} V. This is a screening result: run the full IEEE 80 mesh and step study, add a crushed rock surface layer, or lower the fault current.`);
+ $('msgs').innerHTML=msgs.map(x=>`<div class="msg">${x}</div>`).join('');
+ const inch=x=>(x/25.4).toFixed(1)+'″';
+ const cards=[
+  [ok?'':'warn','Earthing rod',`Ø${dia} mm ${m.pipe?'pipe':'rod'}`,`${INCH[dia]||''} ${m.n}, ${L} m long (${(L*3.281).toFixed(0)} ft)`],
+  ['cu','Number of pits / rods',M?n+' perimeter pits':`${n} × ${L} m`,M?`Each ${L} m rod, around the grid`:`Spacing ${s} m. Total ${n*L} m of electrode`],
+  ['y','Burial depth',`Rod top ${h} m`,`Bottom at ${depth} m. Strip buried ${h} m below grade`],
+  [usePit?'y':'','Pit needed?',usePit?'Yes':'No',why],
+  ['','Pit size',usePit?`Ø${bore} mm bore`:'Driven rod',`${usePit?(bore/25.4).toFixed(0)+'″ bore × '+depth+' m deep, chamber ':'Chamber '}${ch}×${ch}×500 mm (${inch(ch)})`]];
+ if(nd>0)cards.push(['','Down conductors',nd+' nos',`One pit per down conductor (${n} pits). Join them with a ring conductor.`]);
+ if(M)cards.push(['cu',cfg==='ring'?'Ring earth':'Earth grid',`${M.a} × ${M.a} m`,`${cfg==='ring'?'Ring,':'5 m mesh,'} ${M.LT} m of conductor at 0.5 m depth`]);if(SS)cards.push(['cu','Earth strip',`${ls} m`,'GI strip at 0.5 m depth, joined to the rods']);
+ cards.push([ok?'':'warn','Resistance achieved',`${R.toFixed(2)} Ω`,`Target ≤ ${tg} Ω. Design soil ${sm?'two-layer, top ':''}${rho.toFixed(0)} Ω·m`],
+  [gpr<=Et?'':'warn','Touch voltage check',`GPR ${(gpr/1000).toFixed(1)} kV`,`Ig ${Ig.toFixed(1)} kA into soil. Tolerable touch ${Et.toFixed(0)} V, step ${Es.toFixed(0)} V (70 kg, ${t} s)`]);
+ const recTxt=`${dia} mm diameter × ${L} m ${m.n.toLowerCase()}. Quantity: ${n} ${n===1?(m.pipe?'pipe':'rod'):(m.pipe?'pipes':'rods')}. `+(M?(cfg==='ring'?`Ring conductor ${M.a} × ${M.a} m around the building, rods at the corners.`:`Earth grid ${M.a} × ${M.a} m with rods around the edge.`):n>1?`Install approximately ${s} m apart.`:'Single electrode.')+(SS?` Plus ${ls} m of GI strip.`:'')+` Expected ${R.toFixed(2)} Ω against a target of ${tg} Ω (${ok?'met':'not met'}).`;
+ $('rec').className='rec'+(ok?'':' bad');$('rec').innerHTML=`<small>Recommended electrode</small><b>${dia} mm diameter × ${L} m ${m.n.toLowerCase()}</b><div>Quantity: ${n} ${n===1?(m.pipe?'pipe':'rod'):(m.pipe?'pipes':'rods')}</div><div>${recTxt.split('. ').slice(2).join('. ')}</div>`;
+ const cmpRows=compare(A,rx,rb,tg,d0,so,mn),bestM=Math.min(...cmpRows.filter(r=>r.ok).map(r=>r.m));
+ $('cmp').innerHTML='<tr><td><b>Layout</b></td><td><b>Result</b></td><td><b>R (Ω)</b></td><td><b>Metal (m)</b></td><td></td></tr>'+cmpRows.map(r=>`<tr${r.k===cfg?' style="background:#1f3347"':''}><td>${r.nm}</td><td>${r.txt}</td><td style="text-align:left">${r.R.toFixed(2)} ${r.ok?'✓':'✗'}</td><td style="text-align:left">${r.m.toFixed(0)}${r.ok&&r.m===bestM?' (shortest)':''}</td><td><button type="button" data-c="${r.k}" style="padding:3px 10px;font-size:12px">Use</button></td></tr>`).join('');
+ $('res').innerHTML=cards.map(r=>`<div class="card ${r[0]}"><small>${r[1]}</small><b>${r[2]}</b><span>${r[3]}</span></div>`).join('');
+ const TR=[['Application',A.n],['Design soil resistivity',sm?`Two-layer: ${rho.toFixed(0)} Ω·m to ${h1} m, then ${r2.toFixed(0)} Ω·m`:`${rho.toFixed(0)} Ω·m`],['Electrode',`${m.n}, Ø${dia} mm × ${L} m × ${n} nos`],
+  ['Rod size from fault current',`${Sreq.toFixed(0)} mm² needed per electrode (${(Irod/1000).toFixed(1)} kA, ${t} s)`],
+  ['Main earth conductor',`${cu} mm² Cu cable, or GI strip ${gi[0]}×${gi[1]} mm`],[M?'Grid conductor length':'Conductor length (approx.)',`${lead.toFixed(0)} m`],
+  ['Backfill volume',usePit?`${vol.toFixed(2)} m³ (${$('bf').options[$('bf').selectedIndex].text})`:'None'],
+  ['Watering pipe',usePit?'40 mm (1½″) PVC or GI with funnel, per pit':'Not required'],['Test link',usePit?'One per pit, in chamber':'One in main chamber'],
+  ['Chamber (clear / outer)',`${ch}×${ch}×500 mm / ${ch+230}×${ch+230} mm, 115 mm brick wall, 50 mm cover`]];$('tab').innerHTML=TR.map(r=>`<div class="kv"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');LAST={rows:[['Project',$('pn').value],['Prepared by',$('pb').value||'-'],['Drawing / revision',$('dn').value+' / Rev '+$('rv').value],['Recommended electrode',recTxt],...cmpRows.map(r=>['Compare: '+r.nm,`${r.txt}. ${r.R.toFixed(2)} Ω, ${r.ok?'target met':'target not met'}, ${r.m.toFixed(0)} m of metal`]),...msgs.map(x=>['Warning',x]),...cards.map(c=>[c[1],c[2]+'. '+c[3]]),...TR]};
+ $('notes').innerHTML='Backfill resistivity in use: '+rb+' Ω·m. Conductors assume 1.5× uneven current sharing across rods.';
+ const o={cfg,ls,pn:esc($('pn').value.slice(0,30)),pb:esc($('pb').value.slice(0,22)),dn:esc($('dn').value),rv:esc($('rv').value),pre:nd>0?'DC':'P',rho,R,n,s,L,bore,ch,usePit,dia,h,depth,mesh:M,mn:m.n,gi:`${gi[0]}×${gi[1]}`,lead:lead.toFixed(0)};
+ $('sec').innerHTML=drawSec(o);$('chm').innerHTML=drawChm(o);$('plan').innerHTML=drawPlan(o);
+}
+let LAST={rows:[]};const DM='#0b5aa8',K='#1b1b1b';
+const esc=x=>String(x).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+const T=(x,y,s,a='start',c='',z=12)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="${z}" class="${c}">${s}</text>`;
+const Ln=(a,b,c,d,st=K,w=1,da='')=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${st}" stroke-width="${w}" stroke-dasharray="${da}"/>`;
+const Rc=(x,y,w,h,f='none',st=K,sw=1.2)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" stroke="${st}" stroke-width="${sw}"/>`;
+const dH=(a,b,y,s)=>`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${DM}" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>`+T((a+b)/2,y-5,s,'middle','d',13);
+const dV=(x,a,b,s,sd=1)=>`<line x1="${x}" y1="${a}" x2="${x}" y2="${b}" stroke="${DM}" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>`+T(x+sd*6,(a+b)/2+5,s,sd>0?'start':'end','d',13);
+const E=(a,b,c,d)=>Ln(a,b,c,d,DM,.6);
+const CL=(x,a,b)=>Ln(x,a,x,b,K,.7,'14 3 3 3');
+const bal=(x,y,n)=>`<circle cx="${x}" cy="${y}" r="10" fill="#fff" stroke="${K}" stroke-width="1.3"/>`+T(x,y+4,n,'middle','',12);
+const grn=(a,b,c,d)=>Ln(a,b,c,d,'#2e8b3d',4)+Ln(a,b,c,d,'#e9c43c',1.8,'6 6');
+const SY={rod:(x,y)=>Rc(x,y+3,18,6,'#c9803f',K,1),bf:(x,y)=>Rc(x,y,18,12,'url(#bfp)',K,1),bk:(x,y)=>Rc(x,y,18,12,'url(#bk)',K,1),cover:(x,y)=>Rc(x,y+3,18,6,'#555',K,1),strip:(x,y)=>grn(x,y+6,x+18,y+6),pipe:(x,y)=>Rc(x+6,y,6,12,'#9cc9e6',K,1),tl:(x,y)=>Rc(x,y+2,18,8,'#ddd',K,1),clamp:(x,y)=>Rc(x+3,y+1,12,10,'#bbb',K,1)+`<circle cx="${x+9}" cy="${y+6}" r="2" fill="${K}"/>`,
+ pit:(x,y)=>Rc(x,y,18,12,'none',K,1.6)+`<circle cx="${x+9}" cy="${y+6}" r="4" fill="url(#bfp)" stroke="${K}"/><circle cx="${x+9}" cy="${y+6}" r="1.5" fill="#c9803f"/>`,meb:(x,y)=>Rc(x,y,18,12,'#fff',K,1.6)+T(x+9,y+9,'M','middle','',9)};
+function legend(x,y,w,it){let s=Rc(x,y,w,30+it.length*20,'#fff',K,1.4)+T(x+8,y+18,'LEGEND','start','',13);it.forEach(([n,sy,t],i)=>{const yy=y+30+i*20;s+=(n?bal(x+18,yy+6,n):'')+SY[sy](x+36,yy)+T(x+60,yy+10,t,'start','',12)});return s}
+function frame(W,H,title,o,sh){const bx=W-326,by=H-92;return `<rect width="${W}" height="${H}" fill="#f5f6f4"/>`+Rc(6,6,W-12,H-12,'none',K,2.2)+Rc(W-176,16,160,28,'none',K,1.8)+T(W-96,35,'NOT TO SCALE','middle','',14)+Rc(bx,by,320,86,'#fff',K,1.8)+Ln(bx,by+22,W-6,by+22)+Ln(bx,by+44,W-6,by+44)+Ln(bx,by+66,W-6,by+66)+Ln(bx+190,by+44,bx+190,by+66)+Ln(bx+245,by+44,bx+245,by+66)
+ +T(bx+8,by+16,o.pn,'start','',14)+T(bx+8,by+37,title,'start','',12)+T(bx+8,by+60,`DWG ${o.dn}-0${sh}`,'start','',11)+T(bx+198,by+60,'REV '+o.rv,'start','',11)+T(bx+253,by+60,new Date().toLocaleDateString('en-GB'),'start','',10)+T(bx+8,by+80,'Prepared by: '+(o.pb||'-'),'start','',12)+T(bx+312,by+80,`ρ ${o.rho.toFixed(0)} Ω·m   R ${o.R.toFixed(2)} Ω`,'end','',11)}
+const LG=(o)=>[[1,'rod','Earth rod'],[2,'bf','Backfill column'],[3,'pipe','Watering pipe + funnel'],[4,'bk','Brick chamber wall'],[5,'cover','RCC / CI cover'],[6,'strip','Earth conductor'],[7,'tl','Test link'],[8,'clamp','Rod clamp']].filter(x=>o.usePit||![2,3].includes(x[0]));
+function drawSec(o){const W=640,H=640,gy=112,ppm=Math.min(44,330/o.depth),hx=3,cx=170,Y=m=>gy+m*ppm,bw=o.bore/1000*ppm*hx,ow=(o.ch+230)/1000*ppm*hx,cw=o.ch/1000*ppm*hx,rw=Math.max(5,o.dia/1000*ppm*hx),yb=Y(o.depth);
+ let s=frame(W,H,'SECTION A-A  Earth pit',o,1)+Rc(24,gy,300,yb-gy+44,'url(#sh)','none',0)+Ln(24,gy,324,gy,K,2.6);
+ if(o.usePit)s+=Rc(cx-bw/2,Y(.5),bw,yb-Y(.5),'url(#bfp)',K,1.2);
+ s+=Rc(cx-ow/2,gy,ow,.5*ppm,'url(#bk)',K,1.8)+Rc(cx-cw/2,gy,cw,.5*ppm,'#f5f6f4',K,1.2)+Rc(cx-ow/2-4,gy-7,ow+8,7,'#555',K,1.6)+Rc(cx-cw/4-5,gy-11,10,4,'#333','none',0)+Rc(cx+cw/4-5,gy-11,10,4,'#333','none',0);
+ if(o.usePit)s+=Rc(cx+bw/2-9,gy+6,6,(o.h+.9)*ppm-6,'#9cc9e6',K,.9)+`<path d="M${cx+bw/2-15} ${gy+6}h18l-3 -10h-12z" fill="#9cc9e6" stroke="${K}" stroke-width=".9"/>`;
+ s+=Rc(cx-rw/2,Y(o.h-.1),rw,(o.L+.1)*ppm-8,'#c9803f',K,1.3)+`<path d="M${cx-rw/2} ${yb-8}L${cx} ${yb+10}L${cx+rw/2} ${yb-8}z" fill="#c9803f" stroke="${K}" stroke-width="1.3"/>`+CL(cx,gy-16,yb+16)+grn(32,Y(o.h)+5,cx-rw/2-6,Y(o.h)+5)+Rc(cx-rw/2-6,Y(o.h)-1,rw+12,12,'#bbb',K,1.3)+`<circle cx="${cx}" cy="${Y(o.h)+5}" r="2" fill="${K}"/>`;
+ const x1=cx+ow/2+38;
+ s+=E(cx+ow/2+4,gy,x1+56,gy)+E(cx+ow/2+4,Y(o.h),x1+56,Y(o.h))+E(cx+bw/2+4,yb,x1+56,yb)+dV(x1,gy,Y(o.h),o.h*1000)+dV(x1,Y(o.h),yb,o.L*1000)+dV(x1+52,gy,yb,o.depth*1000)+dH(cx-ow/2,cx+ow/2,gy-26,o.ch+230)+T(cx,gy-46,'chamber outer, clear '+o.ch,'middle','d',12);
+ if(o.usePit)s+=dH(cx-bw/2,cx+bw/2,yb+26,'Ø'+o.bore);
+ s+=T(cx,yb+50,`Rod Ø${o.dia} × ${o.L*1000}`,'middle','d',13);
+ const ly=Y(o.h+o.L*.7),by=Y(o.h);
+ s+=Ln(60,ly,cx-rw/2,ly)+bal(50,ly,1)+Ln(cx-ow/2-4,gy-3,60,gy-60)+bal(50,gy-60,5)+Ln(cx-ow/2,gy+.25*ppm,60,gy-18)+bal(50,gy-18,4)+Ln(80,by+5,60,by+30)+bal(50,by+34,6)+Ln(cx-rw/2-6,by+9,60,by+64)+bal(50,by+68,8);
+ if(o.usePit)s+=Ln(cx-bw/2,Y(o.h+o.L*.35),60,Y(o.h+o.L*.35))+bal(50,Y(o.h+o.L*.35),2)+Ln(cx+bw/2-6,gy-8,cx+bw/2+24,gy-72)+bal(cx+bw/2+24,gy-82,3);
+ s+=legend(350,64,270,LG(o).filter(x=>x[0]!==7));
+ const rows=[`Rod  Ø${o.dia} mm × ${o.L*1000} mm`,`Burial depth  ${o.h*1000} mm`,`Total depth  ${o.depth*1000} mm`,o.usePit?`Bore  Ø${o.bore} mm`:'Driven in natural soil',`Chamber  ${o.ch}×${o.ch}×500 mm`,`Resistance  ${o.R.toFixed(2)} Ω`];
+ s+=Rc(350,64+30+(LG(o).length-1)*20+14,270,28+rows.length*22,'#fff',K,1.4)+T(358,64+30+(LG(o).length-1)*20+32,'KEY DIMENSIONS','start','',13);
+ rows.forEach((x,i)=>s+=T(358,64+30+(LG(o).length-1)*20+54+i*22,x,'start','',14));return s}
+function drawChm(o){const W=1000,H=470,k=.3,ow=(o.ch+230)*k,cw=o.ch*k,py=190,p1=150,p2=430,ex=760,rr=Math.max(4,o.dia*k/2);
+ let s=frame(W,H,'DETAIL  Pit chamber',o,2);
+ const slot=(x,y)=>Rc(x-24,y,48,9,'#333','none',0);
+ s+=T(p1,50,'PLAN (cover on)','middle','',14)+Rc(p1-ow/2,py-ow/2,ow,ow,'#aab2b8',K,2)+slot(p1,py-34)+slot(p1,py+25)+T(p1,py+6,'EARTH','middle','',16)+bal(p1+ow/2-14,py-ow/2+16,5)+dH(p1-ow/2,p1+ow/2,py-ow/2-26,o.ch+230)+dV(p1+ow/2+24,py-ow/2,py+ow/2,o.ch+230);
+ s+=T(p2,50,'PLAN (cover removed)','middle','',14)+Rc(p2-ow/2,py-ow/2,ow,ow,'url(#bk)',K,2)+Rc(p2-cw/2,py-cw/2,cw,cw,'#f5f6f4',K,1.3)+grn(p2-ow/2-50,py,p2-rr-5,py)+Rc(p2-cw/2+6,py-8,34,16,'#ddd',K,1.2)+T(p2-cw/2+23,py+4,'TL','middle','',10)+`<circle cx="${p2}" cy="${py}" r="${rr+5}" fill="#bbb" stroke="${K}" stroke-width="1.3"/><circle cx="${p2}" cy="${py}" r="${rr}" fill="#c9803f" stroke="${K}"/><circle cx="${p2}" cy="${py}" r="1.6" fill="${K}"/>`;
+ if(o.usePit)s+=`<circle cx="${p2+cw*.28}" cy="${py-cw*.28}" r="8" fill="#9cc9e6" stroke="${K}" stroke-width="1.2"/>`+Ln(p2+cw*.28+6,py-cw*.28-6,p2+cw*.28+30,py-cw*.28-30)+bal(p2+cw*.28+36,py-cw*.28-36,3);
+ s+=Ln(p2+rr+5,py+rr+5,p2+30,py+34)+bal(p2+36,py+40,1)+Ln(p2-cw/2+23,py+8,p2-cw/2+23,py+34)+bal(p2-cw/2+23,py+44,7)+Ln(p2-ow/2-20,py,p2-ow/2-20,py-30)+bal(p2-ow/2-20,py-40,6)+Ln(p2-cw/2-4,py+cw/2-10,p2-cw/2-40,py+cw/2+30)+bal(p2-cw/2-44,py+cw/2+36,4)+CL(p2,py-ow/2-8,py+ow/2+8)+Ln(p2-ow/2-8,py,p2+ow/2+8,py,K,.7,'14 3 3 3');
+ s+=dH(p2-ow/2,p2+ow/2,py-ow/2-26,o.ch+230)+dH(p2-ow/2,p2-cw/2,py-ow/2-8,115)+dH(p2-cw/2,p2+cw/2,py+ow/2+28,'clear '+o.ch)+dV(p2+ow/2+24,py-ow/2,py+ow/2,o.ch+230);
+ const ch=500*k,cv=50*k,ey=110;
+ s+=T(ex,50,'SECTION B-B','middle','',14)+Rc(ex-ow/2-50,ey,ow+100,ch+cv+110,'url(#sh)','none',0)+Rc(ex-ow/2,ey+cv,115*k,ch,'url(#bk)',K,1.6)+Rc(ex+cw/2,ey+cv,115*k,ch,'url(#bk)',K,1.6)+Rc(ex-ow/2,ey,ow,cv,'#555',K,1.6)+Ln(ex-ow/2-50,ey,ex+ow/2+50,ey,K,2.6);
+ s+=Rc(ex-rr,ey+cv+ch-100*k,rr*2,100*k+100,'#c9803f',K,1.3)+`<path d="M${ex-rr} ${ey+cv+ch+100} L${ex} ${ey+cv+ch+118} L${ex+rr} ${ey+cv+ch+100}z" fill="#c9803f" stroke="${K}"/>`+Rc(ex-rr-5,ey+cv+ch-12,rr*2+10,10,'#bbb',K,1.3)+grn(ex-ow/2-50,ey+cv+ch+6,ex-rr-5,ey+cv+ch+6)+CL(ex,ey-10,ey+cv+ch+124);
+ if(o.usePit)s+=Rc(ex+cw*.28-4,ey+cv+4,8,ch+50,'#9cc9e6',K,.9)+`<path d="M${ex+cw*.28-10} ${ey+cv+4}h20l-4 -12h-12z" fill="#9cc9e6" stroke="${K}" stroke-width=".9"/>`+bal(ex+cw*.28+40,ey+cv+40,3);
+ s+=bal(ex-ow/2-30,ey+cv+ch+26,1)+Ln(ex-ow/2-20,ey+cv+ch+26,ex-rr-6,ey+cv+ch+26)+bal(ex-ow/2-30,ey+cv+ch/2,4)+Ln(ex-ow/2-20,ey+cv+ch/2,ex-ow/2+6,ey+cv+ch/2)+bal(ex-ow/2-30,ey+6,5)+Ln(ex-ow/2-20,ey+6,ex-ow/2+8,ey+6)+bal(ex+ow/2+36,ey+cv+ch-6,8)+Ln(ex+ow/2+26,ey+cv+ch-6,ex+rr+6,ey+cv+ch-6);
+ s+=dH(ex-ow/2,ex+ow/2,ey-26,o.ch+230)+dH(ex-cw/2,ex+cw/2,ey+cv+ch/2,o.ch)+dH(ex-ow/2,ex-cw/2,ey+cv+ch+34,115)+dV(ex+ow/2+66,ey,ey+cv,50)+dV(ex+ow/2+66,ey+cv,ey+cv+ch,500)+E(ex+ow/2+2,ey,ex+ow/2+72,ey)+E(ex+ow/2+2,ey+cv+ch,ex+ow/2+72,ey+cv+ch);
+ const it=LG(o);return s+T(ex+ow/2+84,ey+20,'All dimensions in mm','start','',12)+legend(20,350,235,it.slice(0,4))+legend(265,350,235,it.slice(4))}
+function drawPlan(o){const W=640,H=640,bx=60;let s=frame(W,H,o.mesh?(o.cfg==='ring'?'LAYOUT PLAN  Ring earth':'LAYOUT PLAN  Earth grid'):'LAYOUT PLAN  Earth electrodes',o,3);
+ const leg=legend(20,548,280,[[0,'pit','Earth pit (chamber, bore, rod)'],[0,'strip','Earth conductor'],[0,'meb','Main earth bar (MEB)']]);
+ if(o.mesh){const a=o.mesh.a,st=o.mesh.step||5,p=Math.min(380/a,12),x0=130,y0=120,w=a*p,by=y0+w/2;
+  for(let i=0;i<=a/st;i++){const d=i*st*p;s+=Ln(x0+d,y0,x0+d,y0+w,'#2e8b3d',2)+Ln(x0,y0+d,x0+w,y0+d,'#2e8b3d',2)}
+  Array.from({length:o.n},(_,i)=>{let d=i*4*w/o.n,q;if(d<w)q=[x0+d,y0];else if((d-=w)<w)q=[x0+w,y0+d];else if((d-=w)<w)q=[x0+w-d,y0+w];else{d-=w;q=[x0,y0+w-d]}return q}).forEach((q,i)=>s+=Rc(q[0]-9,q[1]-9,18,18,'#fff',K,1.8)+`<circle cx="${q[0]}" cy="${q[1]}" r="4" fill="url(#bfp)" stroke="${K}"/><circle cx="${q[0]}" cy="${q[1]}" r="1.6" fill="#c9803f"/>`+T(q[0],q[1]-14,o.pre+(i+1),'middle','',12));
+  s+=grn(bx+18,by,x0,by)+Rc(bx-16,by-16,32,32,'#fff',K,2)+T(bx,by+4,'MEB','middle','',12)+dH(x0,x0+w,y0-34,o.mesh.a+' m')+dV(x0+w+26,y0,y0+w,o.mesh.a+' m');
+  if(st<a)s+=dH(x0,x0+st*p,y0+w+30,st+' m mesh');
+  return s+T(30,y0+w+64,`${o.cfg==='ring'?'Ring earth':'Earth grid'} ${o.mesh.a}×${o.mesh.a} m, GI ${o.gi} mm at 0.5 m, ${o.lead} m total`,'start','',13)+leg}
+ const rows=o.n>6?2:1,cols=Math.ceil(o.n/rows),ex=o.cfg==='strip'?Math.max(0,o.ls-(cols-1)*o.s):0,p=Math.min(40,440/Math.max(1,(cols-1)*o.s+ex)),x0=140,y0=rows===1?290:210,sq=Math.max(24,(o.ch+230)/1000*p),pos=[];
+ for(let i=0;i<o.n;i++)pos.push([x0+(i%cols)*o.s*p,y0+Math.floor(i/cols)*o.s*p]);
+ const by=y0+(rows-1)*o.s*p/2,lx=pos[cols-1][0];
+ s+=grn(bx+18,by,x0-36,by);
+ for(let r=0;r<rows;r++){const y=y0+r*o.s*p,xe=pos.filter((q,i)=>Math.floor(i/cols)===r).pop()[0];s+=grn(x0-36,y,xe+(r===0?ex*p:0),y)}
+ if(rows>1)s+=grn(x0-36,y0,x0-36,y0+o.s*p);
+ s+=Rc(bx-16,by-16,32,32,'#fff',K,2)+T(bx,by+4,'MEB','middle','',12);
+ pos.forEach((q,i)=>{s+=Rc(q[0]-sq/2,q[1]-sq/2,sq,sq,'#fff',K,1.8)+(o.usePit?`<circle cx="${q[0]}" cy="${q[1]}" r="${Math.max(9,o.bore/1000*p/2)}" fill="url(#bfp)" stroke="${K}"/>`:'')+`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#c9803f"/>`+T(q[0],q[1]+sq/2+17,o.pre+(i+1),'middle','',13)});
+ if(cols>1)s+=dH(pos[0][0],pos[1][0],y0-sq/2-16,o.s*1000+' mm')+dH(pos[0][0],lx,y0+(rows-1)*o.s*p+sq/2+44,((cols-1)*o.s)+' m overall');
+ if(ex>0)s+=dH(lx,lx+ex*p,y0-sq/2-16,'strip +'+ex.toFixed(0)+' m');
+ return s+T(30,520,`${o.n} ${o.n>1?'pits':'pit'}, each ${o.L} m rod Ø${o.dia} mm. Conductor about ${o.lead} m (GI ${o.gi} mm).`,'start','',13)+leg}
+$('cmp').addEventListener('click',e=>{const c=e.target.dataset&&e.target.dataset.c;if(c){$('cfg').value=c;calc()}});$('sm').addEventListener('input',()=>{$('sm2').style.display=$('sm').value==='2'?'block':'none'});
+const ENG='This is a preliminary design tool. Confirm the target resistance, soil data, fault level, conductor sizing and touch/step study against the project specification, utility requirements and applicable standards before construction.';
+$('eng').innerHTML='<b>Engineering note.</b> '+ENG;
+const lb=$('lb');['sec','plan','chm'].forEach(i=>{const v=$(i);v.style.cursor='zoom-in';v.addEventListener('click',()=>{const c=v.cloneNode(true);c.removeAttribute('style');$('lbc').innerHTML='';$('lbc').appendChild(c);lb.style.display='block'})});
+$('lbx').onclick=()=>lb.style.display='none';document.addEventListener('keydown',e=>{if(e.key==='Escape')lb.style.display='none'});
+function svgPng(id){return new Promise(res=>{const sv=$(id).cloneNode(true),vb=sv.viewBox.baseVal,k=3;
+ sv.setAttribute('xmlns','http://www.w3.org/2000/svg');sv.setAttribute('width',vb.width*k);sv.setAttribute('height',vb.height*k);
+ sv.insertAdjacentHTML('afterbegin','<style>text{fill:#1b1b1b;font-family:Arial,sans-serif}text.d{fill:#0b5aa8}</style>'+document.querySelector('defs').innerHTML);
+ const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=vb.width*k;c.height=vb.height*k;c.getContext('2d').drawImage(im,0,0);res({d:c.toDataURL('image/png'),w:vb.width,h:vb.height})};
+ im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv))})}
+async function pdf(){
+ if(!window.jspdf){window.print();return}
+ const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),Z=x=>String(x).replace(/Ω/g,'ohm').replace(/″/g,'"').replace(/≤/g,'<=').replace(/ρ/g,'rho').replace(/√/g,'sqrt').replace(/·/g,'.');
+ doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('Earthing design report',14,16);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('ElectraLab | '+new Date().toLocaleDateString('en-GB'),14,22);
+ let y=32;doc.setFontSize(10);
+ LAST.rows.forEach(r=>{const v=doc.splitTextToSize(Z(r[1]),205);if(y+v.length*5>198){doc.addPage();y=16}doc.setFont('helvetica','bold');doc.text(Z(r[0]),14,y);doc.setFont('helvetica','normal');doc.text(v,72,y);y+=v.length*5+2});
+const nt=doc.splitTextToSize(ENG,269);if(y+nt.length*5+10>200){doc.addPage();y=16}doc.setFont('helvetica','bold');doc.text('Engineering note',14,y+5);doc.setFont('helvetica','normal');doc.text(nt,14,y+11);
+ for(const id of['sec','chm','plan']){const p=await svgPng(id),k=Math.min(277/p.w,190/p.h);doc.addPage();doc.addImage(p.d,'PNG',(297-p.w*k)/2,(210-p.h*k)/2,p.w*k,p.h*k)}
+ doc.save('earthing-design.pdf')}
+setApp();
+</script>
+</body>
+</html>
