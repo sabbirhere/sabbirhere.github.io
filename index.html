@@ -1,34 +1,9 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>ElectraLab | Electrical Engineering Aid</title> <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>ElectraLab | Electrical Engineering Aid</title> <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
  <style> * { margin: 0; padding: 0; box-sizing: border-box; } html { scroll-behavior: smooth; } body { font-family: Arial, Helvetica, sans-serif; background: #020617; color: white; min-height: 100vh; overflow-x: hidden; } button, input, select { font: inherit; } button { border: none; } a { color: inherit; } .start-button, .tool-card, .back-tools, .theme-toggle, .mode-tabs button, .calc-action, .clear-inputs, .ai-suggestion { transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; } /* ========================= ANIMATED BACKGROUND ========================= */ body::before { content: ""; position: fixed; inset: 0; z-index: -5; background: radial-gradient(circle at 20% 20%, rgba(0,255,255,.18), transparent 25%), radial-gradient(circle at 80% 30%, rgba(139,92,246,.18), transparent 25%), radial-gradient(circle at 50% 90%, rgba(0,128,255,.15), transparent 30%), #020617; } /* Grid */ body::after { content: ""; position: fixed; inset: 0; z-index: -4; background-image: linear-gradient(rgba(0,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,.06) 1px, transparent 1px); background-size: 45px 45px; animation: gridMove 15s linear infinite; } @keyframes gridMove { from { transform: translateY(0); } to { transform: translateY(45px); } } /* Floating glow particles */ .particle { position: fixed; width: 5px; height: 5px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff, 0 0 25px #00ffff; opacity: .6; z-index: -2; animation: floatParticle linear infinite; } @keyframes floatParticle { 0% { transform: translateY(110vh); opacity: 0; } 10% { opacity: .7; } 90% { opacity: .7; } 100% { transform: translateY(-10vh); opacity: 0; } } /* ========================= HEADER ========================= */ header { position: sticky; top: 0; z-index: 100; height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; background: rgba(2,6,23,.72); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,255,255,.18); } .logo { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: bold; letter-spacing: 1px; } .logo-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient( 135deg, #00ffff, #6366f1 ); color: #020617; box-shadow: 0 0 15px rgba(0,255,255,.5); } .logo span { color: #00ffff; } .menu-button { background: none; border: none; color: white; font-size: 27px; cursor: pointer; display: none; } /* ========================= HERO ========================= */ .hero { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; text-align: center; padding: 70px 20px; position: relative; } .hero-content { max-width: 900px; animation: heroEnter 1.2s ease forwards; }
- .creator-credit { margin: 0 auto 24px; display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; border: 1px solid rgba(0,255,255,.25); border-radius: 999px; background: rgba(2,6,23,.5); box-shadow: 0 0 18px rgba(0,255,255,.12); animation: creatorGlow 3s ease-in-out infinite; }
- .creator-label { font-size: 10px; letter-spacing: 2px; color: #64748b; }
- .creator-name { font-size: 15px; font-weight: 700; letter-spacing: .5px; color: #00ffff; text-shadow: 0 0 10px rgba(0,255,255,.55); }
- @keyframes creatorGlow { 0%,100% { box-shadow: 0 0 14px rgba(0,255,255,.10); } 50% { box-shadow: 0 0 26px rgba(0,255,255,.28); } } @keyframes heroEnter { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } } .energy-ring { width: 130px; height: 130px; margin: 0 auto 30px; border-radius: 50%; border: 2px solid #00ffff; display: grid; place-items: center; position: relative; animation: pulseRing 3s infinite ease-in-out; } .energy-ring::before, .energy-ring::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(0,255,255,.4); } .energy-ring::before { inset: 10px; } .energy-ring::after { inset: 22px; } @keyframes pulseRing { 0%,100% { transform: scale(1); box-shadow: 0 0 15px #00ffff, 0 0 40px rgba(0,255,255,.3); } 50% { transform: scale(1.06); box-shadow: 0 0 30px #00ffff, 0 0 80px rgba(0,255,255,.45); } } .bolt { font-size: 50px; color: #ffe600; text-shadow: 0 0 10px #ffe600, 0 0 30px #ff9900; } .hero h1 { font-size: clamp(42px, 8vw, 82px); line-height: 1; margin-bottom: 20px; background: linear-gradient( 90deg, #00ffff, #7c3aed, #ff00cc, #00ffff ); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 6s linear infinite; } @keyframes gradientMove { 0% { background-position: 0%; } 100% { background-position: 300%; } } .hero p { max-width: 650px; margin: auto; color: #94a3b8; font-size: 18px; line-height: 1.7; } .start-button { display: inline-block; margin-top: 35px; padding: 15px 30px; border-radius: 12px; text-decoration: none; color: #020617; font-weight: bold; background: linear-gradient( 90deg, #00ffff, #6366f1 ); box-shadow: 0 0 20px rgba(0,255,255,.35); transition: .3s; } .start-button:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 30px rgba(0,255,255,.7); } /* ========================= MENU SECTION ========================= */ .tools { max-width: 1150px; margin: auto; padding: 80px 20px; } .section-title { text-align: center; margin-bottom: 45px; } .section-title h2 { font-size: 34px; margin-bottom: 10px; } .section-title p { color: #64748b; } /* Cards */ .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; } .tool-card { position: relative; min-height: 190px; padding: 25px; border-radius: 18px; background: linear-gradient( 145deg, rgba(15,23,42,.9), rgba(15,23,42,.55) ); border: 1px solid rgba(0,255,255,.13); overflow: hidden; transition: .35s; text-align: left; width: 100%; display: block; color: white; text-decoration: none; cursor: pointer; appearance: none; -webkit-appearance: none; } .tool-card::before { content: ""; position: absolute; width: 120px; height: 120px; right: -50px; top: -50px; border-radius: 50%; background: #00ffff; filter: blur(55px); opacity: .15; } .tool-card:hover { transform: translateY(-8px); border-color: #00ffff; box-shadow: 0 10px 40px rgba(0,255,255,.12); } .tool-card:focus-visible, .start-button:focus-visible, .back-tools:focus-visible, .ai-suggestion:focus-visible, .calc-action:focus-visible, .clear-inputs:focus-visible { outline: 2px solid #00ffff; outline-offset: 3px; } .tool-icon { width: 55px; height: 55px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; margin-bottom: 20px; background: linear-gradient( 135deg, rgba(0,255,255,.18), rgba(124,58,237,.25) ); border: 1px solid rgba(0,255,255,.25); } .tool-card h3 { margin-bottom: 9px; } .tool-card p { color: #94a3b8; font-size: 14px; line-height: 1.5; } .tool-card.coming { opacity: .6; } .badge { display: inline-block; margin-top: 14px; padding: 5px 9px; border-radius: 20px; font-size: 11px; color: #00ffff; background: rgba(0,255,255,.08); border: 1px solid rgba(0,255,255,.15); } /* ========================= FOOTER ========================= */ footer { text-align: center; padding: 40px 20px; color: #475569; border-top: 1px solid rgba(255,255,255,.05); } /* ========================= MOBILE ========================= */ @media(max-width:650px) { header { padding: 0 20px; } .hero { min-height: 90vh; } .hero h1 { font-size: 48px; } .hero p { font-size: 15px; } .tool-grid { grid-template-columns: 1fr 1fr; } } @media(max-width:430px) { .tool-grid { grid-template-columns: 1fr; } .energy-ring { width: 105px; height: 105px; } .bolt { font-size: 40px; } } 
-.creator-credit {
-    margin: 0 auto 28px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    background: linear-gradient(90deg,#00ffff,#7c3aed,#ff00cc,#ffe600,#00ffff);
-    background-size: 300% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: creatorRainbow 4s linear infinite, creatorFloat 2.8s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px rgba(0,255,255,.45));
-}
-@keyframes creatorRainbow {
-    0% { background-position: 0% center; }
-    100% { background-position: 300% center; }
-}
-@keyframes creatorFloat {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-
+ @keyframes heroEnter { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }  .hero h1 { font-size: clamp(42px, 8vw, 82px); line-height: 1; margin-bottom: 20px; background: linear-gradient( 90deg, #00ffff, #7c3aed, #ff00cc, #00ffff ); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 6s linear infinite; } @keyframes gradientMove { 0% { background-position: 0%; } 100% { background-position: 300%; } } .hero p { max-width: 650px; margin: auto; color: #94a3b8; font-size: 18px; line-height: 1.7; } .start-button { display: inline-block; margin-top: 35px; padding: 15px 30px; border-radius: 12px; text-decoration: none; color: #020617; font-weight: bold; background: linear-gradient( 90deg, #00ffff, #6366f1 ); box-shadow: 0 0 20px rgba(0,255,255,.35); transition: .3s; } .start-button:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 30px rgba(0,255,255,.7); } /* ========================= MENU SECTION ========================= */ .tools { max-width: 1150px; margin: auto; padding: 80px 20px; } .section-title { text-align: center; margin-bottom: 45px; } .section-title h2 { font-size: 34px; margin-bottom: 10px; } .section-title p { color: #64748b; } /* Cards */ .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; } .tool-card { position: relative; min-height: 190px; padding: 25px; border-radius: 18px; background: linear-gradient( 145deg, rgba(15,23,42,.9), rgba(15,23,42,.55) ); border: 1px solid rgba(0,255,255,.13); overflow: hidden; transition: .35s; text-align: left; width: 100%; display: block; color: white; text-decoration: none; cursor: pointer; appearance: none; -webkit-appearance: none; } .tool-card::before { content: ""; position: absolute; width: 120px; height: 120px; right: -50px; top: -50px; border-radius: 50%; background: #00ffff; filter: blur(55px); opacity: .15; } .tool-card:hover { transform: translateY(-8px); border-color: #00ffff; box-shadow: 0 10px 40px rgba(0,255,255,.12); } .tool-card:focus-visible, .start-button:focus-visible, .back-tools:focus-visible, .ai-suggestion:focus-visible, .calc-action:focus-visible, .clear-inputs:focus-visible { outline: 2px solid #00ffff; outline-offset: 3px; } .tool-icon { width: 55px; height: 55px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; margin-bottom: 20px; background: linear-gradient( 135deg, rgba(0,255,255,.18), rgba(124,58,237,.25) ); border: 1px solid rgba(0,255,255,.25); } .tool-card h3 { margin-bottom: 9px; } .tool-card p { color: #94a3b8; font-size: 14px; line-height: 1.5; } .tool-card.coming { opacity: .6; } .badge { display: inline-block; margin-top: 14px; padding: 5px 9px; border-radius: 20px; font-size: 11px; color: #00ffff; background: rgba(0,255,255,.08); border: 1px solid rgba(0,255,255,.15); } /* ========================= FOOTER ========================= */ footer { text-align: center; padding: 40px 20px; color: #475569; border-top: 1px solid rgba(255,255,255,.05); } /* ========================= MOBILE ========================= */ @media(max-width:650px) { header { padding: 0 20px; } .hero { min-height: 90vh; } .hero h1 { font-size: 48px; } .hero p { font-size: 15px; } .tool-grid { grid-template-columns: 1fr 1fr; } } @media(max-width:430px) { .tool-grid { grid-template-columns: 1fr; }  }
 /* Live calculator panels */
 .live-tools {
     display: none;
@@ -422,10 +397,7 @@ body.light-theme .logo-icon {
     box-shadow:0 0 15px rgba(8,145,178,.25);
 }
 
-body.light-theme .bolt {
-    color:#d97706;
-    text-shadow:0 0 8px rgba(217,119,6,.35);
-}
+body.light-theme 
 
 body.light-theme .theme-toggle {
     color:#334155;
@@ -610,17 +582,14 @@ header:before,header:after{content:none}
 .dashboard-links .ai-link{color:#d5c9ff}
 .nav-footer{position:absolute;bottom:26px;left:28px;color:#8eacc9;font-size:11px}
 .nav-footer strong{display:block;color:#16cfff;font-size:19px;margin-bottom:8px}
-.hero{min-height:294px;justify-content:flex-start;text-align:left;padding:38px 40px;overflow:hidden;background:linear-gradient(100deg,#03152b 15%,#041a35 62%,#061d3b,#03152b);background-size:220% 100%;animation:bannerShimmer 12s ease-in-out infinite;border-bottom:1px solid var(--line)}
+.hero{min-height:294px;justify-content:flex-start;text-align:left;padding:38px 40px;overflow:hidden;background:linear-gradient(100deg,#03152b 15%,#041a35 62%,#061d3b,#03152b);border-bottom:1px solid var(--line)}
 .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 70% 48%,rgba(11,177,255,.12),transparent 38%),linear-gradient(110deg,transparent 0 48%,rgba(31,199,255,.06) 49%,transparent 50% 100%);opacity:.55;pointer-events:none;animation:lightningAtmosphere 8s ease-in-out infinite}
 .hero .lightning-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:.09;filter:drop-shadow(0 0 5px rgba(18,211,255,.8));animation:lightningFlash 8s steps(1,end) infinite}
 .hero .lightning-overlay path{fill:none;stroke:#65e6ff;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter}
 .hero-content{max-width:650px;z-index:2}
-.creator-credit{margin:0 0 15px;padding:0;border:0;background:none;box-shadow:none;font-size:11px;letter-spacing:2px;color:#75b4dd}
-.energy-ring{position:absolute;right:-230px;top:35px;width:225px;height:225px;margin:0;border-color:#18bfe8;opacity:.8;z-index:2}
-.bolt{font-size:90px}
+
 .hero h1{font-size:60px;margin:4px 0 10px}
-.hero-creator{display:inline-block;margin:-2px 0 14px;padding:3px 12px;font-size:15px;font-weight:800;letter-spacing:3px;color:#4f9eaf;text-shadow:0 0 5px rgba(0,190,220,.3);border-left:1px solid rgba(0,180,210,.35);border-right:1px solid rgba(0,180,210,.35);animation:creatorTextPulse 5s ease-in-out infinite}
-@keyframes creatorTextPulse{0%,100%{opacity:.82;text-shadow:0 0 4px rgba(0,190,220,.2)}50%{opacity:1;text-shadow:0 0 9px rgba(0,190,220,.5)}}
+.hero-creator{display:inline-block;margin:-2px 0 14px;padding:4px 14px;font-size:16px;font-weight:800;letter-spacing:3px;color:#e6f7ff;border-left:3px solid #22d3ee;background:rgba(34,211,238,.08)}
 .hero h1:before{content:"WELCOME TO";display:block;font-size:13px;letter-spacing:4px;color:#19c8f0;margin-bottom:8px;-webkit-text-fill-color:#19c8f0}
 .hero p{margin:0;max-width:600px;color:#f4f8ff;font-size:21px;line-height:1.35}
 .hero p:after{content:"Calculate   •   Design   •   Optimize   •   With AI";display:block;color:#68b7ed;font-size:16px;margin-top:12px}
@@ -643,12 +612,9 @@ header:before,header:after{content:none}
 .egc-section{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
 .egc-section h3{margin-bottom:8px}
 footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color:#8eacc9;font-size:11px}
-@keyframes bannerPulse{0%,100%{filter:drop-shadow(0 0 2px #0bd1ed)}50%{filter:drop-shadow(0 0 18px #7050ed)}}
-@keyframes bannerShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes lightningAtmosphere{0%,88%,100%{opacity:.32}90%{opacity:.75}91%{opacity:.18}92%{opacity:.62}93%{opacity:.22}}
 @keyframes lightningFlash{0%,87%,100%{opacity:.05}88%{opacity:.95}89%{opacity:.12}90%{opacity:.8}91%{opacity:.08}92%{opacity:.55}93%{opacity:.06}}
-.hero .energy-ring{animation:pulseRing 3s ease-in-out infinite,bannerPulse 2.8s ease-in-out infinite}
-@media(max-width:850px){.tool-grid{grid-template-columns:repeat(2,1fr)}.energy-ring{right:-210px;top:48px;width:190px;height:190px;opacity:.3}.dashboard-ai{grid-template-columns:1fr}}
+@media(max-width:850px){.tool-grid{grid-template-columns:repeat(2,1fr)}.dashboard-ai{grid-template-columns:1fr}}
 @media(max-width:520px){
   html,body{width:100%;overflow-x:hidden}
   header{height:58px;padding:0 14px}
@@ -661,8 +627,7 @@ footer{padding:14px 28px;text-align:right;border-top:1px solid var(--line);color
   .hero-creator{max-width:100%;font-size:12px;letter-spacing:2px;padding:3px 8px}
   .hero p{font-size:16px;line-height:1.45}
   .hero p:after{font-size:12px;line-height:1.5}
-  .energy-ring{right:-130px;top:32px;width:150px;height:150px;opacity:.25}
-  .bolt{font-size:58px}
+  
   .start-button{margin-top:20px;width:100%;max-width:280px;padding:13px 18px}
   .tools{padding:26px 14px 16px}
   .section-title h2{font-size:25px}
@@ -743,28 +708,30 @@ window.MathJax = {
 .lightning-glow{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse 42% 85% at var(--bx,60%) 0%,rgba(125,205,255,.28),rgba(125,205,255,0) 70%)}
 
-/* --- Energy ring: crisp vector, no scale/blur animation --- */
-.hero .energy-ring{border:0;background:none;box-shadow:none;animation:none;opacity:1;filter:none}
-.hero .energy-ring::before,.hero .energy-ring::after{content:none}
-.ring-svg{width:100%;height:100%;display:block;overflow:visible}
-.ring-svg circle{fill:none}
-.ring-svg .r1{stroke:#22d3ee;stroke-width:2.4}
-.ring-svg .r2{stroke:rgba(34,211,238,.7);stroke-width:1.2}
-.ring-svg .r3{stroke:rgba(34,211,238,.55);stroke-width:1.2;stroke-dasharray:2 7;stroke-linecap:round;transform-origin:100px 100px;animation:ringSpin 48s linear infinite}
-.ring-svg .r-halo{stroke:#22d3ee;stroke-width:7;opacity:.10;animation:ringHalo 3.2s ease-in-out infinite}
-.ring-svg .bolt-svg{fill:url(#boltGrad);stroke:#fff3a6;stroke-width:.8;stroke-linejoin:round;filter:drop-shadow(0 0 2px rgba(255,190,0,.55))}
-@keyframes ringSpin{to{transform:rotate(360deg)}}
-@keyframes ringHalo{0%,100%{opacity:.06}50%{opacity:.2}}
-@media(max-width:850px){.hero .energy-ring{opacity:.3}}
-@media(max-width:520px){.hero .energy-ring{opacity:.25}}
-body.light-theme .ring-svg .r1{stroke:#0891b2}
-body.light-theme .ring-svg .r2,body.light-theme .ring-svg .r3{stroke:rgba(8,145,178,.6)}
-body.light-theme .ring-svg .bolt-svg{filter:drop-shadow(0 0 2px rgba(217,119,6,.4))}
-@media (prefers-reduced-motion: reduce){.ring-svg .r3,.ring-svg .r-halo{animation:none}}
+
+
 
 /* --- Advanced Tools: double-width card on desktop and tablet, single on mobile --- */
 .tool-card.tool-card-wide{grid-column:span 2}
 @media(max-width:520px){.tool-card.tool-card-wide{grid-column:auto}}
+</style>
+<style id="v3-circuit-perf">
+/* --- Hero: static sci-fi circuit-trace background (replaces wave + circular ring) --- */
+.hero::after{content:"";position:absolute;top:0;right:0;bottom:0;width:58%;z-index:0;pointer-events:none;opacity:.3;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160' viewBox='0 0 240 160' fill='none' stroke='%2322d3ee' stroke-width='1'%3E%3Cpath d='M0 40H60L80 60H140V20M140 60H200'/%3E%3Cpath d='M40 160V110L60 90H120V30'/%3E%3Cpath d='M240 100H190L170 120H110V160'/%3E%3Cpath d='M0 130H30L50 150'/%3E%3Cpath d='M200 0V40L220 60H240'/%3E%3Ccircle cx='140' cy='20' r='3'/%3E%3Ccircle cx='200' cy='60' r='3'/%3E%3Ccircle cx='120' cy='30' r='3'/%3E%3Ccircle cx='50' cy='150' r='3'/%3E%3Ccircle cx='60' cy='90' r='5'/%3E%3Ccircle cx='170' cy='120' r='5'/%3E%3C/svg%3E");background-size:240px 160px;
+  -webkit-mask-image:linear-gradient(to left,#000 25%,transparent 100%);mask-image:linear-gradient(to left,#000 25%,transparent 100%)}
+body.light-theme .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='160' viewBox='0 0 240 160' fill='none' stroke='%230891b2' stroke-width='1'%3E%3Cpath d='M0 40H60L80 60H140V20M140 60H200'/%3E%3Cpath d='M40 160V110L60 90H120V30'/%3E%3Cpath d='M240 100H190L170 120H110V160'/%3E%3Cpath d='M0 130H30L50 150'/%3E%3Cpath d='M200 0V40L220 60H240'/%3E%3Ccircle cx='140' cy='20' r='3'/%3E%3Ccircle cx='200' cy='60' r='3'/%3E%3Ccircle cx='120' cy='30' r='3'/%3E%3Ccircle cx='50' cy='150' r='3'/%3E%3Ccircle cx='60' cy='90' r='5'/%3E%3Ccircle cx='170' cy='120' r='5'/%3E%3C/svg%3E");opacity:.35}
+@media(max-width:850px){.hero::after{width:100%;opacity:.16}}
+
+/* --- Desktop scroll smoothness (no visual change) --- */
+header{-webkit-backdrop-filter:none;backdrop-filter:none}
+body::after{will-change:transform;backface-visibility:hidden}
+.particle{will-change:transform,opacity;backface-visibility:hidden}
+.tool-card::before{width:230px;height:230px;right:-110px;top:-110px;filter:none;opacity:1;background:radial-gradient(circle,rgba(0,255,255,.15) 0%,rgba(0,255,255,.07) 35%,transparent 68%)}
+.tool-card{contain:layout style;transition:transform .35s,border-color .35s,box-shadow .35s}
+.dashboard-ai{content-visibility:auto;contain-intrinsic-size:auto 320px}
+/* paused automatically when the hero is scrolled out of view */
+.hero.hero-off *,.hero.hero-off{animation-play-state:paused!important}
 </style>
 </head> <body> <!-- Floating particles --> <div class="particle" style="left:8%; animation-duration:12s;"></div> <div class="particle" style="left:18%; animation-duration:17s; animation-delay:2s;"></div> <div class="particle" style="left:31%; animation-duration:14s; animation-delay:5s;"></div> <div class="particle" style="left:45%; animation-duration:19s; animation-delay:1s;"></div> <div class="particle" style="left:59%; animation-duration:13s; animation-delay:4s;"></div> <div class="particle" style="left:72%; animation-duration:18s; animation-delay:7s;"></div> <div class="particle" style="left:86%; animation-duration:15s; animation-delay:3s;"></div>
 <!-- HEADER --> <header>
@@ -787,22 +754,6 @@ body.light-theme .ring-svg .bolt-svg{filter:drop-shadow(0 0 2px rgba(217,119,6,.
   <g id="bolt-core"></g>
 </svg>
 <div class="hero-content">
-    <div class="energy-ring">
-        <svg class="ring-svg" viewBox="0 0 200 200" aria-hidden="true" shape-rendering="geometricPrecision">
-            <defs>
-                <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#fff59a"/>
-                    <stop offset="1" stop-color="#ffb300"/>
-                </linearGradient>
-            </defs>
-            <circle class="r-halo" cx="100" cy="100" r="93"/>
-            <circle class="r1" cx="100" cy="100" r="93"/>
-            <circle class="r2" cx="100" cy="100" r="79"/>
-            <circle class="r3" cx="100" cy="100" r="65"/>
-            <path class="bolt-svg" d="M113 42 L72 110 H97 L86 160 L130 88 H104 Z"/>
-        </svg>
-    </div>
-
     <h1>ElectraLab</h1>
     <div class="hero-creator">Created by SABBIR AHAMED</div>
 
@@ -2746,5 +2697,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   loop(2200);
 })();
+</script>
+<script>
+/* pause hero animations while off-screen (scroll performance) */
+(function(){var h=document.getElementById('home');if(!h||!('IntersectionObserver' in window))return;
+new IntersectionObserver(function(e){h.classList.toggle('hero-off',!e[0].isIntersecting);},{rootMargin:'100px'}).observe(h);})();
 </script>
 </body> </html>
