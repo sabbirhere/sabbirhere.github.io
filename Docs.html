@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElectraLab DocBox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Default: Dark Neon Bluish Theme (Gemini Dark) */
+  --bg: #090d16;
+  --panel: #111827;
+  --panel-soft: #1f293d;
+  --ink: #f0f6fc;
+  --mut: #94a3b8;
+  --line: #1e293b;
+  
+  --gemini-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #7f00ff 100%);
+  --gemini-icon-bg: linear-gradient(135deg, #0f2744 0%, #1a1b3a 100%);
+  --accent: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.35);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 12px 36px rgba(56, 189, 248, 0.25);
+}
+
+html:not(.night) {
+  /* Light Mode Fallback */
+  --bg: #f8fafd;
+  --panel: #ffffff;
+  --panel-soft: #f0f4f9;
+  --ink: #0f172a;
+  --mut: #475569;
+  --line: #e2e8f0;
+  
+  --gemini-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #7c3aed 100%);
+  --gemini-icon-bg: linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 100%);
+  --accent: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.2);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 28px rgba(2, 132, 199, 0.2);
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a { text-decoration: none; color: inherit; }
+
+.app {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 24px 40px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 28px;
+  margin-bottom: 32px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--gemini-gradient);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.brand { min-width: 0; }
+.brand h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+.brand p {
+  margin: 4px 0 0;
+  color: var(--mut);
+  font-size: 15px;
+}
+
+/* Actions */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.top-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.top-btn:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel-soft);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.theme-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Intro */
+.intro {
+  margin: 0 4px 28px;
+}
+
+.intro h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  background: var(--gemini-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.intro p {
+  font-size: 16px;
+  color: var(--mut);
+  margin: 0;
+}
+
+/* Tiles Grid - Desktop / Laptop (4 cols) */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.tile {
+  min-height: 200px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tile:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-4px);
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--gemini-icon-bg);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.tile h3 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.tile p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--mut);
+  margin: 0 0 18px;
+}
+
+.open {
+  margin-top: auto;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.open span {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.tile:hover .open span {
+  transform: translateX(5px);
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  padding: 16px;
+  color: var(--mut);
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.footer-line-1 {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.footer-line-2 {
+  font-weight: 400;
+}
+
+/* Tablet Layout (2 cols) */
+@media (max-width: 1024px) {
+  .tiles { 
+    grid-template-columns: repeat(2, minmax(0, 1fr)); 
+    gap: 16px;
+  }
+}
+
+/* Phone Layout (1 col & optimized mobile header) */
+@media (max-width: 640px) {
+  .app { 
+    padding: 16px 14px 28px; 
+  }
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px;
+    gap: 16px;
+  }
+  .brand-wrapper {
+    width: 100%;
+  }
+  .top-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+  .top-btn { 
+    flex: 1;
+  }
+  .theme-toggle {
+    flex: 0 0 46px;
+  }
+  .tiles { 
+    grid-template-columns: 1fr; 
+    gap: 12px; 
+  }
+  .brand h1 { 
+    font-size: 22px; 
+  }
+  .brand p { 
+    font-size: 13px; 
+  }
+  .tile { 
+    min-height: auto; 
+    padding: 20px; 
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .open span, body, html { transition: none; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+
+  <header class="header">
+    <div class="brand-wrapper">
+      <div class="brand-mark">EL</div>
+      <div class="brand">
+        <h1>ElectraLab DocBox</h1>
+        <p>Practical electrical documentation tools</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="top-btn" href="index.html">ToolBox</a>
+      <a class="top-btn" href="Advanced.html">Advanced</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+        <span class="theme-icon" id="themeIcon">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="intro">
+    <h2>Document Toolbox</h2>
+    <p>Choose a document tool to get started.</p>
+  </section>
+
+  <section class="tiles" aria-label="ElectraLab document tools">
+
+    <a class="tile" href="cv-builder.html">
+      <div class="icon">CV</div>
+      <h3>CV Builder</h3>
+      <p>Create a clean, professional CV ready for printing or PDF.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="cover-letter-builder.html">
+      <div class="icon">CL</div>
+      <h3>Cover Letter Builder</h3>
+      <p>Build polished job application letters with A4-ready layouts.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="quotation-maker.html">
+      <div class="icon">QT</div>
+      <h3>Quotation Maker</h3>
+      <p>Prepare professional quotations for electrical work and services.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="boq-maker.html">
+      <div class="icon">BOQ</div>
+      <h3>BOQ Maker</h3>
+      <p>Create organized bills of quantities and material schedules.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="inspection-checklist.html">
+      <div class="icon">IC</div>
+      <h3>Inspection Checklist</h3>
+      <p>Record inspection points, findings, status and remarks.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="maintenance-log.html">
+      <div class="icon">ML</div>
+      <h3>Maintenance Log</h3>
+      <p>Keep clear records of equipment maintenance and service work.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="test-report-maker.html">
+      <div class="icon">TR</div>
+      <h3>Test Report Maker</h3>
+      <p>Create structured electrical testing and measurement reports.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+    <a class="tile" href="Excel.html">
+      <div class="icon">XL</div>
+      <h3>Excel</h3>
+      <p>Open the ElectraLab spreadsheet utility for quick calculations and data work.</p>
+      <div class="open">Open tool <span>→</span></div>
+    </a>
+
+  </section>
+
+  <div class="footer">
+    <div class="footer-line-1">ElectraLab DocBox by Sabbir Ahamed</div>
+    <div class="footer-line-2">Free lightweight, practical and designed for everyday field and office work.</div>
+  </div>
+
+</main>
+
+<script>
+(function(){
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+
+  function applyTheme(mode){
+    const night = mode === 'night';
+    root.classList.toggle('night', night);
+    icon.textContent = night ? '☽' : '☀';
+    localStorage.setItem('electralab-docbox-theme', mode);
+  }
+
+  const saved = localStorage.getItem('electralab-docbox-theme');
+  applyTheme(saved ? saved : 'night');
+
+  toggle.addEventListener('click', function(){
+    applyTheme(root.classList.contains('night') ? 'day' : 'night');
+  });
+})();
+</script>
+
+</body>
+</html>
