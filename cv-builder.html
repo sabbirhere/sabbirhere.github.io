@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CV Builder | ElectraLab</title>
+<style>
+:root{color-scheme:light;--ink:#1f2937;--mut:#6b7280;--line:#d1d5db;--bg:#eef0f3;--pn:#fff;--pn2:#f9fafb;--inp:#fff;--ui:#0369a1;--onui:#fff;--ac:#1e3a8a}
+[data-theme=dark]{color-scheme:dark;--ink:#e5e7eb;--mut:#9ca3af;--line:#2b3547;--bg:#0b1220;--pn:#111a2b;--pn2:#17213a;--inp:#0f1727;--ui:#38bdf8;--onui:#06222f}
+[data-theme=dark] .ok{color:#4ade80}[data-theme=dark] .warn,[data-theme=dark] .ck i{color:#fbbf24}[data-theme=dark] .ck b{color:#f87171}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg)}
+.app{display:grid;grid-template-columns:430px 1fr;height:calc(100vh - 88px)}
+.panel{overflow:auto;background:var(--pn);border-right:1px solid var(--line)}
+.bar{position:sticky;top:0;z-index:2;background:var(--pn);border-bottom:1px solid var(--line);padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bar label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:2px}
+.bar .full{grid-column:1/-1;display:flex;gap:8px;flex-direction:row}
+.body{padding:14px 16px 40px}
+.card{border:1px solid var(--line);border-radius:6px;margin-bottom:14px}
+.card>h3{margin:0;padding:9px 12px;font-size:14px;background:var(--pn2);border-bottom:1px solid var(--line);border-radius:6px 6px 0 0}
+.in{padding:10px 12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid .w{grid-column:1/-1}
+.f{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:2px}
+input,select,textarea,button{font:inherit;color:var(--ink)}
+input[type=text],input:not([type]),select,textarea{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--inp)}
+textarea{min-height:64px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--ui);outline-offset:1px}
+button{padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:var(--inp);cursor:pointer}
+button:hover{background:var(--pn2)}
+.pri{background:var(--ui);color:var(--onui);border-color:var(--ui);flex:1}
+.pri:hover{background:var(--ui);filter:brightness(1.12)}
+.en{border:1px solid var(--line);border-radius:4px;padding:8px;margin-bottom:8px;background:var(--pn2)}
+.tools{display:flex;gap:4px;justify-content:flex-end;margin-bottom:6px}
+.tools button{padding:2px 8px}
+.add{width:100%;border-style:dashed}
+.hint{font-size:12px;color:var(--mut);margin:6px 0 0}
+.preview{overflow:auto;padding:16px;height:calc(100vh - 88px)}
+#page{background:#fff;width:210mm;min-height:297mm;margin:0 auto;padding:20mm 14mm 14mm 20mm;box-shadow:0 2px 12px #0003;color:#111;line-height:1.35}
+header{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+.hd{flex:1}
+h1{margin:0;font-size:2em;line-height:1.1}
+.ti{font-size:1.15em;margin-top:2px}
+.ct{margin-top:4px;font-size:.95em;color:#374151}
+.ph{width:28mm;height:34mm;object-fit:cover}
+h2{font-size:1.05em;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 5px;padding-bottom:2px;border-bottom:1px solid #111}
+.r{display:flex;justify-content:space-between;gap:8px}
+.e{margin-bottom:6px;break-inside:avoid}
+#page ul{margin:2px 0 0;padding-left:18px}
+#page p{margin:0}
+.t-classic header{flex-direction:column;text-align:center}
+.t-classic .ph{order:-1}
+.t-modern h1,.t-modern h2{color:var(--ac)}
+.t-modern h2{border-bottom:2px solid var(--ac)}
+.t-compact{padding:20mm 12mm 10mm 20mm!important}
+.t-compact h2{background:#f3f4f6;border:0;border-left:4px solid var(--ac);padding:2px 6px;margin:8px 0 4px}
+.t-compact .e{margin-bottom:4px}
+#page a{color:inherit;text-decoration:underline;text-decoration-color:#9ca3af;text-underline-offset:2px}
+.pt{width:100%;border-collapse:collapse}.pt td{padding:0;vertical-align:top}.pt>thead>tr>td,.pt>tfoot>tr>td{height:0}
+.t-exec header{flex-direction:column;text-align:center;border-bottom:3px double #111;padding-bottom:8px}
+.t-exec .ph{order:-1}
+.t-exec h1{text-transform:uppercase;letter-spacing:.12em;font-size:1.8em}
+.t-exec h2{font-variant:small-caps;text-transform:none;letter-spacing:.08em;font-size:1.15em;border-bottom:1px solid #9ca3af}
+.t-minimal h1{font-weight:300;font-size:2.3em}
+.t-minimal h2{border:0;letter-spacing:.14em;margin:14px 0 4px}
+.t-minimal .ct{color:#555}
+.t-banner header{background:var(--ac);color:#fff;padding:10px 14px;border-radius:2px}
+.t-banner .ct{color:#e5e7eb}
+.t-banner h2{color:var(--ac);border-bottom:1px solid var(--ac)}
+.t-timeline h1,.t-timeline h2{color:var(--ac)}
+.t-timeline h2{border:0;border-bottom:1px solid #d1d5db}
+.t-timeline .e{border-left:2px solid var(--ac);padding-left:10px}
+.bar .full button{flex:1}
+.top{min-height:56px;display:flex;align-items:center;gap:14px;padding:6px 16px;background:var(--pn);border-bottom:1px solid var(--line)}
+.top .back{display:inline-block;padding:6px 14px;border:1px solid var(--ui);border-radius:4px;color:var(--ui);background:var(--inp);text-decoration:none;font-weight:600;white-space:nowrap}
+.top .back:hover{background:var(--ui);color:var(--onui)}
+.top .back:focus-visible{outline:2px solid var(--ui);outline-offset:2px}
+.ttl{flex:1;display:flex;flex-direction:column;line-height:1.25}.ttl b{font-size:17px}.tg{font-size:12px;color:var(--mut)}
+.foot{min-height:32px;display:flex;align-items:center;justify-content:center;padding:4px 16px;background:var(--pn);border-top:1px solid var(--line);color:var(--mut);font-size:11.5px;text-align:center}
+@media(max-width:600px){.tg{display:none}.top{flex-wrap:wrap}}
+.ck{margin:0 0 6px;font-size:13px}.ck b{color:#b91c1c}.ck i{color:#b45309;font-style:normal;font-weight:600}
+details.en>summary{cursor:pointer;font-weight:600;padding:2px 0}
+details.en[open]>summary{margin-bottom:8px}
+.badge{font-size:12px;color:var(--mut)}.ok{color:#15803d}.warn{color:#b45309}
+.tabs{display:none}
+@media(max-width:900px){.app{display:block;height:auto}.panel{overflow:visible;border:0}.preview{height:auto}.bar{top:41px}.tabs{display:flex;position:sticky;top:0;z-index:3;background:var(--pn);border-bottom:1px solid var(--line)}.tabs button{flex:1;border:0;border-radius:0;padding:10px}.tabs .on{border-bottom:2px solid var(--ui);font-weight:600}body.pvmode .panel{display:none}body:not(.pvmode) .preview{display:none}}
+@media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.top,.foot{display:none!important}.tabs{display:none!important}.app{display:block;height:auto}.panel{display:none}.preview{padding:0;overflow:visible;height:auto}
+#page{box-shadow:none;width:auto;min-height:0;padding:0 14mm 0 20mm!important;zoom:1!important}#page.t-compact{padding:0 12mm 0 20mm!important}.pt>thead>tr>td{height:20mm}.pt>tfoot>tr>td{height:14mm}.t-compact .pt>tfoot>tr>td{height:10mm}@page{size:A4;margin:0}}
+@media(min-width:901px){.app{grid-template-columns:clamp(400px,36vw,500px) 1fr;height:calc(100vh - 88px);height:calc(100dvh - 88px)}.preview{height:calc(100vh - 88px);height:calc(100dvh - 88px)}}
+@media(max-width:900px){.bar{position:static;grid-template-columns:repeat(4,1fr)}.body{max-width:760px;margin:0 auto;padding:12px 14px 60px}.tabs button{min-height:44px;font-size:15px}.preview{padding:8px}}
+@media(max-width:600px){.bar{grid-template-columns:1fr 1fr}.body{padding:10px 10px 60px}.in{padding:8px}.top{gap:8px;padding:6px 10px}.top .back{padding:6px 10px;font-size:13px}.ttl b{font-size:15px}.foot{font-size:11px;padding:6px 10px}input[type=text],input[type=date],input[type=number],input[type=email],input[type=url],select,textarea{font-size:16px}.tools{flex-wrap:wrap}.tools button{flex:1;min-height:38px}}
+@media(pointer:coarse){button,select,input[type=text],input[type=date],input[type=number],input[type=email],input[type=url]{min-height:40px}}
+</style><script>try{document.documentElement.dataset.theme=localStorage.getItem('electralab-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script></head><body>
+<div class="top"><a class="back" href="Docs.html">← Back to DOCBOX</a><div class="ttl"><b>ElectraLab Docs</b><span class="tg">CV Builder: free, clean and ATS-friendly, ready to print on A4</span></div><button id="theme" type="button" aria-label="Switch between light and dark theme">Dark mode</button></div>
+<div class="tabs"><button class="on" id="tE">Edit</button><button id="tP">Preview</button></div>
+<div class="app">
+<div class="panel">
+ <div class="bar">
+  <label>Format<select id="tpl"><option value="classic">Classic (centered)</option><option value="modern">Modern (accent color)</option><option value="compact">Compact (dense)</option><option value="exec">Executive (double rule)</option><option value="minimal">Minimal (airy)</option><option value="banner">Banner (colored header)</option><option value="timeline">Timeline (accent line)</option></select></label>
+  <label>Font<select id="font"><option>Arial</option><option>Calibri</option><option>Times New Roman</option><option>Georgia</option></select></label>
+  <label>Font size<select id="fs"><option>9</option><option>9.5</option><option>10</option><option selected>10.5</option><option>11</option><option>11.5</option><option>12</option></select></label>
+  <label>Accent color<input type="color" id="ac" value="#1e3a8a"></label>
+  <div class="full"><button class="pri" id="print">Download PDF / Print (A4)</button></div>
+  <div class="full"><button id="ex" title="Fill with sample content">Example</button><button id="exp" title="Save your CV data as a file">Save data</button><button id="imp" title="Load a saved data file">Open data</button><button id="reset">Reset</button><input type="file" id="impf" accept=".json" hidden></div>
+  <div class="full badge" id="pgs"></div>
+ </div>
+ <div class="body" id="form"></div>
+</div>
+<div class="preview" id="pv"><div id="page"></div></div>
+</div>
+<footer class="foot">Free, safe and private: no sign-up, no tracking, no data stored on any server. Everything you type stays in your browser and never leaves your device.</footer>
+<script>
+const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LK=/([\w.+-]+@[\w-]+(?:\.[\w-]+)+)|((?:https?:\/\/|www\.)[^\s<]+|\b(?:[a-z0-9-]+\.)+(?:com|org|net|io|dev|me|co|app|edu|info|bd|uk|us|ca)\b(?:\/[^\s<]*)?)/gi;
+const A=h=>`<a href="${h}" target="_blank" rel="noopener">`;
+const lk=t=>e(t).replace(LK,(m,em)=>{const x=m.replace(/[.,;:!?)]+$/,''),r=m.slice(x.length);return A(em?'mailto:'+x:(/^https?:/i.test(x)?x:'https://'+x))+x+'</a>'+r});
+const u2=t=>{const r=lk(t);return r.includes('<a ')||!/^[^\s@]+\.[^\s@]+$/.test(t)?r:A(/^https?:/i.test(t)?e(t):'https://'+e(t))+e(t)+'</a>'};
+const mail=t=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())?A('mailto:'+e(t.trim()))+e(t)+'</a>':e(t);
+const tel=t=>A('tel:'+t.replace(/[^\d+]/g,''))+e(t)+'</a>';
+const ul=t=>{const l=String(t||'').split('\n').map(x=>x.trim()).filter(Boolean);return l.length?'<ul>'+l.map(x=>'<li>'+lk(x)+'</li>').join('')+'</ul>':''};
+const dt=x=>[x.start,x.end].filter(Boolean).map(e).join(' – ');
+const j=(a,s=', ')=>a.filter(Boolean).map(e).join(s);
+const SC={
+exp:{t:'Experience',a:'experience',f:[['role','Job title'],['org','Company'],['loc','Location'],['gap',''],['start','Start date'],['end','End date (or Present)'],['desc','Responsibilities and achievements (one per line)',1]],
+ r:x=>`<div class=e><div class=r><b>${e(x.role)}</b><span>${dt(x)}</span></div><div><i>${j([x.org,x.loc])}</i></div>${ul(x.desc)}</div>`},
+edu:{t:'Education',a:'education',f:[['deg','Degree / qualification'],['org','School / university'],['loc','Location'],['gpa','Grade / GPA'],['start','Start date'],['end','End date'],['desc','Details (one per line)',1]],
+ r:x=>`<div class=e><div class=r><b>${e(x.deg)}</b><span>${dt(x)}</span></div><div><i>${j([x.org,x.loc,x.gpa])}</i></div>${ul(x.desc)}</div>`},
+skills:{t:'Skills',a:'skill group',f:[['cat','Category (e.g. Software)'],['items','Skills, comma separated',1]],
+ r:x=>`<div class=e><b>${e(x.cat)}${x.cat?': ':''}</b>${lk(x.items)}</div>`},
+proj:{t:'Projects',a:'project',f:[['name','Project name'],['link','Link'],['desc','Description (one per line)',1]],
+ r:x=>`<div class=e><div class=r><b>${e(x.name)}</b><span>${u2(x.link)}</span></div>${ul(x.desc)}</div>`},
+cert:{t:'Certifications',a:'certification',f:[['name','Certification'],['org','Issuer'],['year','Year']],
+ r:x=>`<div class=e><div class=r><span><b>${e(x.name)}</b>${x.org?' – '+e(x.org):''}</span><span>${e(x.year)}</span></div></div>`},
+lang:{t:'Languages',a:'language',f:[['name','Language'],['level','Level (e.g. Fluent)']],j:' • ',
+ r:x=>e(x.name)+(x.level?' ('+e(x.level)+')':'')},
+oth:{t:'Additional information',a:'item',f:[['title','Heading (e.g. Awards)'],['desc','Details (one per line)',1]],
+ r:x=>`<div class=e>${x.title?'<b>'+e(x.title)+'</b>':''}${ul(x.desc)}</div>`}
+};
+const PF=[['name','Full name'],['title','Professional title'],['email','Email'],['phone','Phone'],['loc','City, country'],['web','Website / portfolio'],['link','LinkedIn / GitHub'],['summary','Professional summary',1]];
+const ORDER=['exp','edu','skills','proj','cert','lang','oth'];
+const has=x=>Object.keys(x).some(k=>k!='_o'&&x[k]);
+const lbl=(x,k)=>{const c=SC[k].f,v=[x[c[0][0]],x[c[1][0]]].filter(Boolean).join(' – ').slice(0,60);return v||'New '+SC[k].a};
+const def=()=>({p:{},s:{},o:{tpl:'classic',font:'Arial',fs:'10.5',ac:'#1e3a8a',ph:true}});
+let D;try{D=JSON.parse(localStorage.getItem('cvb1'))||def()}catch(_){D=def()}
+const $=id=>document.getElementById(id);
+const save=()=>{try{localStorage.setItem('cvb1',JSON.stringify(D))}catch(_){}};
+
+
+function draw(){
+ const P=D.p,O=D.o,pg=$('page');
+ pg.className='t-'+O.tpl;pg.style.fontFamily=`"${O.font}",${O.font=='Calibri'?'Carlito,Arial,':''}${O.font=='Times New Roman'||O.font=='Georgia'?'serif':'sans-serif'}`;
+ pg.style.fontSize=O.fs+'pt';pg.style.setProperty('--ac',O.ac);document.documentElement.style.setProperty('--ac',O.ac);
+ let h=`<header>${P.photo&&O.ph?`<img class=ph src="${P.photo}" alt="">`:''}<div class=hd><h1>${e(P.name)||'Your Name'}</h1>${P.title?`<div class=ti>${e(P.title)}</div>`:''}<div class=ct>${[P.email&&mail(P.email),P.phone&&tel(P.phone),P.loc&&e(P.loc),P.web&&u2(P.web),P.link&&u2(P.link)].filter(Boolean).join(' &nbsp;|&nbsp; ')}</div></div></header>`;
+ const sec=(t,b)=>b?`<section><h2>${e(t)}</h2>${b}</section>`:'';
+ h+=sec('Summary',P.summary?`<p>${lk(P.summary).replace(/\n/g,'<br>')}</p>`:'');
+ ORDER.forEach(k=>{const c=SC[k];const b=(D.s[k]||[]).filter(has).map(c.r);h+=sec(c.t,b.length?(c.j?'<p>'+b.join(c.j)+'</p>':b.join('')):'')});
+ pg.innerHTML='<table class=pt><thead><tr><td></td></tr></thead><tbody><tr><td>'+h+'</td></tr></tbody><tfoot><tr><td></td></tr></tfoot></table>';fit();chk();
+}
+function fit(){const w=$('pv').clientWidth-32;if(w<=0)return;const pg=$('page'),mm=96/25.4;pg.style.zoom=1;const h=pg.offsetHeight;pg.style.zoom=Math.min(1,w/(210*mm));const bot=D.o.tpl==='compact'?10:14,n=Math.max(1,Math.ceil((h-(20+bot)*mm)/((277-bot)*mm)-.02));$('pgs').innerHTML=n==1?'<span class=ok>✓ Fits on 1 page</span>':`<span class=warn>${n} pages. For 1 page, try a smaller font or the Compact format.</span>`}
+const fld=(f,v,at)=>f[0]=='gap'?'':`<label class="f${f[2]?' w':''}">${f[1]}${f[2]?`<textarea spellcheck=true ${at} >${e(v)}</textarea>`:`<input type=text spellcheck=true ${at} value="${e(v)}">`}</label>`;
+function form(){
+ let h=`<p class=hint style="margin:0 0 10px">Fill in only what you need: empty fields and sections are left out of your CV. Click an entry to open and edit it.</p><div class=card id=chk></div><div class=card><h3>Personal details</h3><div class=in><div class=grid>${PF.map(f=>fld(f,D.p[f[0]],`data-s=p data-k=${f[0]}`)).join('')}</div>
+ <div class=grid style="margin-top:10px"><label class="f w">Photo (optional)<input type=file id=photo accept="image/*"></label>
+ <label class=w><input type=checkbox id=showph ${D.o.ph?'checked':''}> Show photo on CV</label>${D.p.photo?'<button class=w data-a=rmph>Remove photo</button>':''}</div>
+ <p class=hint>Tip: many ATS tools ignore photos, and some employers prefer none. Turn it off for online applications.</p></div></div>`;
+ ORDER.forEach(k=>{const c=SC[k],L=D.s[k]||[];
+  h+=`<div class=card><h3>${c.t}</h3><div class=in>${L.map((x,i)=>`<details class=en data-s=${k} data-i=${i} ${x._o?'open':''}><summary><span class=st>${e(lbl(x,k))}</span></summary><div class=tools><button data-a=up data-s=${k} data-i=${i} title="Move up">↑</button><button data-a=dn data-s=${k} data-i=${i} title="Move down">↓</button><button data-a=del data-s=${k} data-i=${i} title="Remove">Remove</button></div><div class=grid>${c.f.map(f=>fld(f,x[f[0]],`data-s=${k} data-i=${i} data-k=${f[0]}`)).join('')}</div></details>`).join('')}<button class=add data-a=add data-s=${k}>+ Add ${c.a}</button></div></div>`});
+ h+=`<div class=card><h3>Writing help</h3><div class=in><label><input type=checkbox id=fixon ${D.o.fix===false?'':'checked'}> Auto-correct text when I leave a field</label>
+<p class=hint>Fixes spacing, capital letters, bullet symbols and common typos. Your browser also underlines spelling mistakes.</p>
+</div></div>`;
+ $('form').innerHTML=h;
+}
+$('form').addEventListener('input',ev=>{const t=ev.target,d=t.dataset;
+ if(t.id=='showph'){D.o.ph=t.checked}else if(d.k){if(d.s=='p')D.p[d.k]=t.value;else{D.s[d.s][d.i][d.k]=t.value;const st=t.closest('details').querySelector('.st');st.textContent=lbl(D.s[d.s][d.i],d.s)}}else return;draw();save()});
+$('form').addEventListener('change',ev=>{if(ev.target.id!='photo')return;const f=ev.target.files[0];if(!f)return;
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=400,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);D.p.photo=c.toDataURL('image/jpeg',.85);form();draw();save()};im.src=r.result};r.readAsDataURL(f)});
+$('form').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b||!b.dataset.a)return;const d=b.dataset,i=+d.i,L=D.s[d.s]=D.s[d.s]||[];
+ if(d.a=='add')L.push({_o:true});else if(d.a=='del')L.splice(i,1);else if(d.a=='rmph')delete D.p.photo;
+ else{const n=d.a=='up'?i-1:i+1;if(n<0||n>=L.length)return;[L[i],L[n]]=[L[n],L[i]]}
+ form();draw();save();if(d.a=='add'){const q=[...document.querySelectorAll(`details.en[data-s=${d.s}]`)].pop();q&&q.querySelector('input,textarea').focus()}});
+[['tpl','tpl'],['font','font'],['fs','fs'],['ac','ac']].forEach(([id,k])=>{const el=$(id);el.value=D.o[k];el.addEventListener('input',()=>{D.o[k]=el.value;draw();save()})});
+$('print').onclick=()=>{const t=document.title,m=document.body.classList.contains('pvmode');document.body.classList.add('pvmode');document.title=D.p.name?D.p.name+' - CV':'CV';addEventListener('afterprint',()=>{document.title=t;document.body.classList.toggle('pvmode',m)},{once:true});window.print()};
+$('reset').onclick=()=>{if(confirm('Clear all entries and start over?')){D=def();localStorage.removeItem('cvb1');['tpl','font','fs','ac'].forEach(k=>$(k).value=D.o[k]);form();draw()}};
+addEventListener('resize',fit);
+$('form').addEventListener('toggle',ev=>{const d=ev.target;if(d.tagName!='DETAILS')return;const x=(D.s[d.dataset.s]||[])[d.dataset.i];if(x){x._o=d.open;save()}},true);
+const tab=p=>{document.body.classList.toggle('pvmode',p);$('tE').className=p?'':'on';$('tP').className=p?'on':'';fit();scrollTo(0,0)};
+$('tE').onclick=()=>tab(false);$('tP').onclick=()=>tab(true);
+const refresh=()=>{['tpl','font','fs','ac'].forEach(k=>$(k).value=D.o[k]);form();draw();save()};
+$('ex').onclick=()=>{if(!confirm('Replace your entries with an example CV? Your name, contact details and photo are kept.'))return;const o=D.o,p0=D.p;D=def();D.o=o;
+D.p=Object.assign({name:'Sabbir',title:'Electrical Engineer',email:'yourname@example.com',phone:'+1 555 123 4567',loc:'City, Country',link:'linkedin.com/in/yourname',summary:'Electrical engineer with 6 years of experience in power distribution design, commissioning and maintenance, focused on safe, reliable and cost-efficient installations.'},Object.fromEntries(Object.entries(p0).filter(([k,v])=>v)));
+D.s={exp:[{_o:true,role:'Senior Electrical Engineer',org:'Northwind Power',loc:'Austin, TX',start:'Mar 2022',end:'Present',desc:'Designed LV/MV distribution for 12 industrial sites\nCut commissioning time by 25% with standard test checklists\nMentored 4 junior engineers'},{role:'Electrical Engineer',org:'Bright Systems',loc:'Dallas, TX',start:'Jun 2019',end:'Feb 2022',desc:'Prepared single line diagrams and protection studies\nSupervised installation and testing of switchgear'}],
+edu:[{_o:true,deg:'B.Sc. Electrical Engineering',org:'University of Texas',loc:'Austin, TX',start:'2015',end:'2019'}],
+skills:[{_o:true,cat:'Software',items:'AutoCAD, ETAP, MATLAB, Excel'},{cat:'Engineering',items:'Protection coordination, load flow, earthing design'}],
+lang:[{name:'English',level:'Native'},{name:'Spanish',level:'Intermediate'}]};refresh()};
+$('exp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));a.download='cv-data.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$('imp').onclick=()=>$('impf').click();
+$('impf').onchange=ev=>{const f=ev.target.files[0];if(!f)return;f.text().then(t=>{try{const x=JSON.parse(t);D=Object.assign(def(),x);D.o=Object.assign(def().o,x.o);refresh()}catch(_){alert('This file is not a valid CV data file.')}});ev.target.value=''};
+
+/* ---- CV check (detection) ---- */
+function chk(){const el=$('chk');if(!el)return;const P=D.p,S=D.s,out=[],bad=t=>out.push('<div class=ck><b>Fix:</b> '+e(t)+'</div>'),tip=t=>out.push('<div class=ck><i>Tip:</i> '+e(t)+'</div>');
+ if(!P.name)bad('Add your full name.');
+ if(!P.email)bad('Add an email address.');else if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(P.email))bad('The email address looks invalid.');
+ if(!P.phone)tip('Add a phone number so recruiters can call you.');
+ if(P.summary){const n=P.summary.length;if(n>600)tip('Your summary is long ('+n+' characters). Aim for 2–4 sentences.');else if(n<80)tip('Your summary is very short.')}
+ if(!(S.exp||[]).some(has)&&!(S.edu||[]).some(has))tip('Add your experience or education.');
+ const all=[];['exp','edu','proj','oth'].forEach(k=>(S[k]||[]).forEach(q=>String(q.desc||'').split('\n').forEach(l=>l.trim()&&all.push(l.trim()))));
+ const text=[P.summary,...all].filter(Boolean).join('\n');
+ if(/\b(I|I'm|my|me)\b/.test(text))tip('Avoid "I", "my" and "me". CVs read better without first person.');
+ const weak=all.filter(l=>/^(responsible for|worked on|helped|assisted with|duties included)/i.test(l)).length;
+ if(weak)tip(weak+' bullet(s) start with a weak phrase. Start with an action verb instead (Led, Built, Reduced).');
+ if(all.length>=3&&!all.some(l=>/\d/.test(l)))tip('Add numbers to your bullets (%, amounts, team size) to show impact.');
+ const lg=all.filter(l=>l.length>200).length;if(lg)tip(lg+' bullet(s) are over 200 characters. Shorter bullets are easier to scan.');
+ const dp=text.match(/\b([A-Za-z]+)\s+\1\b/i);if(dp)tip('Repeated word: "'+dp[0]+'".');
+ ['exp','edu'].forEach(k=>(S[k]||[]).forEach(q=>{const y=s=>(String(s||'').match(/(19|20)\d\d/)||[])[0];if(y(q.start)&&y(q.end)&&y(q.end)<y(q.start))bad('"'+lbl(q,k)+'" ends before it starts.')}));
+ el.innerHTML='<h3>CV check</h3><div class=in>'+(out.length?out.join(''):'<span class=ok>✓ No issues found.</span>')+'</div>'}
+
+/* ---- Auto-correct ---- */
+const TY={teh:'the',recieve:'receive',managment:'management',experiance:'experience',responsability:'responsibility',enviroment:'environment',sucessful:'successful',sucessfully:'successfully',acheived:'achieved',acheivement:'achievement',developement:'development',definately:'definitely',seperate:'separate',occured:'occurred',untill:'until',maintainance:'maintenance',knowlege:'knowledge',proffesional:'professional',comunication:'communication',adress:'address'};
+function fix(s,k,v,ta){
+ if(k=='email')return v.toLowerCase().replace(/\s/g,'');
+ if(k=='web'||k=='link')return v.replace(/\s/g,'');
+ if(k=='phone')return v.replace(/[ \t]{2,}/g,' ').trim();
+ let L=v.replace(/\r/g,'').split('\n').map(l=>l.replace(/[ \t]{2,}/g,' ').replace(/\s+([,.;:!?])/g,'$1').replace(/,(?=[A-Za-z])/g,', ').replace(/\b[a-z]+\b/gi,w=>TY[w.toLowerCase()]||w).trim());
+ if(ta)L=L.map(l=>l.replace(/^[\-*•·▪●–—]+\s*/,''));
+ L=L.map(l=>l.charAt(0).toUpperCase()+l.slice(1));
+ if(ta&&k!='summary')L=L.filter(Boolean);
+ v=L.join('\n').trim();
+ if(s=='p'&&k=='name'&&(v==v.toLowerCase()||v==v.toUpperCase()))v=v.toLowerCase().replace(/(^|[\s'-])([a-z])/g,(m,a,b)=>a+b.toUpperCase());
+ return v}
+$('form').addEventListener('change',ev=>{const t=ev.target,d=t.dataset;
+ if(t.id=='fixon'){D.o.fix=t.checked;save();return}
+ if(D.o.fix===false||!d.k||!/^(INPUT|TEXTAREA)$/.test(t.tagName))return;
+ const v=fix(d.s,d.k,t.value,t.tagName=='TEXTAREA');if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
+
+
+const setTheme=t=>{document.documentElement.dataset.theme=t;try{localStorage.setItem('electralab-theme',t)}catch(_){}$('theme').textContent=t=='dark'?'Light mode':'Dark mode'};
+$('theme').onclick=()=>setTheme(document.documentElement.dataset.theme=='dark'?'light':'dark');
+setTheme(document.documentElement.dataset.theme||'light');
+form();draw();
+</script></body></html>
