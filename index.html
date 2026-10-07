@@ -2,6 +2,12 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#020617">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ElectraLab">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
  <style> * { margin: 0; padding: 0; box-sizing: border-box; } html { scroll-behavior: smooth; } body { font-family: Arial, Helvetica, sans-serif; background: #020617; color: white; min-height: 100vh; overflow-x: hidden; } button, input, select { font: inherit; } button { border: none; } a { color: inherit; } .start-button, .tool-card, .back-tools, .theme-toggle, .mode-tabs button, .calc-action, .clear-inputs, .ai-suggestion { transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease; } /* ========================= ANIMATED BACKGROUND ========================= */ body::before { content: ""; position: fixed; inset: 0; z-index: -5; background: radial-gradient(circle at 20% 20%, rgba(0,255,255,.18), transparent 25%), radial-gradient(circle at 80% 30%, rgba(139,92,246,.18), transparent 25%), radial-gradient(circle at 50% 90%, rgba(0,128,255,.15), transparent 30%), #020617; } /* Grid */ body::after { content: ""; position: fixed; inset: 0; z-index: -4; background-image: linear-gradient(rgba(0,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,.06) 1px, transparent 1px); background-size: 45px 45px; animation: gridMove 15s linear infinite; } @keyframes gridMove { from { transform: translateY(0); } to { transform: translateY(45px); } } /* Floating glow particles */ .particle { position: fixed; width: 5px; height: 5px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff, 0 0 25px #00ffff; opacity: .6; z-index: -2; animation: floatParticle linear infinite; } @keyframes floatParticle { 0% { transform: translateY(110vh); opacity: 0; } 10% { opacity: .7; } 90% { opacity: .7; } 100% { transform: translateY(-10vh); opacity: 0; } } /* ========================= HEADER ========================= */ header { position: sticky; top: 0; z-index: 100; height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; background: rgba(2,6,23,.72); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,255,255,.18); } .logo { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: bold; letter-spacing: 1px; } .logo-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient( 135deg, #00ffff, #6366f1 ); color: #020617; box-shadow: 0 0 15px rgba(0,255,255,.5); } .logo span { color: #00ffff; } .menu-button { background: none; border: none; color: white; font-size: 27px; cursor: pointer; display: none; } /* ========================= HERO ========================= */ .hero { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; text-align: center; padding: 70px 20px; position: relative; } .hero-content { max-width: 900px; animation: heroEnter 1.2s ease forwards; }
  @keyframes heroEnter { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }  .hero h1 { font-size: clamp(42px, 8vw, 82px); line-height: 1; margin-bottom: 20px; background: linear-gradient( 90deg, #00ffff, #7c3aed, #ff00cc, #00ffff ); background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientMove 6s linear infinite; } @keyframes gradientMove { 0% { background-position: 0%; } 100% { background-position: 300%; } } .hero p { max-width: 650px; margin: auto; color: #94a3b8; font-size: 18px; line-height: 1.7; } .start-button { display: inline-block; margin-top: 35px; padding: 15px 30px; border-radius: 12px; text-decoration: none; color: #020617; font-weight: bold; background: linear-gradient( 90deg, #00ffff, #6366f1 ); box-shadow: 0 0 20px rgba(0,255,255,.35); transition: .3s; } .start-button:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 0 30px rgba(0,255,255,.7); } /* ========================= MENU SECTION ========================= */ .tools { max-width: 1150px; margin: auto; padding: 80px 20px; } .section-title { text-align: center; margin-bottom: 45px; } .section-title h2 { font-size: 34px; margin-bottom: 10px; } .section-title p { color: #64748b; } /* Cards */ .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; } .tool-card { position: relative; min-height: 190px; padding: 25px; border-radius: 18px; background: linear-gradient( 145deg, rgba(15,23,42,.9), rgba(15,23,42,.55) ); border: 1px solid rgba(0,255,255,.13); overflow: hidden; transition: .35s; text-align: left; width: 100%; display: block; color: white; text-decoration: none; cursor: pointer; appearance: none; -webkit-appearance: none; } .tool-card::before { content: ""; position: absolute; width: 120px; height: 120px; right: -50px; top: -50px; border-radius: 50%; background: #00ffff; filter: blur(55px); opacity: .15; } .tool-card:hover { transform: translateY(-8px); border-color: #00ffff; box-shadow: 0 10px 40px rgba(0,255,255,.12); } .tool-card:focus-visible, .start-button:focus-visible, .back-tools:focus-visible, .ai-suggestion:focus-visible, .calc-action:focus-visible, .clear-inputs:focus-visible { outline: 2px solid #00ffff; outline-offset: 3px; } .tool-icon { width: 55px; height: 55px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; margin-bottom: 20px; background: linear-gradient( 135deg, rgba(0,255,255,.18), rgba(124,58,237,.25) ); border: 1px solid rgba(0,255,255,.25); } .tool-card h3 { margin-bottom: 9px; } .tool-card p { color: #94a3b8; font-size: 14px; line-height: 1.5; } .tool-card.coming { opacity: .6; } .badge { display: inline-block; margin-top: 14px; padding: 5px 9px; border-radius: 20px; font-size: 11px; color: #00ffff; background: rgba(0,255,255,.08); border: 1px solid rgba(0,255,255,.15); } /* ========================= FOOTER ========================= */ footer { text-align: center; padding: 40px 20px; color: #475569; border-top: 1px solid rgba(255,255,255,.05); } /* ========================= MOBILE ========================= */ @media(max-width:650px) { header { padding: 0 20px; } .hero { min-height: 90vh; } .hero h1 { font-size: 48px; } .hero p { font-size: 15px; } .tool-grid { grid-template-columns: 1fr 1fr; } } @media(max-width:430px) { .tool-grid { grid-template-columns: 1fr; }  }
 /* Live calculator panels */
@@ -733,6 +739,29 @@ body::after{will-change:transform;backface-visibility:hidden}
 /* paused automatically when the hero is scrolled out of view */
 .hero.hero-off *,.hero.hero-off{animation-play-state:paused!important}
 </style>
+<style>
+/* ===== Install App button ===== */
+.install-btn{position:absolute;right:76px;top:50%;margin-top:-15px;height:30px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;
+  border-radius:18px;border:1px solid #0bb9ed;background:rgba(11,185,237,.14);color:#5eeaff;font-size:13px;font-weight:700;letter-spacing:.3px;
+  line-height:1;cursor:pointer;white-space:nowrap;box-shadow:0 0 12px rgba(11,185,237,.25);transition:background .18s ease,box-shadow .18s ease,color .18s ease}
+.install-btn[hidden]{display:none!important}
+.install-btn:hover{background:#0bb9ed;color:#020617;box-shadow:0 0 16px rgba(11,185,237,.55)}
+.install-btn .install-ico{font-size:14px}
+body.light-theme .install-btn{background:#e0f2fe;color:#0369a1;box-shadow:none}
+body.light-theme .install-btn:hover{background:#0bb9ed;color:#fff}
+@media(max-width:520px){
+  .install-btn{right:74px;width:34px;padding:0;justify-content:center;gap:0}
+  .install-btn .install-label{display:none}
+}
+.install-sheet{position:fixed;top:74px;right:28px;width:320px;max-width:calc(100vw - 24px);z-index:300;padding:16px 18px;border-radius:14px;
+  background:#0b1730;color:#e6f1ff;border:1px solid rgba(11,185,237,.6);box-shadow:0 12px 40px rgba(0,0,0,.5);font-size:14px;line-height:1.55}
+.install-sheet-title{font-weight:700;color:#5eeaff;margin-bottom:8px}
+.install-sheet-close{margin-top:12px;float:right;padding:6px 14px;border-radius:10px;border:0;background:#0bb9ed;color:#020617;font-weight:700;cursor:pointer}
+.install-sheet:after{content:"";display:block;clear:both}
+body.light-theme .install-sheet{background:#fff;color:#0f172a;border-color:#0bb9ed;box-shadow:0 12px 40px rgba(2,132,199,.25)}
+body.light-theme .install-sheet-title{color:#0369a1}
+@media(max-width:520px){.install-sheet{top:66px;right:12px;left:12px;width:auto;max-width:none}}
+</style>
 </head> <body> <!-- Floating particles --> <div class="particle" style="left:8%; animation-duration:12s;"></div> <div class="particle" style="left:18%; animation-duration:17s; animation-delay:2s;"></div> <div class="particle" style="left:31%; animation-duration:14s; animation-delay:5s;"></div> <div class="particle" style="left:45%; animation-duration:19s; animation-delay:1s;"></div> <div class="particle" style="left:59%; animation-duration:13s; animation-delay:4s;"></div> <div class="particle" style="left:72%; animation-duration:18s; animation-delay:7s;"></div> <div class="particle" style="left:86%; animation-duration:15s; animation-delay:3s;"></div>
 <!-- HEADER --> <header>
 <div class="logo">
@@ -744,6 +773,8 @@ body::after{will-change:transform;backface-visibility:hidden}
     </div>
 
 </div>
+
+<button class="install-btn" id="installBtn" type="button" hidden aria-label="Install ElectraLab as an app" title="Install ElectraLab as an app"><span class="install-ico" aria-hidden="true">⬇</span><span class="install-label">Install App</span></button>
 
 <button class="theme-toggle" id="themeButton" onclick="toggleTheme()" aria-label="Toggle day and night mood">☾</button>
 
@@ -2706,4 +2737,5 @@ document.addEventListener("DOMContentLoaded", () => {
 (function(){var h=document.getElementById('home');if(!h||!('IntersectionObserver' in window))return;
 new IntersectionObserver(function(e){h.classList.toggle('hero-off',!e[0].isIntersecting);},{rootMargin:'100px'}).observe(h);})();
 </script>
+<script src="pwa.js" defer></script>
 </body> </html>
