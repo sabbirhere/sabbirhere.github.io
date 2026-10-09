@@ -1,4 +1,4 @@
-/* cbp_validator.js v2.0 - Circuit Builder Pro validation engine.
+/* cbp_validator.js v2.3 - Circuit Builder Pro validation engine.
    No drawing code. Loaded on demand by the Validate button in CBP_Sabbir.html.
 
    Pipeline
@@ -18,7 +18,7 @@
 (function(){
 'use strict';
 
-const VERSION='2.0';
+const VERSION='2.3';
 const key=l=>((l||'').trim().toUpperCase().split(/[\s(\/:,]+/)[0])||'';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const PROT=['mcb','mccb','acb','vcb','sf6','elcb','rccb','rcbo'];          // breaker kinds that give short-circuit protection
@@ -79,7 +79,16 @@ function run(api){
    E(a,b,'inp',{i,mode})};
   const ab=pid.includes('a')&&pid.includes('b'),bk=s.bkind;
   const olIec=s.mark==='ctr'?!!s.trip:s.id==='iec_mpcb_3p';
-  if(k==='source'||k==='battery'){if(ab)SRC.push({c,na:N(pk(c.uid,'a')),nb:N(pk(c.uid,'b')),dc:k==='battery'||/^(dc_supply|generator_dc)$/.test(s.id),ph1:s.id==='ac_1ph',ph3:s.id==='ac_3ph'||s.id==='generator_ac'})}
+  if((k==='source'||k==='battery'||k==='solar')&&ab){
+   const threePhase=s.ports==='3ph4'&&['a','c','d','b'].every(id=>pid.includes(id));
+   const dc=k==='battery'||k==='solar'||/^(dc_supply|generator_dc)$/.test(s.id);
+   if(threePhase){
+    // Model a 3-phase source as L1-N, L2-N and L3-N legs, sharing one neutral.
+    // The group marker also lets the dry-run recognize phase-to-phase control power.
+    ['a','c','d'].forEach((phase,i)=>SRC.push({c,na:N(pk(c.uid,phase)),nb:N(pk(c.uid,'b')),dc:false,ph1:false,ph3:true,phaseGroup:c.uid,phaseName:['L1','L2','L3'][i]}));
+   } else SRC.push({c,na:N(pk(c.uid,'a')),nb:N(pk(c.uid,'b')),dc,
+    ph1:/^(ac_1ph|generator_ac)$/.test(s.id),ph3:/^(ac_3ph|generator_3ph)$/.test(s.id)});
+  }
   else if(k==='earth')EARTH.push({net:N(pk(c.uid,'a')),variant:s.variant,c});
   else if(k==='motorX'||k==='load3ph'){const line=pid.filter(i=>!/^b/.test(i)).map(i=>N(pk(c.uid,i)));
    MOT.push({c,s,nets:pid.map(i=>N(pk(c.uid,i))),line,dc:!!s.dc,three:(s.top||0)>=3||k==='load3ph'})}
@@ -97,8 +106,9 @@ function run(api){
   else if(k==='pb')inp('a','b',/nc|estop/.test(s.variant)?'nc':'no');
   else if(k==='fieldSwitch')inp('a','b','no');
   else if(k==='breaker'){if(bk==='switch')inp('a','b','no');else if(bk==='ol')inp('a','b','nc');else if(!['earth_sw','spd','arrester','ef'].includes(bk)&&ab)E('a','b','zi',{prot:PROT.includes(bk)})}
-  /* devices the dry-run cannot model but which may drive a coil from outside */
-  if(k==='ansiRelay'||(k==='semiconductor'&&s.variant==='thyristor')||(k==='powerElec'&&/igbt|mosfet/.test(s.id)))pid.forEach(i=>EXT.push(N(pk(c.uid,i))));
+  /* External-driver placeholders retained for semiconductors / power devices.
+     ANSI single-line relay symbols were removed from the current component library. */
+  if((k==='semiconductor'&&s.variant==='thyristor')||(k==='powerElec'&&/igbt|mosfet/.test(s.id)))pid.forEach(i=>EXT.push(N(pk(c.uid,i))));
  });
  const NN=ids.size;
  const series=new Set([...EL.map(e=>e.c),...SRC.map(s=>s.c),...MOT.map(m=>m.c)]);
@@ -106,7 +116,7 @@ function run(api){
  /* reachability over the static graph (contacts and switches assumed closed, coils never conduct) */
  const reach=(starts,skip)=>{const adj=[];EL.forEach(e=>{if(e.t==='coil'||(skip&&skip(e)))return;(adj[e.na]=adj[e.na]||[]).push(e.nb);if(e.t!=='dir')(adj[e.nb]=adj[e.nb]||[]).push(e.na)});
   const R=new Set(),q=[];starts.forEach(n=>{R.add(n);q.push(n)});while(q.length){const x=q.pop();(adj[x]||[]).forEach(y=>{if(!R.has(y)){R.add(y);q.push(y)}})}return R};
- const srcNets=S=>S.flatMap(s=>[s.na,s.nb]);
+ const srcNets=S=>S.flatMap(s=>[s.na,s.nb]); // 3-phase sources are represented as three Lx-N source legs
  const allSrc=srcNets(SRC),acSrc=SRC.filter(s=>!s.dc),dcSrc=SRC.filter(s=>s.dc);
  const hasAC=acSrc.length>0;
 
@@ -134,9 +144,12 @@ function run(api){
   const s=SYM[c.symbolId],k=s.kind,pid=PW.get(c.uid).map(q=>q.id),open=pid.filter(i=>!used.has(pk(c.uid,i)));
   if(k==='basicMisc'||k==='bus'||!pid.length)return;
   if(open.length===pid.length){
-   const important=['source','battery','motorX','load3ph','fuseN','ovl','iec','breaker','coil','coilV','contact3ph','xfmr'].includes(k);
+   const important=['source','battery','solar','motorX','load3ph','fuseN','ovl','iec','breaker','coil','coilV','contact3ph','xfmr'].includes(k);
    add(important?'warn':'info','S02','Isolated component: '+nm(c),'It has no wire on any terminal, so it takes no part in the circuit.','Wire it in or delete it.',[c.uid]);return}
   if(!open.length)return;
+  // A 3-phase source exposes L1/L2/L3/N independently; unused terminals can be intentional.
+  // Check phase completeness against connected 3-phase loads instead of flagging neutral as open.
+  if(k==='source'&&s.ports==='3ph4')return;
   const wired=pid.filter(i=>!open.includes(i)),aP=pid.filter(i=>/^a\d+$/.test(i)),bP=pid.filter(i=>/^b\d+$/.test(i)),tP=pid.filter(i=>/^t\d+$/.test(i));
   const u=i=>used.has(pk(c.uid,i));
   if(tP.length&&!s.dc){
@@ -155,7 +168,19 @@ function run(api){
   else add('warn','S03','Open terminal on '+nm(c),'Terminal(s) '+open.join(', ')+' have no wire.','Connect the terminal, or ignore if it is intentionally spare.',[c.uid]);
  });
  const seen=new Map();cs.forEach(c=>{const k=c.symbolId+'@'+c.x+','+c.y;if(seen.has(k))add('warn','S04','Duplicate component on top of another: '+nm(c),'Two identical symbols sit at the same position, so a wire may attach to the wrong one.','Delete the duplicate.',[c.uid,seen.get(k)]);else seen.set(k,c.uid)});
- const ss=new Set();SRC.forEach((s,j)=>{if(s.na===s.nb){ss.add(j);add('error','S05','Source shorted: '+nm(s.c),'Both terminals of this source are on the same net, so it is short-circuited permanently.','Remove the wire joining the two terminals.',[s.c.uid])}});
+ const ss=new Set();SRC.forEach((s,j)=>{if(s.na===s.nb){ss.add(j);add('error','S05','Source shorted: '+nm(s.c),'Both terminals of this source leg are on the same net, so it is short-circuited permanently.','Remove the wire joining the source terminals.',[s.c.uid])}});
+ /* A 3-phase source can also be shorted phase-to-phase (L1-L2, L2-L3 or L1-L3),
+    even when its neutral is not involved. Detect terminal-net merges per source. */
+ cs.forEach(c=>{
+  const s=SYM[c.symbolId];if(s.kind!=='source'||s.ports!=='3ph4')return;
+  const ids=['a','c','d'],names=['L1','L2','L3'],net=ids.map(id=>N(pk(c.uid,id)));
+  let found=false;const duplicateNames=new Set();
+  for(let a=0;a<net.length;a++)for(let b=a+1;b<net.length;b++)if(net[a]===net[b]){found=true;duplicateNames.add(names[a]);duplicateNames.add(names[b]);}
+  if(found){
+   SRC.forEach((src,j)=>{if(src.phaseGroup===c.uid&&duplicateNames.has(src.phaseName))ss.add(j)});
+   add('error','S05','Three-phase source has shorted phases: '+nm(c),'Two or more phase terminals (L1, L2 or L3) are connected to the same electrical net. This is a phase-to-phase short, even if neutral is not connected.','Separate the phase conductors and check the wire/junction connections.',[c.uid]);
+  }
+ });
  EL.forEach(e=>{if((e.t==='coil'||e.t==='imp'||e.t==='dir')&&e.na===e.nb)add(e.t==='coil'?'error':'warn','S06',(e.t==='coil'?'Coil shorted out: ':'Component bypassed: ')+nm(e.c),
   e.t==='coil'?'Both terminals of the coil are on the same net, so no voltage can ever appear across it and it can never operate.':'Both terminals are on the same net, so current skips this component entirely.','Check the wiring at this component.',[e.c.uid])});
  /* earthing */
@@ -198,11 +223,15 @@ function run(api){
   if(mix.length&&acSrc.length)add('error','X02','AC and DC sources are joined','A DC source ('+list(mix.map(s=>nm(s.c)))+') is wired to the same network as an AC source with no rectifier or converter between them.','Separate the two networks or add the converter.',[...mix.map(s=>s.c.uid)]);
   const g1=SRC.filter(s=>s.ph1),g3=SRC.filter(s=>s.ph3),r1=reach(srcNets(g1),conv),r3=reach(srcNets(g3),conv);
   MOT.forEach(m=>{if(m.three&&!m.dc&&inR(r1,m.nets)&&!inR(r3,m.nets))add('error','X04','Three-phase machine on a single-phase supply: '+nm(m.c),'The only AC source reaching it is single-phase, so it cannot start or will run on one phase.','Use a three-phase supply, or a single-phase machine.',[m.c.uid])});
-  for(let a=0;a<SRC.length;a++)for(let b=a+1;b<SRC.length;b++){const A=SRC[a],B=SRC[b];if(A.na===A.nb||B.na===B.nb)continue;
+  const parallelReported=new Set();
+  for(let a=0;a<SRC.length;a++)for(let b=a+1;b<SRC.length;b++){
+   const A=SRC[a],B=SRC[b];if(A.na===A.nb||B.na===B.nb||A.c.uid===B.c.uid)continue;
    const same=A.na===B.na&&A.nb===B.nb,rev=A.na===B.nb&&A.nb===B.na;if(!same&&!rev)continue;
+   const pair=[A.c.uid,B.c.uid].sort((x,y)=>x-y).join('|');if(parallelReported.has(pair))continue;parallelReported.add(pair);
    if(A.dc&&B.dc&&rev)add('error','X03','DC sources in opposition: '+nm(A.c)+' / '+nm(B.c),'The two sources are connected in parallel with opposite polarity, so each one drives a short circuit through the other.','Reverse one source.',[A.c.uid,B.c.uid]);
    else if(A.dc&&B.dc)add('warn','X03','DC sources in parallel: '+nm(A.c)+' / '+nm(B.c),'Paralleled sources with unequal voltage circulate current between them.','Match voltages and add blocking diodes or fuses per source.',[A.c.uid,B.c.uid]);
-   else if(!A.dc&&!B.dc)add('warn','X03','AC sources in parallel: '+nm(A.c)+' / '+nm(B.c),'Two AC sources joined with no synchronising check will drive large circulating current if voltage, phase or frequency differ.','Add a sync-check (25) and breaker for each source.',[A.c.uid,B.c.uid])}
+   else if(!A.dc&&!B.dc)add('warn','X03','AC sources in parallel: '+nm(A.c)+' / '+nm(B.c),'Two AC sources joined with no synchronising check will drive large circulating current if voltage, phase or frequency differ.','Add a sync-check (25) and breaker for each source.',[A.c.uid,B.c.uid]);
+  }
  }
  /* conductor sharing: poles of one device on the same line while other devices keep phases apart */
  const pole=c=>{const p=PW.get(c.uid).map(q=>q.id),a=p.filter(i=>/^a\d+$/.test(i)),b=p.filter(i=>/^b\d+$/.test(i));return{a,b}};
@@ -213,6 +242,19 @@ function run(api){
   const tP=PW.get(c.uid).map(q=>q.id).filter(i=>/^t\d+$/.test(i));if(tP.length>1)sides.push(['t',tP]);
   sides.forEach(([sd,ports])=>{const n=poleNets(c,ports);if(!n||n.length<2)return;const d=new Set(n).size;
    if(d>1&&d<n.length)add('error','X05','Two phases joined at '+nm(c),'On the '+(sd==='b'?'load':'supply')+' side, '+(n.length-d+1)+' terminals of this device sit on the same conductor while other poles carry separate phases. That is a phase-to-phase short through the wiring, or a lost phase.','Give each pole its own phase conductor.',[c.uid])})});
+  /* Check that a connected 3-phase motor reaches three distinct source phases. */
+  const threePhaseSources=cs.filter(c=>{const s=SYM[c.symbolId];return s.kind==='source'&&s.ports==='3ph4'});
+  if(threePhaseSources.length){
+   const phaseMaps=threePhaseSources.map(c=>({c,reach:['a','c','d'].map(port=>reach([N(pk(c.uid,port))]))}));
+   MOT.filter(m=>m.three&&!m.dc&&m.line.length>=3).forEach(m=>{
+    const outcomes=phaseMaps.map(g=>m.line.slice(0,3).map(net=>g.reach.map((r,i)=>r.has(net)?i:-1).filter(i=>i>=0)));
+    const valid=outcomes.some(a=>a.length===3&&a.every(v=>v.length===1)&&new Set(a.map(v=>v[0])).size===3);
+    const related=outcomes.some(a=>a.some(v=>v.length>0));
+    if(related&&!valid)add('error','X06','Three-phase load is not connected to three distinct phases: '+nm(m.c),
+     'The load reaches a three-phase source, but its three line terminals do not each trace to a different source phase. A missing or duplicated phase can prevent starting and damage the motor.',
+     'Connect L1, L2 and L3 through separate poles to the three motor terminals. Do not join two phases together.',[m.c.uid,...threePhaseSources.map(c=>c.uid)]);
+   });
+  }
  /* indicators that can never be powered */
  if(SRC.length){const A=reach(allSrc);TAP.forEach(t=>{if(!A.has(t.net))add('warn','M02','Indicator not supplied: '+nm(t.c),'The lamp/alarm terminal is not connected to any path from a source.','Wire it to the supply through its switching contact.',[t.c.uid])})}
 
@@ -243,7 +285,7 @@ function run(api){
   else if(MOT.length&&CONTACTOR_COILS.includes(x.s.id)&&!mine.some(e=>e.pw))add('warn','P05','Contactor coil '+x.key+' has no power contacts','Only auxiliary contacts carry the label '+x.key+'. No main (3-pole/power) contact is driven, so the coil switches no motor.','Add the main contacts and label them '+x.key+'.',[x.c.uid])});
  const tags=new Map();cs.forEach(c=>{const s=SYM[c.symbolId];if(!(c.label&&c.label.trim()))return;
   /* device tags only; contacts, buttons and overload contacts legitimately repeat the tag of their parent device */
-  if(!['fuseN','motorX','load3ph','xfmr','source','battery','ovl'].includes(s.kind)&&!(s.kind==='breaker'&&s.bkind!=='ol'&&s.bkind!=='switch'))return;
+  if(!['fuseN','motorX','load3ph','xfmr','source','battery','solar','ovl'].includes(s.kind)&&!(s.kind==='breaker'&&s.bkind!=='ol'&&s.bkind!=='switch'))return;
   const t=c.label.trim().toUpperCase();(tags.get(t)||tags.set(t,[]).get(t)).push(c.uid)});
  tags.forEach((u,t)=>{if(u.length>1)add('warn','C06','Tag '+t+' used on '+u.length+' devices','Two or more devices share one tag, so they cannot be told apart on drawings, in lists or by contacts.','Give every device a unique tag.',u)});
 
@@ -260,7 +302,14 @@ function run(api){
    Ie.forEach((e,i)=>{const a=g(e.na),b=g(e.nb);ad(a,b,i);if(e.t!=='dir')ad(b,a,i)});
    const rr=new Map();rails.forEach(([n,r])=>{const x=g(n);if(!rr.has(x))rr.set(x,[]);rr.get(x).push(r)});
    const rc=(s,skip)=>{const sn=new Set([s]),q=[s],R=new Set();while(q.length){const x=q.pop();(rr.get(x)||[]).forEach(r=>R.add(r));(adj.get(x)||[]).forEach(([y,i])=>{if(i!==skip&&!sn.has(y)){sn.add(y);q.push(y)}})}return R};
-   return COIL.map(cl=>{const e=Ie[cl.ie],A=rc(g(e.na),cl.ie),B=rc(g(e.nb),cl.ie);for(let j=0;j<SRC.length;j++)if((A.has(2*j)&&B.has(2*j+1))||(A.has(2*j+1)&&B.has(2*j)))return true;return false})};
+   return COIL.map(cl=>{const e=Ie[cl.ie],A=rc(g(e.na),cl.ie),B=rc(g(e.nb),cl.ie);
+    for(let j=0;j<SRC.length;j++)if((A.has(2*j)&&B.has(2*j+1))||(A.has(2*j+1)&&B.has(2*j)))return true;
+    // Also recognize phase-to-phase control supply (L1-L2, L2-L3 or L1-L3).
+    for(let a=0;a<SRC.length;a++)if(SRC[a].phaseGroup)for(let b=a+1;b<SRC.length;b++){
+     if(SRC[b].phaseGroup!==SRC[a].phaseGroup)continue;
+     if((A.has(2*a)&&B.has(2*b))||(A.has(2*b)&&B.has(2*a)))return true;
+    }
+    return false})};
   const relax=(I,K0)=>{let K=K0.slice();for(let it=0;it<40;it++){const on=coilsOn(solve(I,K));let ch=-1;for(let x=0;x<keys.length;x++){const v=COIL.some((c,i)=>on[i]&&KI.get(c.key)===x)?1:0;if(v!==K[x]){ch=x;break}}if(ch<0)return{K,ok:true};K[ch]^=1}return{K,ok:false}};
   const st=[],sn=new Map(),edges=[];let osc=null;
   const infl=INP.map(()=>keys.map(()=>false));                                // does input j ever change coil x?
@@ -273,7 +322,7 @@ function run(api){
   meta.states=st.length;
   const trace=i=>{const p=[];while(st[i].p>=0){p.push((st[i].I[st[i].v]?'Operate ':'Release ')+INP[st[i].v].name);i=st[i].p}return p.length?p.reverse():['(the initial state, nothing operated)']};
   const on=i=>keys.filter((k,x)=>st[i].K[x]).join(', ')||'none';
-  const tr=i=>({trace:trace(i)}),srcNm=SRC.map(s=>nm(s.c)).join(' / ');
+  const tr=i=>({trace:trace(i)}),srcNm=[...new Set(SRC.map(s=>nm(s.c)))].join(' / ');
   const coilUids=k=>COIL.filter(c=>c.key===k).map(c=>c.c.uid);
   /* contactors that switch a motor: have power contacts or a contactor-type coil */
   const PK=keys.map((k,i)=>EL.some(e=>e.pw&&e.key===k)||COIL.some(c=>c.key===k&&CONTACTOR_COILS.includes(c.s.id))?i:-1).filter(i=>i>=0);
@@ -286,7 +335,12 @@ function run(api){
   const PROTIN=INP.map(x=>x.estop||x.ol||x.stop);
   st.forEach((s,i)=>{
    s.K.forEach((v,x)=>{if(v)ever[x]=true});
-   const g=solve(s.I,s.K);if(short<0&&SRC.some((x,j)=>!ss.has(j)&&g(x.na)===g(x.nb)))short=i;
+   const g=solve(s.I,s.K);
+   if(short<0){
+    const legShort=SRC.some((x,j)=>!ss.has(j)&&g(x.na)===g(x.nb));
+    const phaseShort=SRC.some((x,j)=>!ss.has(j)&&x.phaseGroup&&SRC.some((y,k)=>k!==j&&!ss.has(k)&&y.phaseGroup===x.phaseGroup&&g(x.na)===g(y.na)));
+    if(legShort||phaseShort)short=i;
+   }
    pairs.forEach((p,x)=>{if(pp[x]<0&&s.K[KI.get(p[0])]&&s.K[KI.get(p[1])])pp[x]=i});
    INP.forEach((x,j)=>{if(!s.I[j]||!PROTIN[j])return;keys.forEach((k,xi)=>{if(s.K[xi]&&!hit.has(j+'|'+xi))hit.set(j+'|'+xi,i)})});
   });
@@ -344,20 +398,27 @@ function run(api){
 /* ================= REPORT PANEL ================= */
 let last=null,filt='all';
 const COL={error:'#e94560',warn:'#f1c40f',info:'#4fc3f7'},LAB={error:'ERROR',warn:'WARNING',info:'NOTE'};
-const bs=()=>'background:#1b2445;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit';
+const bs=()=>'background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;color-scheme:inherit';
 function toText(res){return res.issues.map(x=>'['+LAB[x.sev]+'] '+x.id+' '+x.title+'\n  '+x.why+(x.trace?'\n  Reproduce: '+x.trace.join(' -> '):'')+'\n  Fix: '+x.fix).join('\n\n')}
+function ensureThemeStyles(){
+ let style=document.getElementById('cbpv-theme-rules');
+ if(!style){style=document.createElement('style');style.id='cbpv-theme-rules';document.head.appendChild(style)}
+ style.textContent='#cbpv button{background-color:var(--panel2)!important;color:var(--text)!important} #cbpv{background:var(--panel)!important;color:var(--text)!important;border-color:var(--line)!important} #cbpv [data-i]{background-color:var(--panel2)!important;color:var(--text)!important}';
+}
 function show(api,res){
  last=res;
+ ensureThemeStyles();
  let p=document.getElementById('cbpv');
- if(!p){p=document.createElement('div');p.id='cbpv';p.style.cssText='position:fixed;top:54px;right:10px;bottom:46px;width:450px;max-width:94vw;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;box-shadow:0 10px 34px #000a;font:12.5px "Segoe UI",Roboto,sans-serif;color:var(--text)';document.body.appendChild(p)}
+ if(!p){p=document.createElement('div');p.id='cbpv';p.style.cssText='position:fixed;top:54px;right:10px;bottom:46px;width:450px;max-width:94vw;z-index:60;background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;box-shadow:0 10px 34px #000a;font:12.5px "Segoe UI",Roboto,sans-serif;color:var(--text);color-scheme:inherit';document.body.appendChild(p)}
  const I=res.issues,n=s=>I.filter(x=>x.sev===s).length,m=res.meta,ne=n('error'),nw=n('warn');
- const verdict=ne?['FAIL','#e94560']:nw?['PASS WITH WARNINGS','#f1c40f']:['PASS','#2ecc71'];
- const chip=(k,t,c)=>'<button data-f="'+k+'" style="'+bs()+';border-color:'+(filt===k?c:'var(--line)')+';'+(filt===k?'background:'+c+'33':'')+'">'+t+'</button>';
+ const incomplete=I.some(x=>x.id==='S08');
+ const verdict=ne?['FAIL','#e94560']:incomplete?['INCOMPLETE','#4fc3f7']:nw?['PASS WITH WARNINGS','#f1c40f']:['PASS','#2ecc71'];
+ const chip=(k,t,c)=>'<button data-f="'+k+'" style="'+bs()+';border-color:'+(filt===k?c:'var(--line)')+';'+(filt===k?'box-shadow:inset 0 -2px '+c:'')+'">'+t+'</button>'; 
  const shown=I.map((x,i)=>[x,i]).filter(([x])=>filt==='all'||x.sev===filt);
  p.innerHTML='<div style="padding:10px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px"><b style="font-size:14px">Circuit check</b><span style="background:'+verdict[1]+'22;color:'+verdict[1]+';border:1px solid '+verdict[1]+';border-radius:10px;padding:1px 9px;font-weight:600;font-size:11px">'+verdict[0]+'</span><span style="flex:1"></span><button data-a="cp" style="'+bs()+'">Copy</button><button data-a="re" style="'+bs()+'">Re-run</button><button data-a="x" style="'+bs()+'">✕</button></div>'+
- '<div style="padding:8px 12px;border-bottom:1px solid var(--line)"><div style="display:flex;gap:6px;flex-wrap:wrap">'+chip('all','All '+I.length,'#8899cc')+chip('error',ne+' errors',COL.error)+chip('warn',nw+' warnings',COL.warn)+chip('info',n('info')+' notes',COL.info)+'</div>'+
+ '<div style="padding:8px 12px;border-bottom:1px solid var(--line)"><div style="display:flex;gap:6px;flex-wrap:wrap">'+chip('all','All '+I.length,'#8899cc')+chip('error',ne+' errors',COL.error)+chip('warn',nw+' warnings',COL.warn)+chip('info',n('info')+(n('info')===1?' note':' notes'),COL.info)+'</div>'+
  '<div style="color:var(--dim);margin-top:6px;font-size:11.5px">'+m.comps+' components · '+m.wires+' wires · '+m.nets+' nets'+(m.states?' · dry-run '+m.states+' states, '+m.inputs+' inputs, '+m.coils+' coils'+(m.partial?' (partial: state limit reached)':''):'')+' · '+m.ms+' ms · engine v'+m.version+'. Rule-based aid; it does not replace engineering review.</div></div>'+
- '<div style="overflow:auto;flex:1;padding:8px 10px;display:flex;flex-direction:column;gap:8px">'+(shown.length?shown.map(([x,i])=>'<div data-i="'+i+'" style="cursor:pointer;background:var(--panel2);border-left:4px solid '+COL[x.sev]+';border-radius:6px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:baseline"><span style="color:'+COL[x.sev]+';font-weight:700;font-size:10.5px">'+LAB[x.sev]+'</span><span style="color:var(--dim);font-size:10.5px">'+x.id+' · '+esc(x.cat)+'</span></div><div style="font-weight:600;margin-top:2px">'+esc(x.title)+'</div><div style="margin-top:3px">'+esc(x.why)+'</div>'+(x.trace?'<div style="margin-top:4px;color:var(--dim)"><b>To reproduce:</b> '+x.trace.map(esc).join(' → ')+'</div>':'')+'<div style="margin-top:4px;color:#7fe0a0"><b>Fix:</b> '+esc(x.fix)+'</div></div>').join(''):'<div style="padding:20px;text-align:center;color:#7fe0a0">'+(I.length?'Nothing in this category.':'No problems found.')+'</div>')+'</div>';
+ '<div style="overflow:auto;flex:1;padding:8px 10px;display:flex;flex-direction:column;gap:8px">'+(shown.length?shown.map(([x,i])=>'<div data-i="'+i+'" style="cursor:pointer;background:var(--panel2);border-left:4px solid '+COL[x.sev]+';border-radius:6px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:baseline"><span style="color:'+COL[x.sev]+';font-weight:700;font-size:10.5px">'+LAB[x.sev]+'</span><span style="color:var(--dim);font-size:10.5px">'+x.id+' · '+esc(x.cat)+'</span></div><div style="font-weight:600;margin-top:2px">'+esc(x.title)+'</div><div style="margin-top:3px">'+esc(x.why)+'</div>'+(x.trace?'<div style="margin-top:4px;color:var(--dim)"><b>To reproduce:</b> '+x.trace.map(esc).join(' → ')+'</div>':'')+'<div style="margin-top:4px;color:var(--ok)"><b>Fix:</b> '+esc(x.fix)+'</div></div>').join(''):'<div style="padding:20px;text-align:center;color:var(--ok)">'+(I.length?'Nothing in this category.':'No problems found.')+'</div>')+'</div>';
  p.onclick=e=>{
   const a=e.target.closest('[data-a]');if(a){const v=a.dataset.a;if(v==='x')p.remove();else if(v==='re')run2(api);else if(v==='cp'){const t=toText(last);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{a.textContent='Copied'},()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');a.textContent='Copied'}catch(_){}ta.remove()})}return}
   const fl=e.target.closest('[data-f]');if(fl){filt=fl.dataset.f;show(api,last);return}

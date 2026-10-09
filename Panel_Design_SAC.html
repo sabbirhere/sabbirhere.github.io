@@ -46,7 +46,7 @@ footer{flex:none;text-align:center;padding:5px 8px;font-size:11.5px;letter-spaci
 .tb button,.tb input,.tb select{min-height:36px}.tb .sw{min-height:0;width:30px;height:30px}
 #bmore{display:inline-block}#btb+b{display:none}#fe{display:none}body.more #fe{display:flex}
 #st{font-size:11px}#pal{max-height:108px}footer{font-size:10px;padding:3px 6px}.nb{padding:6px 10px;font-size:12px}
-#md>div{width:96vw;padding:8px}}
+#md>div{width:96vw;padding:8px}#cx{flex-wrap:wrap;overflow-x:hidden;overflow-y:auto;max-height:34vh}#cx>*{flex:none}#cx #lb{width:46vw}#cbx{width:100%}#cbx>span:last-child{display:none}#cbs label{white-space:nowrap}}
 </style></head><body>
 <div class="tb"><a id="btb" class="nb" href="Advanced.html">&#9664; Back To Toolbox</a><b>Panel Designer Pro</b>
 <button id="bs" class="on">Select (V)</button><button id="bw">Wire (W)</button>
@@ -72,25 +72,26 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const R=(x,y,w,h,f,s='#333',r=2)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" stroke="${s}" stroke-width="1"/>`;
 const T=(x,y,t,s=9,f='#222',b=0,a='middle')=>`<text x="${x}" y="${y}" font-size="${s}" fill="${f}" text-anchor="${a}" font-weight="${b?700:400}">${esc(t)}</text>`;
 const SC=(x,y)=>`<circle cx="${x}" cy="${y}" r="5.5" fill="url(#mt)" stroke="#555"/><path d="M${x-3.5} ${y+2.5}L${x+3.5} ${y-2.5}" stroke="#333" stroke-width="1.6"/>`;
-const DEFS=`<defs><linearGradient id="pl" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#eef0f2"/><stop offset="1" stop-color="#cfd3d8"/></linearGradient><linearGradient id="bk" x1="0" x2="1"><stop offset="0" stop-color="#5a5f64"/><stop offset=".5" stop-color="#2d3135"/><stop offset="1" stop-color="#16181a"/></linearGradient><linearGradient id="br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d77a"/><stop offset=".5" stop-color="#d9a62e"/><stop offset="1" stop-color="#9c6f12"/></linearGradient><linearGradient id="fm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f5f6"/><stop offset=".5" stop-color="#a3aab0"/><stop offset="1" stop-color="#dadde0"/></linearGradient><radialGradient id="mt"><stop offset="0" stop-color="#f4f4f4"/><stop offset="1" stop-color="#8d9298"/></radialGradient><pattern id="gr" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M10 0V50M20 0V50M30 0V50M40 0V50M0 10H50M0 20H50M0 30H50M0 40H50" fill="none" stroke="#eef0f3"/><path d="M50 0H0V50" fill="none" stroke="#d3d9e0"/></pattern></defs>`;
+const DEFS=`<defs><linearGradient id="pl" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#eef0f2"/><stop offset="1" stop-color="#cfd3d8"/></linearGradient><linearGradient id="bk" x1="0" x2="1"><stop offset="0" stop-color="#5a5f64"/><stop offset=".5" stop-color="#2d3135"/><stop offset="1" stop-color="#16181a"/></linearGradient><linearGradient id="br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d77a"/><stop offset=".5" stop-color="#d9a62e"/><stop offset="1" stop-color="#9c6f12"/></linearGradient><linearGradient id="fm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f5f6"/><stop offset=".5" stop-color="#a3aab0"/><stop offset="1" stop-color="#dadde0"/></linearGradient><radialGradient id="mt"><stop offset="0" stop-color="#f4f4f4"/><stop offset="1" stop-color="#8d9298"/></radialGradient><linearGradient id="fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#f0f0e8"/><stop offset="1" stop-color="#aeb2ae"/></linearGradient><pattern id="gr" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M10 0V50M20 0V50M30 0V50M40 0V50M0 10H50M0 20H50M0 30H50M0 40H50" fill="none" stroke="#eef0f3"/><path d="M50 0H0V50" fill="none" stroke="#d3d9e0"/></pattern></defs>`;
 const mod=(p,n,lab)=>({n,lab,s:()=>[24*p,100],tm:()=>[...Array(p)].flatMap((_,i)=>[[12+24*i,8],[12+24*i,92]]),d:(it,w)=>{let s=R(0,0,w,100,'url(#pl)','#9aa0a6',3)+R(0,0,w,15,'#c9cdd2','#9aa0a6',3)+R(0,85,w,15,'#c9cdd2','#9aa0a6',3)+R(3,24,w-6,48,'#25282c','#111',2);for(let i=0;i<p;i++){const c=12+24*i;s+=SC(c,8)+SC(c,92)+R(c-8,28,16,20,'#f6f6f6','#000',2)+R(c-8,48,16,20,'#111','#000',2)+T(c,41,'ON',6.5)+T(c,62,'OFF',6,'#eee')}return s+T(w/2,81,it.lab,8.5,'#222',1)}});
 const DB=w=>R(0,0,w,100,'url(#pl)','#9aa0a6',3)+R(0,0,w,15,'#c9cdd2','#9aa0a6',3)+R(0,85,w,15,'#c9cdd2','#9aa0a6',3);
 const pn=(n,lab,c,k)=>({n,lab,s:()=>[44,66],tm:()=>[[10,46],[34,46]],d:it=>'<circle cx="22" cy="22" r="21" fill="url(#mt)" stroke="#555"/>'+(k?`<circle cx="22" cy="22" r="14" fill="${c}" stroke="#000"/><circle cx="22" cy="22" r="8" fill="#fff" opacity=".35"/>`:`<circle cx="22" cy="22" r="15" fill="${c}" stroke="#000"/><circle cx="18" cy="18" r="5" fill="#fff" opacity=".4"/>`)+R(0,40,44,12,'#3d4348','#000',2)+SC(10,46)+SC(34,46)+T(22,63,it.lab,8,'#222',1)});
 const SNP=v=>SN?Math.round(v/GS)*GS:Math.round(v),r3=v=>Math.round(v*1000)/1000,eq=(a,b)=>Math.abs(a-b)<.01;
-const frw=it=>Math.max(12,Math.round((2.6+String(it.lab).length*2.4)*20)/10);
+const frw=it=>Math.max(10,Math.round((4.4+String(it.lab).length*3.5)*10)/10);
 const blk=it=>it.bl||D[it.t].bl;
 const cbd=it=>{const B=blk(it),o=[];['NO','NC'].forEach(t=>{const c=B.filter(b=>b.t==t).length;if(c)o.push(c+t)});return o.join('+')};
-const cblk=(b,x,k,ps)=>{const cx=x+11,no=b.t=='NO',c=no?'#1b6e2a':'#b32020',n=(k+1)*10+(no?3:1),sy='stroke="#222" stroke-width="1.4" fill="none" stroke-linecap="round"';
- return `<g data-b="${k}">`+R(x+1,44,20,66,no?'#dcefe0':'#f4dcdc','#555',2)+SC(cx,51)+SC(cx,103)+T(cx,62.5,n,5.2,'#333')+T(cx,96.5,n+1,5.2,'#333')
- +(no?`<path d="M${cx} 66V73M${cx} 82V77.5M${cx} 77.5L${cx+5.5} 70" ${sy}/>`:`<path d="M${cx} 66V82M${cx-4.5} 77L${cx+4.5} 71" ${sy}/>`)
- +T(cx,90,b.t+(ps&&b.p?' '+b.p:''),ps?4.6:5.4,c,1)+'</g>'};
-const hdPB=c=>cx=>`<circle cx="${cx}" cy="22" r="21" fill="url(#mt)" stroke="#555"/><circle cx="${cx}" cy="22" r="15" fill="${c}" stroke="#000"/><circle cx="${cx-4}" cy="18" r="5" fill="#fff" opacity=".4"/>`;
-const hdES=cx=>`<circle cx="${cx}" cy="22" r="21" fill="#f2c200" stroke="#555"/><circle cx="${cx}" cy="22" r="15" fill="#d62828" stroke="#700"/><circle cx="${cx-4}" cy="17" r="5" fill="#fff" opacity=".4"/>`;
-const hdSel=n3=>cx=>`<circle cx="${cx}" cy="22" r="21" fill="url(#mt)" stroke="#555"/><circle cx="${cx}" cy="22" r="13" fill="#15171a" stroke="#000"/><path d="M${cx} 22${n3?'V9.5':'L'+(cx-7)+' 11.5'}" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`+T(cx-17,24.2,'I',5.5,'#222',1)+T(cx+17,24.2,'II',5.5,'#222',1)+(n3?T(cx,7.6,'0',5.5,'#222',1):'');
-const op=(n,lab,head,bl,pos)=>({n,lab,bl,pos,s:it=>[Math.max(44,blk(it).length*22),136],
- tm:it=>{const B=blk(it),W=Math.max(44,B.length*22),x0=(W-B.length*22)/2;return B.flatMap((_,k)=>[[x0+22*k+11,51],[x0+22*k+11,103]])},
+const SCs=(x,y)=>`<circle cx="${x}" cy="${y}" r="4.2" fill="url(#mt)" stroke="#555" stroke-width=".8"/><path d="M${x-2.6} ${y+1.9}L${x+2.6} ${y-1.9}" stroke="#333" stroke-width="1.3"/>`;
+const cblk=(b,x,k,ps)=>{const cx=x+9,no=b.t=='NO',c=no?'#1b6e2a':'#b32020',n=(k+1)*10+(no?3:1),sy='stroke="#222" stroke-width="1.2" fill="none" stroke-linecap="round"';
+ return `<g data-b="${k}">`+R(x+.8,36,16.4,54,no?'#dcefe0':'#f4dcdc','#555',2)+SCs(cx,43)+SCs(cx,84)+T(cx,53.5,n,4.6,'#333')+T(cx,79.5,n+1,4.6,'#333')
+ +(no?`<path d="M${cx} 56V61M${cx} 68V64M${cx} 64L${cx+4.5} 58" ${sy}/>`:`<path d="M${cx} 56V68M${cx-3.5} 63.5L${cx+3.5} 59" ${sy}/>`)
+ +T(cx,74,b.t+(ps&&b.p?' '+b.p:''),ps?3.9:4.4,c,1)+'</g>'};
+const hdPB=c=>cx=>`<circle cx="${cx}" cy="18" r="17" fill="url(#mt)" stroke="#555"/><circle cx="${cx}" cy="18" r="12" fill="${c}" stroke="#000"/><circle cx="${cx-3}" cy="14.5" r="4" fill="#fff" opacity=".4"/>`;
+const hdES=cx=>`<circle cx="${cx}" cy="18" r="17" fill="#f2c200" stroke="#555"/><circle cx="${cx}" cy="18" r="12" fill="#d62828" stroke="#700"/><circle cx="${cx-3}" cy="14" r="4" fill="#fff" opacity=".4"/>`;
+const hdSel=n3=>cx=>`<circle cx="${cx}" cy="18" r="17" fill="url(#mt)" stroke="#555"/><circle cx="${cx}" cy="18" r="10.5" fill="#15171a" stroke="#000"/><path d="M${cx} 18${n3?'V9.5':'L'+(cx-5)+' 10'}" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`+T(cx-13.8,20,'I',4.8,'#222',1)+T(cx+13.8,20,'II',4.8,'#222',1)+(n3?T(cx,6.2,'0',4.8,'#222',1):'');
+const op=(n,lab,head,bl,pos)=>({n,lab,bl,pos,ex:'v',s:it=>[Math.max(36,blk(it).length*18),113],
+ tm:it=>{const B=blk(it),W=Math.max(36,B.length*18),x0=(W-B.length*18)/2;return B.flatMap((_,k)=>[[x0+18*k+9,43],[x0+18*k+9,84]])},
  tn:(it,i)=>{const b=blk(it)[i>>1];return String(((i>>1)+1)*10+(b.t=='NO'?3:1)+(i&1))},
- d:(it,w)=>{const B=blk(it),x0=(w-B.length*22)/2,L=String(it.lab);return head(w/2)+B.map((b,k)=>cblk(b,x0+22*k,k,pos)).join('')+T(w/2,132,L,Math.max(4.5,Math.min(8,w/(Math.max(L.length,1)*.6))),'#222',1)}});
+ d:(it,w)=>{const B=blk(it),x0=(w-B.length*18)/2,L=String(it.lab);return head(w/2)+B.map((b,k)=>cblk(b,x0+18*k,k,pos)).join('')+T(w/2,109,L,Math.max(4.2,Math.min(7,w/(Math.max(L.length,1)*.62))),'#222',1)}});
 const DN=['sp','dp','tp','fp','rcd','fuse','din','ctr','ol','tmr','pfr','psu','plc','plio','spd','rly','iso','cos'];
 const LN=['bus','ter','rail','duct','chan','bb4','bb1','nbar','ebar'],BK=['rail','duct','chan'];
 const bb=(n,rows)=>({n,lab:'',s:it=>[it.n*30+30,rows.length*18+10],tm:it=>rows.flatMap((_,r)=>[...Array(it.n)].map((_,i)=>[30+i*30,11+r*18])),net:it=>rows.map((_,r)=>[...Array(it.n)].map((_,i)=>r*it.n+i)),d:(it,w)=>{const h=rows.length*18+10;return [w*.2,w*.7].map(x=>R(x,0,12,h,'#dfe2e5','#8d949a',2)).join('')+rows.map((c,r)=>{const y=5+r*18;return R(0,y,w,12,'url(#br)','#7a5410',2)+(c?R(0,y,16,12,c,'#222',2):'')+[...Array(it.n)].map((_,i)=>`<circle cx="${30+i*30}" cy="${y+6}" r="3.5" fill="#5b3f0a"/>`).join('')}).join('')}});
@@ -107,9 +108,19 @@ ct:{n:'CT',lab:'CT',s:()=>[44,44],tm:()=>[[22,22]],d:it=>'<circle cx="22" cy="22
 bus:{n:'Cu Busbar',lab:'',s:it=>[it.n*20+8,28],tm:it=>[...Array(it.n)].map((_,i)=>[14+i*20,14]),net:it=>[[...Array(it.n).keys()]],d:(it,w)=>R(0,0,w,28,'url(#br)','#7a5410',4)+[...Array(it.n)].map((_,i)=>SC(14+i*20,14)).join('')+T(w/2,42,it.lab,9,'#222',1)},
 gnd:{n:'Earth Electrode',lab:'To Earth Electrode',s:()=>[40,56],tm:()=>[[20,0]],d:it=>'<path d="M20 0V20M5 20H35M11 28H29M17 36H23" stroke="#222" stroke-width="3" fill="none"/>'+T(20,52,it.lab,8,'#a01010',1)},
 ctr:{n:'Contactor 3P',lab:'9A 230V',s:()=>[80,110],tm:()=>[12,32,52,70].flatMap(x=>[[x,10],[x,100]]),d:it=>R(0,0,80,110,'url(#bk)','#000',5)+R(0,0,80,22,'#3d4348','#000',4)+R(0,88,80,22,'#3d4348','#000',4)+[12,32,52].map((x,i)=>SC(x,10)+SC(x,100)+T(x,21,'L'+(i+1),5.5,'#ddd')+T(x,93,'T'+(i+1),5.5,'#ddd')).join('')+SC(70,10)+T(70,21,'A1',5.5,'#ddd')+SC(70,100)+T(70,93,'A2',5.5,'#ddd')+R(6,26,68,58,'#202327','#000',3)+R(12,32,56,18,'#e9e9e9','#555',2)+T(40,45,it.lab,8,'#111',1)+R(30,58,20,14,'#4a5056','#222',2)+T(40,80,'TEST',5.5,'#aaa')},
+ctrx:{n:'Contactor 3P + Aux 1NO 1NC',lab:'9A 230V',ex:'v',s:()=>[112,110],tm:()=>[...[12,32,52,70].flatMap(x=>[[x,10],[x,100]]),[90,31],[90,77],[104,31],[104,77]],tn:(it,i)=>['L1','T1','L2','T2','L3','T3','A1','A2','13','14','21','22'][i],
+ d:it=>R(0,0,80,110,'url(#bk)','#000',5)+R(0,0,80,22,'#3d4348','#000',4)+R(0,88,80,22,'#3d4348','#000',4)+[12,32,52].map((x,i)=>SC(x,10)+SC(x,100)+T(x,21,'L'+(i+1),5.5,'#ddd')+T(x,93,'T'+(i+1),5.5,'#ddd')).join('')+SC(70,10)+T(70,21,'A1',5.5,'#ddd')+SC(70,100)+T(70,93,'A2',5.5,'#ddd')
+ +R(6,26,68,58,'#202327','#000',3)+R(12,32,56,18,'#e9e9e9','#555',2)+T(40,45,it.lab,8,'#111',1)+R(30,58,20,14,'#4a5056','#222',2)+T(40,80,'TEST',5.5,'#aaa')
+ +R(79,40,4,22,'#3d4348','#000',1)+R(82,24,30,58,'#dbe9f4','#1f5f8f',3)
+ +[[90,'13','14',1],[104,'21','22',0]].map(([x,a,b,no])=>{const c=no?'#1b6e2a':'#b32020';return SCs(x,31)+SCs(x,77)+T(x,41.5,a,4.4,'#244')+T(x,71.5,b,4.4,'#244')+`<path d="${no?`M${x} 44V50M${x} 58V54M${x} 54L${x+4} 48`:`M${x} 44V58M${x-3.5} 53.5L${x+3.5} 49`}" stroke="${c}" stroke-width="1.3" fill="none" stroke-linecap="round"/>`+T(x,65,no?'NO':'NC',4,c,1)}).join('')},
 aux2:acb('Aux Block 1NO+1NC','1NO 1NC',[['NO','13','14'],['NC','21','22']]),
 aux4:acb('Aux Block 2NO+2NC','2NO 2NC',[['NO','13','14'],['NO','23','24'],['NC','31','32'],['NC','41','42']]),
 ol:{n:'Overload Relay',lab:'4-6A',s:()=>[80,76],tm:()=>[12,32,52].flatMap(x=>[[x,8],[x,68]]),d:it=>R(0,0,80,76,'#c9cdd1','#777',4)+R(0,0,80,16,'#9aa0a6','#666',4)+R(0,60,80,16,'#9aa0a6','#666',4)+[12,32,52].map(x=>SC(x,8)+SC(x,68)).join('')+'<circle cx="26" cy="38" r="12" fill="#fff" stroke="#555"/><path d="M26 38L32 30" stroke="#c8341f" stroke-width="2"/>'+R(46,24,26,10,'#1d6fd6','#000',2)+T(59,32,'RESET',5.5,'#fff')+R(46,38,26,10,'#c8341f','#000',2)+T(59,46,'STOP',5.5,'#fff')+T(40,57,it.lab,7.5,'#111',1)},
+olx:{n:'Overload Relay + Contacts',lab:'4-6A',ex:'v',s:()=>[108,76],tm:()=>[12,32,52,80,98].flatMap(x=>[[x,8],[x,68]]),tn:(it,i)=>['1/L1','2/T1','3/L2','4/T2','5/L3','6/T3','95','96','97','98'][i],
+ d:it=>R(0,0,108,76,'#c9cdd1','#777',4)+R(0,0,108,16,'#9aa0a6','#666',4)+R(0,60,108,16,'#9aa0a6','#666',4)+[12,32,52,80,98].map(x=>SC(x,8)+SC(x,68)).join('')
+ +'<circle cx="22" cy="36" r="11" fill="#fff" stroke="#555"/><path d="M22 36L27 29" stroke="#c8341f" stroke-width="2"/>'+R(38,24,26,10,'#1d6fd6','#000',2)+T(51,32,'RESET',5.5,'#fff')+R(38,38,26,10,'#c8341f','#000',2)+T(51,46,'STOP',5.5,'#fff')+T(36,56,it.lab,7.5,'#111',1)
+ +R(70,16,38,44,'#b9bec3','#777',2)
+ +[[80,'95','96',0],[98,'97','98',1]].map(([x,a,b,no])=>T(x,24,a,4.8,'#222')+T(x,57,b,4.8,'#222')+`<path d="${no?`M${x} 27V35M${x} 47V41M${x} 41L${x+5} 34`:`M${x} 27V47M${x-4} 40L${x+4} 34`}" stroke="#222" stroke-width="1.3" fill="none" stroke-linecap="round"/>`+T(x,53,no?'NO':'NC',4.4,no?'#1b6e2a':'#b32020',1)).join('')},
 tmr:{n:'Timer',lab:'ON Delay',s:()=>[72,100],tm:()=>[12,36,60].flatMap(x=>[[x,8],[x,92]]),d:it=>DB(72)+[12,36,60].map(x=>SC(x,8)+SC(x,92)).join('')+'<circle cx="36" cy="44" r="15" fill="#25282c" stroke="#000"/><path d="M36 44L44 34" stroke="#fff" stroke-width="2"/><circle cx="12" cy="26" r="3" fill="#2e9d3a"/><circle cx="60" cy="26" r="3" fill="#d62828"/>'+T(36,70,'TIMER',8.5,'#222',1)+T(36,80,it.lab,7)},
 pfr:{n:'Phase Relay',lab:'Phase Failure',s:()=>[72,100],tm:()=>[12,28,44,60].map(x=>[x,8]).concat([12,36,60].map(x=>[x,92])),d:it=>DB(72)+[12,28,44,60].map(x=>SC(x,8)).join('')+[12,36,60].map(x=>SC(x,92)).join('')+'<circle cx="18" cy="28" r="3.5" fill="#2e9d3a"/><circle cx="36" cy="28" r="3.5" fill="#f2c200"/><circle cx="54" cy="28" r="3.5" fill="#d62828"/>'+R(10,38,52,20,'#25282c','#111',2)+T(36,52,'L1 L2 L3',7,'#ddd')+T(36,70,'RELAY',8.5,'#222',1)+T(36,80,it.lab,6.5)},
 iso:{n:'Isolator 3P',lab:'3P 63A',s:()=>[72,100],tm:()=>[12,36,60].flatMap(x=>[[x,8],[x,92]]),d:it=>DB(72)+[12,36,60].map(x=>SC(x,8)+SC(x,92)).join('')+R(8,24,56,50,'#25282c','#111',3)+'<circle cx="36" cy="49" r="19" fill="#f2c200" stroke="#555"/><circle cx="36" cy="49" r="12" fill="#c8341f" stroke="#700"/><path d="M36 49V36" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'+T(14,36,'0',8,'#fff',1)+T(58,36,'I',8,'#fff',1)+T(36,82,it.lab,7.5,'#222',1)},
@@ -122,7 +133,7 @@ lmr:pn('Lamp Red','R','#d62828',1),lmy:pn('Lamp Yellow','Y','#f2c200',1),lmb:pn(
 sel:op('Selector 2-Pos','Man-Auto',hdSel(0),[{t:'NO',p:'I'},{t:'NC',p:'I'}],['I','II']),
 sel3:op('Selector 3-Pos','Man-0-Auto',hdSel(1),[{t:'NO',p:'I'},{t:'NC',p:'II'}],['I','0','II']),
 ter:{n:'Terminal Block',lab:'',s:it=>[it.n*16,56],tm:it=>[...Array(it.n)].flatMap((_,i)=>[[8+i*16,10],[8+i*16,40]]),net:it=>[...Array(it.n)].map((_,i)=>[2*i,2*i+1]),d:(it,w)=>[...Array(it.n)].map((_,i)=>R(i*16,0,15,50,'#d9dcdf','#777',2)+R(i*16+2,18,11,14,'#9aa0a6','#666',1)+SC(8+i*16,10)+SC(8+i*16,40)).join('')+T(w/2,64,it.lab,9,'#222',1)},
-fer:{n:'Ferrule Ring',lab:'1',z:2.5,s:it=>[frw(it),12],d:(it,w,h)=>{const L=String(it.lab),rx=w/2,c=it.wc&&CL[it.wc]||'#8a9096',fs=Math.max(4.2,Math.min(7.2,(w-5)/(Math.max(L.length,1)*.62)));return `<rect x="-2" y="-2" width="${w+4}" height="16" fill="transparent"/><ellipse cx="${rx}" cy="6" rx="${rx}" ry="6" fill="#fdfdf8" stroke="#222" stroke-width=".9"/><ellipse cx="${rx}" cy="6" rx="${Math.max(rx-1.9,1)}" ry="4.1" fill="none" stroke="${c}" stroke-width="1.2"/><text x="${rx}" y="${(6+fs*.35).toFixed(2)}" font-size="${fs.toFixed(2)}" fill="#111" text-anchor="middle" font-weight="700">${esc(L)}</text>`}},
+fer:{n:'Wire Marker Ring',lab:'1',z:4,s:it=>[frw(it),7],d:(it,w,h)=>{const L=String(it.lab),c=it.wc&&CL[it.wc]||'#8a9096',fs=Math.max(3.6,Math.min(5.6,(w-4.5)/(Math.max(L.length,1)*.62)));return `<rect x="-1" y="-2" width="${w+2}" height="11" fill="transparent"/><rect x="0" y="0" width="${w}" height="7" rx="2.2" fill="url(#fr)" stroke="#222" stroke-width=".8"/><path d="M1.9 .5V6.5M${w-1.9} .5V6.5" stroke="${c}" stroke-width="1.1"/><text x="${w/2}" y="${(3.5+fs*.35).toFixed(2)}" font-size="${fs.toFixed(2)}" fill="#111" text-anchor="middle" font-weight="700">${esc(L)}</text>`}},
 rail:{n:'DIN Rail',lab:'',s:it=>[it.n*30,20],d:(it,w)=>R(0,0,w,20,'#c9cdd2','#8d949a',1)+R(0,6,w,8,'#b2b8be','#8d949a',0)+[...Array(Math.floor(w/15))].map((_,i)=>R(i*15+4,8,9,4,'#555','#333',2)).join('')},
 duct:{n:'Slotted Duct',lab:'',s:it=>[it.n*30,40],d:(it,w)=>R(0,0,w,40,'#b8bec4','#5f666c',2)+R(0,0,w,5,'#d3d7db','#5f666c',1)+R(0,35,w,5,'#d3d7db','#5f666c',1)+[...Array(Math.floor((w-6)/9))].map((_,i)=>R(5+i*9,8,4,24,'#6b727a','#4a5056',1)).join('')},
 chan:{n:'Cable Channel',lab:'',s:it=>[it.n*30,24],d:(it,w)=>R(0,0,w,24,'#d5d9dd','#7b828a',2)+R(3,3,w-6,18,'#e8ebee','#9aa0a6',1)+`<path d="M4 12H${w-4}" stroke="#aab0b6" stroke-dasharray="2 6"/>`},
@@ -151,7 +162,7 @@ capb:{n:'Capacitor Bank',lab:'25kVAr',s:()=>[96,100],tm:()=>[[18,8],[48,8],[78,8
 apfc:{n:'PF Controller',lab:'APFC 6-step',s:()=>[96,96],tm:()=>[10,26,42,58,74,90].map(x=>[x,86]),d:it=>R(0,0,96,96,'#2a2d31','#000',4)+R(6,6,84,34,'#a9d6bd','#333',2)+T(48,28,'PF 0.98',12,'#123',1)+[10,36,62].map(x=>R(x,46,24,12,'#4a5056','#000',2)).join('')+T(48,72,it.lab,7.5,'#ddd',1)+[10,26,42,58,74,90].map(x=>SC(x,86)).join('')}
 });
 {const a=D.txt,b=D.tag;delete D.txt;delete D.tag;D.txt=a;D.tag=b}
-const DES={sp:'Q',dp:'Q',tp:'Q',fp:'Q',rcd:'Q',rcbo:'Q',mccb:'Q',mpcb:'Q',iso:'QS',cos:'QS',fuse:'F',ctr:'KM',ol:'FR',tmr:'KT',pfr:'KP',rly:'K',aux2:'KA',aux4:'KA',psu:'G',plc:'A',plio:'A',apfc:'A',spd:'FV',din:'PM',kwh:'PM',pm:'P',ct:'T',pbg:'S',pbr:'S',pbe:'S',sel:'S',sel3:'S',lmr:'H',lmy:'H',lmb:'H',dlp:'H',buz:'HA',ssd:'U',vfd:'U',fan:'M',htr:'EH',thm:'B',gld:'XG',lug:'XL',capb:'C',bus:'XB',bb4:'XB',bb1:'XB',nbar:'XN',ebar:'XE',ter:'X',gnd:'PE'};
+const DES={sp:'Q',dp:'Q',tp:'Q',fp:'Q',rcd:'Q',rcbo:'Q',mccb:'Q',mpcb:'Q',iso:'QS',cos:'QS',fuse:'F',ctr:'KM',ctrx:'KM',ol:'FR',olx:'FR',tmr:'KT',pfr:'KP',rly:'K',aux2:'KA',aux4:'KA',psu:'G',plc:'A',plio:'A',apfc:'A',spd:'FV',din:'PM',kwh:'PM',pm:'P',ct:'T',pbg:'S',pbr:'S',pbe:'S',sel:'S',sel3:'S',lmr:'H',lmy:'H',lmb:'H',dlp:'H',buz:'HA',ssd:'U',vfd:'U',fan:'M',htr:'EH',thm:'B',gld:'XG',lug:'XL',capb:'C',bus:'XB',bb4:'XB',bb1:'XB',nbar:'XN',ebar:'XE',ter:'X',gnd:'PE'};
 const tr=it=>D[it.t].s(it);
 const tp=it=>{const[w,h]=tr(it);return(D[it.t].tm?.(it)||[]).map(([x,y])=>{let dx=x-w/2,dy=y-h/2;for(let i=0;i<it.r/90;i++)[dx,dy]=[-dy,dx];return[it.x+w/2+dx,it.y+h/2+dy]})};
 function wire(w,ex,dash){const p=w.pts.map(q=>q.join(',')).join(' ');let a='';
@@ -161,11 +172,17 @@ function body(ex){const g=it=>{const[w,h]=tr(it);return `<g data-id="${it.id}" t
 const rt=(a,s)=>{const l=a[a.length-1],pv=a[a.length-2],o=[];if(l[0]!=s.x&&l[1]!=s.y)o.push(!pv||pv[1]==l[1]?[l[0],s.y]:[s.x,l[1]]);o.push([s.x,s.y]);return o};
 /* ---------- connection engine ---------- */
 function nearOn(pts,p){let b=null,bd=1e9;for(let j=1;j<pts.length;j++){const a=pts[j-1],c=pts[j],dx=c[0]-a[0],dy=c[1]-a[1],l2=dx*dx+dy*dy;let t=l2?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2:0;t=Math.max(0,Math.min(1,t));const q=[r3(a[0]+dx*t),r3(a[1]+dy*t)],d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;b={q,d,a,c}}}return b}
-function exd(it,i){const[w,h]=tr(it),a=D[it.t].tm(it)[i];if(!a)return'v';const dx=(a[0]-w/2)/w,dy=(a[1]-h/2)/h;let d=Math.abs(dy)>=Math.abs(dx)?'v':'h';if((it.r/90)%2)d=d=='v'?'h':'v';return d}
+function exd(it,i){const[w,h]=tr(it),a=D[it.t].tm(it)[i];if(!a)return'v';let d=D[it.t].ex;if(!d)d=Math.min(a[1],h-a[1])<=Math.min(a[0],w-a[0])?'v':'h';if((it.r/90)%2)d=d=='v'?'h':'v';return d}
 function exdOf(w,k){const e=k?w.b:w.a,it=e&&e.id!=null&&items.find(i=>i.id==e.id);return it?exd(it,e.i):'v'}
 function setEnd(w,k,np){const p=w.pts,n=p.length,ei=k?n-1:0,o=p[ei];if(eq(o[0],np[0])&&eq(o[1],np[1]))return 0;
  if(n>2){const N=p[k?n-2:1],e=k?w.b:w.a,h=e&&e.id!=null&&exdOf(w,k)=='h';if(eq(o[0],N[0])&&!(eq(o[1],N[1])&&h))N[0]=np[0];else if(eq(o[1],N[1]))N[1]=np[1]}
  p[ei]=np;return 1}
+function stubEnd(w,k){const e=k?w.b:w.a;if(!e||e.id==null)return;const it=items.find(i=>i.id==e.id);if(!it||!D[it.t].tm)return;
+ const P=k?[...w.pts].reverse():[...w.pts];if(P.length<2)return;
+ const ax=exd(it,e.i),q=tp(it)[e.i],[bw,bh]=tr(it),dl=ax=='v'?q[1]-(it.y+bh/2):q[0]-(it.x+bw/2);if(Math.abs(dl)<1)return;
+ const sg=dl>0?1:-1,E=P[0],N=P[1],hor=eq(E[1],N[1]),ver=eq(E[0],N[0]);
+ if((ax=='v'&&hor&&!ver)||(ax=='h'&&ver&&!hor)){const S=18,S1=ax=='v'?[E[0],E[1]+sg*S]:[E[0]+sg*S,E[1]],S2=ax=='v'?[N[0],S1[1]]:[S1[0],N[1]];P.splice(1,0,S1,S2)}
+ w.pts=k?P.reverse():P}
 function clean(w){const P=w.pts;if(P.length<2)return;const o=[P[0]];
  for(let j=1;j<P.length;j++){const a=o[o.length-1],b=P[j],last=j==P.length-1;
   if(eq(a[0],b[0])&&eq(a[1],b[1])){if(last){if(o.length>1)o[o.length-1]=b;else o.push(b)}continue}
@@ -176,8 +193,9 @@ function clean(w){const P=w.pts;if(P.length<2)return;const o=[P[0]];
    else v=false;
    o.push(v?[a[0],b[1]]:[b[0],a[1]])}
   o.push(b)}
- const q=[o[0]];for(let j=1;j<o.length-1;j++){const a=q[q.length-1],b=o[j],c=o[j+1];if((eq(a[0],b[0])&&eq(b[0],c[0]))||(eq(a[1],b[1])&&eq(b[1],c[1])))continue;q.push(b)}
- q.push(o[o.length-1]);w.pts=q}
+ w.pts=o;stubEnd(w,0);stubEnd(w,1);const z=w.pts,q=[z[0]];
+ for(let j=1;j<z.length-1;j++){const a=q[q.length-1],b=z[j],c=z[j+1];if((eq(a[0],b[0])&&eq(b[0],c[0]))||(eq(a[1],b[1])&&eq(b[1],c[1])))continue;q.push(b)}
+ q.push(z[z.length-1]);w.pts=q}
 function dep(w,t,seen){seen=seen||{};if(seen[w.id])return 0;seen[w.id]=1;return[w.a,w.b].some(e=>{if(!e||e.w==null)return 0;if(e.w==t)return 1;const x=wires.find(v=>v.id==e.w);return x?dep(x,t,seen):0})}
 function autoAttach(w){[0,1].forEach(k=>{const kk=k?'b':'a';if(w[kk])return;const p=w.pts[k?w.pts.length-1:0];let b=null,bd=7;
   items.forEach(it=>{if(!D[it.t].tm)return;tp(it).forEach((q,i)=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;b={id:it.id,i}}})});
@@ -244,8 +262,9 @@ function dup(){if(!sel.size)return;push();const n=new Set(),mp={},im={},cp=[],wc
 function undo(){const h=hist.pop();if(!h)return;const d=JSON.parse(h);items=d.items;wires=d.wires;sel=new Set();cur=null;ui();render()}
 const inSel=i=>sel.has(i.id)||(i.t=='fer'&&sel.has(i.wid));
 function fplace(f,w,e){const P=e?[...w.pts].reverse():w.pts,E=P[0],Q=P.find(p=>!eq(p[0],E[0])||!eq(p[1],E[1]))||[E[0]+1,E[1]],dx=Q[0]-E[0],dy=Q[1]-E[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,[fw,fh]=tr(f);
- let d=8+Math.abs(ux)*fw/2+Math.abs(uy)*fh/2+(w.ar&&e?10:0);d=Math.min(d,Math.max(L-1,10));
- f.x=r3(E[0]+ux*d-fw/2);f.y=r3(E[1]+uy*d-fh/2);f.r=0;f.wid=w.id;f.we=e;f.wc=w.c}
+ let d=7.5+fw/2+(w.ar&&e?10:0);d=Math.min(d,Math.max(L-1,fw/2+2));
+ f.r=Math.abs(ux)>=Math.abs(uy)?0:270;
+ f.x=r3(E[0]+ux*d-fw/2);f.y=r3(E[1]+uy*d-fh/2);f.wid=w.id;f.we=e;f.wc=w.c}
 function fsnap(f){const[w,h]=tr(f),cx=f.x+w/2,cy=f.y+h/2;let b=null,bd=34;wires.forEach(q=>[0,1].forEach(e=>{const E=e?q.pts[q.pts.length-1]:q.pts[0],d=Math.hypot(E[0]-cx,E[1]-cy);if(d<bd){bd=d;b=[q,e]}}));if(b)fplace(f,b[0],b[1]);else{delete f.wid;delete f.we}}
 function fattach(it){const q=wires.find(w=>sel.has(w.id));if(!q)return;const e=[0,1].find(e=>!items.some(f=>f.t=='fer'&&f.wid==q.id&&f.we==e));if(e==null)return;const N=nets(),o=items.find(f=>f.t=='fer'&&f.wid!=null&&N.id[f.wid]!=null&&N.id[f.wid]==N.id[q.id]);if(o)it.lab=o.lab;fplace(it,q,e)}
 function nextNo(){let mx=FN.s-1;items.forEach(i=>{if(i.t!='fer')return;const L=String(i.lab),m=L.match(/(\d+)$/);if(m&&L.slice(0,L.length-m[1].length)==FN.p)mx=Math.max(mx,+m[1])});return FN.p+(mx+1)}
