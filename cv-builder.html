@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CV Builder | ElectraLab</title>
+<title>ElectraLab CV BUILDER</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect x=%2710%27 y=%276%27 width=%2744%27 height=%2752%27 rx=%276%27 fill=%27%230369a1%27/%3E%3Cpath d=%27M22 20h20M22 29h20M22 38h14%27 stroke=%27white%27 stroke-width=%274%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
 <style>
 :root{color-scheme:light;--ink:#1f2937;--mut:#6b7280;--line:#d1d5db;--bg:#eef0f3;--pn:#fff;--pn2:#f9fafb;--inp:#fff;--ui:#0369a1;--onui:#fff;--ac:#1e3a8a}
 [data-theme=dark]{color-scheme:dark;--ink:#e5e7eb;--mut:#9ca3af;--line:#2b3547;--bg:#0b1220;--pn:#111a2b;--pn2:#17213a;--inp:#0f1727;--ui:#38bdf8;--onui:#06222f}
@@ -68,6 +69,7 @@ h2{font-size:1.05em;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 
 .t-timeline h2{border:0;border-bottom:1px solid #d1d5db}
 .t-timeline .e{border-left:2px solid var(--ac);padding-left:10px}
 .bar .full button{flex:1}
+.bar.collapsed>*:not(.format-toggle){display:none!important}.format-toggle{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;font-weight:600}.format-toggle .arrow{font-size:16px;transition:transform .15s}.ai-tools{display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap}.ai-tools .hint{flex:1;margin:0}.ai-btn{font-size:12px;padding:4px 8px}.ai-result{min-width:0}.ai-menu{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.ai-menu button{font-size:12px}.ai-result textarea{margin-top:4px}.ai-result .ai-tools{justify-content:flex-start}.ai-result button{margin-top:6px}
 .top{min-height:56px;display:flex;align-items:center;gap:14px;padding:6px 16px;background:var(--pn);border-bottom:1px solid var(--line)}
 .top .back{display:inline-block;padding:6px 14px;border:1px solid var(--ui);border-radius:4px;color:var(--ui);background:var(--inp);text-decoration:none;font-weight:600;white-space:nowrap}
 .top .back:hover{background:var(--ui);color:var(--onui)}
@@ -83,16 +85,17 @@ details.en[open]>summary{margin-bottom:8px}
 @media(max-width:900px){.app{display:block;height:auto}.panel{overflow:visible;border:0}.preview{height:auto}.bar{top:41px}.tabs{display:flex;position:sticky;top:0;z-index:3;background:var(--pn);border-bottom:1px solid var(--line)}.tabs button{flex:1;border:0;border-radius:0;padding:10px}.tabs .on{border-bottom:2px solid var(--ui);font-weight:600}body.pvmode .panel{display:none}body:not(.pvmode) .preview{display:none}}
 @media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.top,.foot{display:none!important}.tabs{display:none!important}.app{display:block;height:auto}.panel{display:none}.preview{padding:0;overflow:visible;height:auto}
 #page{box-shadow:none;width:auto;min-height:0;padding:0 14mm 0 20mm!important;zoom:1!important}#page.t-compact{padding:0 12mm 0 20mm!important}.pt>thead>tr>td{height:20mm}.pt>tfoot>tr>td{height:14mm}.t-compact .pt>tfoot>tr>td{height:10mm}@page{size:A4;margin:0}}
-@media(min-width:901px){.app{grid-template-columns:clamp(400px,36vw,500px) 1fr;height:calc(100vh - 88px);height:calc(100dvh - 88px)}.preview{height:calc(100vh - 88px);height:calc(100dvh - 88px)}}
+@media(min-width:901px){.app{grid-template-columns:clamp(520px,62vw,1050px) minmax(0,1fr);height:calc(100vh - 88px);height:calc(100dvh - 88px)}.preview{height:calc(100vh - 88px);height:calc(100dvh - 88px)}}
 @media(max-width:900px){.bar{position:static;grid-template-columns:repeat(4,1fr)}.body{max-width:760px;margin:0 auto;padding:12px 14px 60px}.tabs button{min-height:44px;font-size:15px}.preview{padding:8px}}
 @media(max-width:600px){.bar{grid-template-columns:1fr 1fr}.body{padding:10px 10px 60px}.in{padding:8px}.top{gap:8px;padding:6px 10px}.top .back{padding:6px 10px;font-size:13px}.ttl b{font-size:15px}.foot{font-size:11px;padding:6px 10px}input[type=text],input[type=date],input[type=number],input[type=email],input[type=url],select,textarea{font-size:16px}.tools{flex-wrap:wrap}.tools button{flex:1;min-height:38px}}
 @media(pointer:coarse){button,select,input[type=text],input[type=date],input[type=number],input[type=email],input[type=url]{min-height:40px}}
 </style><script>try{document.documentElement.dataset.theme=localStorage.getItem('electralab-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script></head><body>
-<div class="top"><a class="back" href="Docs.html">← Back to DOCBOX</a><div class="ttl"><b>ElectraLab Docs</b><span class="tg">CV Builder: free, clean and ATS-friendly, ready to print on A4</span></div><button id="theme" type="button" aria-label="Switch between light and dark theme">Dark mode</button></div>
+<div class="top"><a class="back" href="Docs.html">← Back to DOCBOX</a><div class="ttl"><b>ElectraLab CV BUILDER</b><span class="tg">Free, clean and ATS-friendly, ready to print on A4</span></div><button id="theme" type="button" aria-label="Switch between light and dark theme">Dark mode</button></div>
 <div class="tabs"><button class="on" id="tE">Edit</button><button id="tP">Preview</button></div>
 <div class="app">
 <div class="panel">
  <div class="bar">
+  <button type="button" class="format-toggle" id="formatToggle" aria-expanded="true"><span>Format and page settings</span><span class="arrow" aria-hidden="true">▾</span></button>
   <label>Format<select id="tpl"><option value="classic">Classic (centered)</option><option value="modern">Modern (accent color)</option><option value="compact">Compact (dense)</option><option value="exec">Executive (double rule)</option><option value="minimal">Minimal (airy)</option><option value="banner">Banner (colored header)</option><option value="timeline">Timeline (accent line)</option></select></label>
   <label>Font<select id="font"><option>Arial</option><option>Calibri</option><option>Times New Roman</option><option>Georgia</option></select></label>
   <label>Font size<select id="fs"><option>9</option><option>9.5</option><option>10</option><option selected>10.5</option><option>11</option><option>11.5</option><option>12</option></select></label>
@@ -114,11 +117,11 @@ const lk=t=>e(t).replace(LK,(m,em)=>{const x=m.replace(/[.,;:!?)]+$/,''),r=m.sli
 const u2=t=>{const r=lk(t);return r.includes('<a ')||!/^[^\s@]+\.[^\s@]+$/.test(t)?r:A(/^https?:/i.test(t)?e(t):'https://'+e(t))+e(t)+'</a>'};
 const mail=t=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.trim())?A('mailto:'+e(t.trim()))+e(t)+'</a>':e(t);
 const tel=t=>A('tel:'+t.replace(/[^\d+]/g,''))+e(t)+'</a>';
-const ul=t=>{const l=String(t||'').split('\n').map(x=>x.trim()).filter(Boolean);return l.length?'<ul>'+l.map(x=>'<li>'+lk(x)+'</li>').join('')+'</ul>':''};
+const ul=t=>{const l=String(t||'').split('\n').map(x=>x.trim().replace(/^(?:\d+[.)]\s*|[•*\-–—]\s*)/, '').trim()).filter(Boolean);return l.length?'<ul>'+l.map(x=>'<li>'+lk(x)+'</li>').join('')+'</ul>':''};
 const dt=x=>[x.start,x.end].filter(Boolean).map(e).join(' – ');
 const j=(a,s=', ')=>a.filter(Boolean).map(e).join(s);
 const SC={
-exp:{t:'Experience',a:'experience',f:[['role','Job title'],['org','Company'],['loc','Location'],['gap',''],['start','Start date'],['end','End date (or Present)'],['desc','Responsibilities and achievements (one per line)',1]],
+exp:{t:'Experience',a:'experience',f:[['role','Job title'],['org','Company'],['loc','Location'],['gap',''],['start','Start date'],['end','End date (or Present)'],['desc','Responsibilities and achievements (one point per line; numbers are added automatically)',1]],
  r:x=>`<div class=e><div class=r><b>${e(x.role)}</b><span>${dt(x)}</span></div><div><i>${j([x.org,x.loc])}</i></div>${ul(x.desc)}</div>`},
 edu:{t:'Education',a:'education',f:[['deg','Degree / qualification'],['org','School / university'],['loc','Location'],['gpa','Grade / GPA'],['start','Start date'],['end','End date'],['desc','Details (one per line)',1]],
  r:x=>`<div class=e><div class=r><b>${e(x.deg)}</b><span>${dt(x)}</span></div><div><i>${j([x.org,x.loc,x.gpa])}</i></div>${ul(x.desc)}</div>`},
@@ -154,7 +157,7 @@ function draw(){
  pg.innerHTML='<table class=pt><thead><tr><td></td></tr></thead><tbody><tr><td>'+h+'</td></tr></tbody><tfoot><tr><td></td></tr></tfoot></table>';fit();chk();
 }
 function fit(){const w=$('pv').clientWidth-32;if(w<=0)return;const pg=$('page'),mm=96/25.4;pg.style.zoom=1;const h=pg.offsetHeight;pg.style.zoom=Math.min(1,w/(210*mm));const bot=D.o.tpl==='compact'?10:14,n=Math.max(1,Math.ceil((h-(20+bot)*mm)/((277-bot)*mm)-.02));$('pgs').innerHTML=n==1?'<span class=ok>✓ Fits on 1 page</span>':`<span class=warn>${n} pages. For 1 page, try a smaller font or the Compact format.</span>`}
-const fld=(f,v,at)=>f[0]=='gap'?'':`<label class="f${f[2]?' w':''}">${f[1]}${f[2]?`<textarea spellcheck=true ${at} >${e(v)}</textarea>`:`<input type=text spellcheck=true ${at} value="${e(v)}">`}</label>`;
+const fld=(f,v,at)=>{if(f[0]=='gap')return '';const resp=at.includes('data-s=exp')&&at.includes('data-k=desc');const ix=(at.match(/data-i=([^ ]+)/)||[])[1];return `<label class="f${f[2]?' w':''}">${f[1]}${f[2]?`<textarea spellcheck=true ${at}>${e(v)}</textarea>${resp?`<div class="ai-tools"><button type="button" class="ai-btn" data-ai="responsibilities" data-s="exp" data-i="${ix}" aria-expanded="false"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>Electra AI Assistant ▾</button><span class="hint">Enter one responsibility per line. Lines are numbered automatically. Choose the exact numbered line to send for each AI action.</span></div>`:''}`:`<input type=text spellcheck=true ${at} value="${e(v)}">`}</label>`};
 function form(){
  let h=`<p class=hint style="margin:0 0 10px">Fill in only what you need: empty fields and sections are left out of your CV. Click an entry to open and edit it.</p><div class=card id=chk></div><div class=card><h3>Personal details</h3><div class=in><div class=grid>${PF.map(f=>fld(f,D.p[f[0]],`data-s=p data-k=${f[0]}`)).join('')}</div>
  <div class=grid style="margin-top:10px"><label class="f w">Photo (optional)<input type=file id=photo accept="image/*"></label>
@@ -167,11 +170,134 @@ function form(){
 </div></div>`;
  $('form').innerHTML=h;
 }
+$('form').addEventListener('keydown',ev=>{const t=ev.target;if(t.matches('textarea[data-k="desc"]')&&ev.key==='Enter'&&!ev.shiftKey){const before=t.value.slice(0,t.selectionStart),line=before.split(/\r?\n/).pop()||'';if(/^\s*\d+[.)]\s+/.test(line)){ev.preventDefault();const next=(Number((line.match(/^\s*(\d+)[.)]/)||[])[1])||0)+1;const start=t.selectionStart,end=t.selectionEnd;t.setRangeText('\n'+next+'. ',start,end,'end');t.dispatchEvent(new Event('input',{bubbles:true}));}}});
+$('form').addEventListener('focusout',ev=>{const t=ev.target;if(t.matches('textarea[data-k="desc"]'))electraAutoNumber(t)});
 $('form').addEventListener('input',ev=>{const t=ev.target,d=t.dataset;
  if(t.id=='showph'){D.o.ph=t.checked}else if(d.k){if(d.s=='p')D.p[d.k]=t.value;else{D.s[d.s][d.i][d.k]=t.value;const st=t.closest('details').querySelector('.st');st.textContent=lbl(D.s[d.s][d.i],d.s)}}else return;draw();save()});
 $('form').addEventListener('change',ev=>{if(ev.target.id!='photo')return;const f=ev.target.files[0];if(!f)return;
  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=400,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);D.p.photo=c.toDataURL('image/jpeg',.85);form();draw();save()};im.src=r.result};r.readAsDataURL(f)});
-$('form').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b||!b.dataset.a)return;const d=b.dataset,i=+d.i,L=D.s[d.s]=D.s[d.s]||[];
+// Set this once in the source code. The URL is never shown in the editor UI.
+const AI_WORKER_URL = 'https://electra-cv-ai.sabbirac.workers.dev';
+const AI_ACTIONS = {
+ improve: {label:'Improve writing', task:'improve_writing', instructions:'Rewrite these job responsibilities into polished, professional CV bullets. Improve clarity, flow, and impact while preserving all facts. Do not invent achievements, metrics, tools, or duties. Return only bullets, one per line.'},
+ correct: {label:'Correct grammar', task:'correct_grammar', instructions:'Correct grammar, spelling, punctuation, and awkward phrasing only. Preserve the original meaning and level of detail. Do not add new facts. Return the corrected text in the same line-by-line format.'},
+ concise: {label:'Make concise', task:'make_concise', instructions:'Make these job responsibility bullets concise and easy to scan. Remove repetition and filler while preserving important details and facts. Do not invent details. Return only bullets, one per line.'},
+ verbs: {label:'Stronger action verbs', task:'stronger_action_verbs', instructions:'Rewrite each bullet to begin with an appropriate strong action verb where natural. Keep the claims truthful and do not exaggerate or invent results. Return only bullets, one per line.'},
+ achievements: {label:'Highlight achievements', task:'highlight_achievements', instructions:'Improve the wording to make concrete contributions and outcomes clearer, using only facts already present. Do not invent numbers, metrics, outcomes, or responsibilities. If no outcome is stated, do not fabricate one. Return only bullets, one per line.'},
+ suggestions: {label:'Suggestions', task:'writing_suggestions', instructions:'Review these job responsibility bullets and suggest specific improvements to make them clearer and more effective on a CV. Keep suggestions practical and based only on the text. Clearly separate suggested revised bullets from brief notes if useful.'},
+ tailor: {label:'Tailor to job title', task:'tailor_to_role', instructions:'Refine these bullets to emphasize relevant skills for the stated job title, without adding experience, qualifications, tools, or achievements not supported by the source text. Return only revised bullets, one per line.'}
+};
+function aiPanel(details){let panel=details.querySelector('.ai-result');if(!panel){panel=document.createElement('div');panel.className='ai-result';panel.style.cssText='grid-column:1/-1;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--pn2)';details.querySelector('.grid').appendChild(panel)}return panel}
+function electraNormLine(value){return String(value||'').trim().replace(/^(?:[•*\-–—]|\d+[.)])\s*/,'').replace(/\s+/g,' ').toLocaleLowerCase()}
+function electraSplitResponsibilities(value){
+ const out=[];
+ String(value||'').split(/\r?\n/).forEach((row,lineIndex)=>{
+  // Separate numbered/bulleted points pasted onto a shared line, then number each item consistently.
+  const parts=row.trim().split(/\s+(?=(?:\d+[.)]\s+|[•*]\s+))/);
+  parts.forEach(part=>{const raw=part.trim();const text=raw.replace(/^(?:[•*\-–—]|\d+[.)])\s*/,'').trim();if(text)out.push({raw,text,key:electraNormLine(text),lineIndex});});
+ });
+ return out;
+}
+function electraNumberResponsibilities(value){
+ const items=electraSplitResponsibilities(value);
+ return items.map((item,i)=>(i+1)+'. '+item.text).join('\n');
+}
+function electraAutoNumber(textarea){
+ const before=textarea.value, start=textarea.selectionStart, end=textarea.selectionEnd;
+ const numbered=electraNumberResponsibilities(before);
+ if(numbered!==before){textarea.value=numbered;const delta=numbered.length-before.length;textarea.setSelectionRange(Math.min(numbered.length,start+delta),Math.min(numbered.length,end+delta));textarea.dispatchEvent(new Event('input',{bubbles:true}));}
+}
+function electraExtractText(data){
+ if(typeof data==='string')return data;
+ if(!data||typeof data!=='object')return '';
+ let value=data.text??data.output??data.result??data.response??data.content??data.message??'';
+ if(value&&typeof value==='object')value=value.text??value.content??value.output??'';
+ if(!value&&Array.isArray(data.choices))value=data.choices[0]?.message?.content??data.choices[0]?.text??'';
+ if(Array.isArray(value))value=value.map(x=>typeof x==='string'?x:(x.text||x.content||'')).join('\n');
+ return typeof value==='string'?value:'';
+}
+function electraRenderResults(panel,entry,actionKey,failed=false){
+ const input=panel.closest('details')?.querySelector('textarea[data-k="desc"]');
+ const currentKeys=new Set((input?.value||'').split(/\r?\n/).map(electraNormLine).filter(Boolean));
+ const items=(entry._electraAIItems||[]).filter(x=>x.action===actionKey&&!x.inserted&&currentKeys.has(x.sourceKey));
+ panel.innerHTML=(failed?'<p class="hint" role="alert">AI not available now.</p>':'')+'<b>Electra AI results</b><p class="hint">Each request contains one responsibility point. Insert replaces only its matching original point. Already inserted AI text is skipped.</p><div class="ai-line-results"></div><div class="ai-tools"><button type="button" class="ai-again">Check for new points</button><button type="button" class="ai-cancel">Close</button></div>';
+ const box=panel.querySelector('.ai-line-results');
+ items.forEach((item,n)=>{
+  const card=document.createElement('div');card.style.cssText='border:1px solid var(--line);border-radius:4px;padding:8px;margin-top:8px';
+  const from=document.createElement('p');from.className='hint';from.textContent='Original line: '+item.source;
+  const label=document.createElement('label');label.className='f';label.textContent='AI result';
+  const output=document.createElement('textarea');output.className='ai-suggestion';output.rows=3;output.spellcheck=true;output.value=item.result;
+  const insert=document.createElement('button');insert.type='button';insert.className='ai-insert';insert.textContent='Insert';insert.dataset.itemId=item.id;
+  const note=document.createElement('span');note.className='hint';note.style.marginLeft='8px';note.textContent='Not inserted';
+  label.appendChild(output);card.append(from,label,insert,note);box.appendChild(card);
+ });
+ if(!items.length&&!failed){const note=document.createElement('p');note.className='hint';note.textContent='No new responsibility lines to send. Add or edit a line, then run Electra AI Assistant again.';box.appendChild(note)}
+}
+$('form').addEventListener('click',async ev=>{const b=ev.target.closest('button');if(!b)return;
+ if(b.dataset.ai==='responsibilities'){
+  const details=b.closest('details'),panel=aiPanel(details),existing=panel.querySelector('.ai-menu');
+  if(existing){panel.remove();b.setAttribute('aria-expanded','false');return}
+  const input=details.querySelector('textarea[data-k="desc"]');if(input)electraAutoNumber(input);
+  const lines=electraSplitResponsibilities(input?.value||'');
+  panel.innerHTML='<b>Choose an AI action</b><div class="ai-menu">'+Object.entries(AI_ACTIONS).map(([key,a])=>`<button type="button" data-ai-action="${key}">${a.label}</button>`).join('')+'<button type="button" class="ai-cancel">Close</button></div><p class="hint">Each action asks you to choose one numbered line. The last/highest-numbered line is selected by default. Only that line is sent.</p>';
+  b.setAttribute('aria-expanded','true');return;
+ }
+ if(b.dataset.aiAction&&!b.classList.contains('ai-send-selected')){
+  const actionKey=b.dataset.aiAction,action=AI_ACTIONS[actionKey],details=b.closest('details'),panel=aiPanel(details),input=details.querySelector('textarea[data-k="desc"]');
+  if(!action||!input)return;
+  electraAutoNumber(input);
+  const lines=electraSplitResponsibilities(input.value);
+  if(!lines.length){panel.innerHTML='<p class="hint">Add at least one responsibility line first.</p><button type="button" class="ai-cancel">Close</button>';return}
+  panel.innerHTML='<b>'+e(action.label)+'</b><label class="f" style="margin-top:8px">Which line should AI process?<select class="ai-line-select">'+lines.map((line,index)=>`<option value="${index}" ${index===lines.length-1?'selected':''}>${index+1}. ${e(line.text.length>100?line.text.slice(0,97)+'…':line.text)}</option>`).join('')+'</select></label><div class="ai-tools"><button type="button" class="ai-send-selected" data-ai-action="'+actionKey+'">Send selected line</button><button type="button" class="ai-cancel">Cancel</button></div><p class="hint">Only the selected line will be sent. By default, the last/highest-numbered line is selected.</p>';
+  return;
+ }
+ if(b.classList.contains('ai-send-selected')){
+  const actionKey=b.dataset.aiAction,action=AI_ACTIONS[actionKey],details=b.closest('details'),panel=aiPanel(details),input=details.querySelector('textarea[data-k="desc"]'),entry=(D.s.exp||[])[+(details.dataset.i||0)];
+  if(!action||!input||!entry)return;
+  const endpoint=(localStorage.getItem('cvb-ai-worker-url')||AI_WORKER_URL).trim();
+  if(!endpoint){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>';return}
+  const lines=electraSplitResponsibilities(input.value),selected=Number(panel.querySelector('.ai-line-select')?.value);
+  const line=lines[selected];if(!line){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>';return}
+  if(!Array.isArray(entry._electraAIItems))entry._electraAIItems=[];
+  if(!Array.isArray(entry._electraInsertedLines))entry._electraInsertedLines=[];
+  const existing=entry._electraAIItems.find(x=>x.action===actionKey&&x.sourceKey===line.key&&!x.inserted);
+  if(existing){electraRenderResults(panel,entry,actionKey,false);return}
+  const alreadyInserted=entry._electraInsertedLines.includes(electraNormLine(line.text));
+  if(alreadyInserted){panel.innerHTML='<p class="hint">This line has already been inserted by AI and will not be sent again.</p><button type="button" class="ai-cancel">Close</button>';return}
+  b.disabled=true;panel.innerHTML='<p class="hint" role="status">'+e(action.label)+'… sending line '+(selected+1)+'.</p><progress max="1" value="0" style="width:100%"></progress>';
+  try{
+   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);let response,raw,data,result;
+   try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json, text/plain'},body:JSON.stringify({task:'rewrite_job_responsibilities',action:actionKey,role:entry.role||'',company:entry.org||'',text:line.text,instructions:action.instructions,item_index:selected+1,total_items:lines.length}),signal:controller.signal});raw=await response.text()}finally{clearTimeout(timeout)}
+   try{data=raw?JSON.parse(raw):{}}catch(_){data=raw}
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   result=electraExtractText(data).trim().replace(/^```(?:\w+)?\s*/,'').replace(/\s*```$/,'').trim();
+   if(!result||/^\s*<(?:!doctype|html|head|body)\b/i.test(result))throw new Error('Empty response');
+   entry._electraAIItems.push({id:'el-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),action:actionKey,source:line.raw,sourceKey:line.key,result,inserted:false});save();electraRenderResults(panel,entry,actionKey,false);
+  }catch(err){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>'}
+  return;
+ }
+ if(b.classList.contains('ai-again')){const details=b.closest('details'),trigger=details.querySelector('[data-ai="responsibilities"]');if(trigger){details.querySelector('.ai-result')?.remove();trigger.click()}return}
+ if(b.classList.contains('ai-insert')){
+  const details=b.closest('details'),ta=details.querySelector('textarea[data-k="desc"]'),entry=(D.s.exp||[])[+(details.dataset.i||0)],card=b.closest('div'),suggestion=card&&card.querySelector('.ai-suggestion');
+  if(!ta||!entry||!suggestion)return;
+  const item=(entry._electraAIItems||[]).find(x=>x.id===b.dataset.itemId),resultText=suggestion.value.trim();if(!item||!resultText)return;
+  const current=ta.value.split(/\r?\n/),key=electraNormLine(item.sourceKey);
+  // Replace the exact matching point; the first match is used if duplicate points exist.
+  let target=current.findIndex(line=>electraNormLine(line)===key);
+  if(target>=0){current[target]=resultText.replace(/\s*\n+\s*/g,' ').trim();ta.value=current.join('\n');}
+  else {
+   // Numbered/bulleted points may have been pasted on a shared line. Split them before matching.
+   const parts=electraSplitResponsibilities(ta.value);const match=parts.findIndex(part=>part.key===key);
+   if(match<0){const note=card.querySelector('.hint');if(note)note.textContent='Original point changed or removed. Nothing was replaced; run Electra AI again for that point.';return}
+   parts[match].raw=resultText.replace(/\s*\n+\s*/g,' ').trim();ta.value=parts.map(part=>part.raw).join('\n');
+  }
+  item.inserted=true;item.result=resultText.replace(/\s*\n+\s*/g,' ').trim();
+  if(!Array.isArray(entry._electraInsertedLines))entry._electraInsertedLines=[];
+  entry._electraInsertedLines.push(electraNormLine(resultText));
+  ta.dispatchEvent(new Event('input',{bubbles:true}));b.disabled=true;b.textContent='Inserted';const note=card.querySelector('.hint');if(note)note.textContent='Inserted into responsibilities';return;
+ }
+ if(b.classList.contains('ai-cancel')){const details=b.closest('details'),panel=details.querySelector('.ai-result');if(panel)panel.remove();const trigger=details.querySelector('[data-ai="responsibilities"]');if(trigger)trigger.setAttribute('aria-expanded','false');return}
+  if(!b.dataset.a)return;const d=b.dataset,i=+d.i,L=D.s[d.s]=D.s[d.s]||[];
  if(d.a=='add')L.push({_o:true});else if(d.a=='del')L.splice(i,1);else if(d.a=='rmph')delete D.p.photo;
  else{const n=d.a=='up'?i-1:i+1;if(n<0||n>=L.length)return;[L[i],L[n]]=[L[n],L[i]]}
  form();draw();save();if(d.a=='add'){const q=[...document.querySelectorAll(`details.en[data-s=${d.s}]`)].pop();q&&q.querySelector('input,textarea').focus()}});
@@ -230,6 +356,7 @@ $('form').addEventListener('change',ev=>{const t=ev.target,d=t.dataset;
  const v=fix(d.s,d.k,t.value,t.tagName=='TEXTAREA');if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
 
 
+$('formatToggle').onclick=()=>{const bar=$('formatToggle').closest('.bar'),collapsed=bar.classList.toggle('collapsed');$('formatToggle').setAttribute('aria-expanded',String(!collapsed));$('formatToggle .arrow').textContent=collapsed?'▴':'▾'};
 const setTheme=t=>{document.documentElement.dataset.theme=t;try{localStorage.setItem('electralab-theme',t)}catch(_){}$('theme').textContent=t=='dark'?'Light mode':'Dark mode'};
 $('theme').onclick=()=>setTheme(document.documentElement.dataset.theme=='dark'?'light':'dark');
 setTheme(document.documentElement.dataset.theme||'light');
