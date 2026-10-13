@@ -60,10 +60,10 @@ main>.band,main>.sum{grid-column:1/-1}.band{grid-template-columns:minmax(0,5fr) 
 .drawing-layout{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
 main>.drawing-layout{grid-column:1/-1}
 .drawing-layout .panel{min-width:0;background:#f5f6f4;padding:6px}
-.drawing-layout .drawing-top svg{width:100%;height:420px;object-fit:contain}
+.drawing-layout .drawing-top svg{width:100%;height:480px;object-fit:contain}
 .drawing-layout .drawing-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .drawing-layout .drawing-bottom .panel{min-width:0}
-.drawing-layout .drawing-bottom svg{width:100%;height:420px;object-fit:contain}
+.drawing-layout .drawing-bottom svg{width:100%;height:470px;object-fit:contain}
 @media(max-width:900px){
   main>.drawing-layout{grid-column:1/-1;order:4}
   .drawing-layout .drawing-top svg,.drawing-layout .drawing-bottom svg{height:auto}
@@ -71,42 +71,58 @@ main>.drawing-layout{grid-column:1/-1}
 }
 .el-footer{border-top:1px solid var(--line);padding:16px 22px;margin-top:18px;text-align:center;color:var(--mute);font-size:12px}
 .el-footer b{color:var(--yel);font-weight:600}
-@media print{
-@page{size:A4 portrait;margin:10mm}
-html,body{background:#fff!important;color:#000!important;font-size:12px}
-*{box-shadow:none!important}
-header{border-bottom:1px solid #999;padding:0 0 8px;margin-bottom:8px}
-header a,button,#inputs,#det,#lb{display:none!important}
-main{display:flex!important;flex-direction:column;padding:0;max-width:none;gap:8px}
-#side{display:contents!important}
-main>section{order:1;min-width:0}.band{order:2}main>.sum{order:3}#secp{padding:0!important;border:0!important}.kv{border-color:#ccc!important}.kv span{color:#333!important}
-.panel,.card,.rec,.eng,.msg{background:#fff!important;color:#000!important;border-color:#999!important}
-.card small,.card span,.rec small,.hint,.note{color:#333!important}
-.msg{border-color:#c00!important}
-.res{grid-template-columns:1fr 1fr!important}
-.draw{display:block!important}
-.draw .panel{padding:0!important;margin:0 0 8mm;overflow:visible!important;max-width:none!important;border:0!important;background:#f5f6f4!important}
-.draw .panel.sum{background:#fff!important;padding:4px!important}
-svg{width:100%;height:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-#plan,#sec{width:165mm!important;margin:0 auto}
-.panel,.card,.rec,.eng,.msg,table,tr,svg{break-inside:avoid;page-break-inside:avoid}
-td{border-color:#ccc!important}
-}
 #libF label{margin:6px 0 2px;font-size:12px}#libF input{padding:6px 8px}.lh{font-size:12px;margin:14px 0 2px;color:var(--yel);text-transform:uppercase;letter-spacing:.04em}
-#psum{display:none}
-@media print{#psum{display:block!important}#side>.det,#cmpp,#req,.res,#libF{display:none!important}main>.drawing-layout{display:block!important}.drawing-layout .drawing-bottom{display:block!important}.drawing-layout svg{height:auto!important;width:100%!important}.drawing-layout .panel{margin-bottom:6mm;background:#fff!important}#psum h2{font-size:15px;margin:0 0 6px}#psum td{padding:5px 6px;border-bottom:1px solid #999;font-size:12px;text-align:left!important}#psum td:first-child{width:34mm;font-weight:600}}
 #req ul{margin:6px 0 0;padding-left:18px}#req li{margin-bottom:5px;font-size:13.5px}#req h2{font-size:15px}
-@page drawingSheet{size:A4 landscape;margin:7mm}
+/* ===== PRINT / SAVE AS PDF: results only ===== */
+#psum{display:none}
+@page{size:A4 portrait;margin:12mm 12mm 15mm;
+ @bottom-left{content:"ElectraLab  \2022  Earthing designer Pro";font:7.5pt Arial,Helvetica,sans-serif;color:#666}
+ @bottom-right{content:"Page " counter(page) " of " counter(pages);font:7.5pt Arial,Helvetica,sans-serif;color:#666}}
+@page drawings{size:A4 landscape;margin:8mm 8mm 13mm}
 @media print{
-  /* Each generated drawing receives its own large landscape sheet. */
-  .drawing-layout{display:block!important;width:100%!important;margin:0!important;grid-column:1/-1!important}
-  .drawing-layout .drawing-top,
-  .drawing-layout > .panel,
-  .drawing-layout .drawing-bottom > .panel{page:drawingSheet;break-before:page;page-break-before:always;break-inside:avoid;page-break-inside:avoid;display:block!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;overflow:visible!important;background:#fff!important}
-  .drawing-layout .drawing-bottom{display:contents!important}
-  .drawing-layout .panel svg{display:block!important;width:100%!important;height:180mm!important;max-width:100%!important;max-height:180mm!important;margin:0 auto!important;object-fit:contain!important}
-  .drawing-layout .hint{color:#222!important;font-size:9pt!important;padding:2mm 0!important}
-  .drawing-layout .panel *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none!important;text-shadow:none!important}
+html,body{background:#fff!important;color:#111!important;font-size:9.5pt!important;line-height:1.4}
+
+/* hide everything that is not a result */
+#side,#lb,#req,#cmpp,header a,header p,.hint,button,#msgs,.rec,.res,.eng,main>.sum{display:none!important}
+
+/* title */
+header{display:flex!important;align-items:center;gap:3mm;padding:0 0 3mm!important;margin:0 0 5mm!important;border-bottom:.6mm solid #111!important}
+header .bar{width:1.6mm;height:9mm;border-radius:0}
+h1{font-size:15pt!important;margin:0!important;color:#111!important}
+main{display:block!important;padding:0!important;margin:0!important;max-width:none!important}
+main>section{min-width:0}
+.panel{background:#fff!important;color:#111!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important}
+
+/* result tables */
+#psum{display:block!important}
+#psum:empty{display:none!important}
+#psum h2{font-size:9pt!important;text-transform:uppercase;letter-spacing:.07em;color:#111;margin:0 0 1.5mm!important;padding:0 0 1mm;border-bottom:.3mm solid #111;break-after:avoid}
+#psum h2:not(:first-child){margin-top:5mm!important}
+#psum table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt;break-inside:avoid}
+#psum th,#psum td{border:.2mm solid #bdbdbd!important;padding:1.6mm 2.2mm!important;text-align:left!important;vertical-align:top;color:#111;font-size:9pt!important}
+#psum th{background:#eef0ee!important;font-weight:600;color:#333}
+#psum .kv4 th{width:19%}#psum .kv4 td{width:31%}
+#psum .chk th:nth-child(1){width:28%}#psum .chk th:nth-child(2){width:24%}#psum .chk th:nth-child(3){width:28%}#psum .chk th:nth-child(4){width:20%}
+#psum .st{font-weight:700;letter-spacing:.03em}
+#psum .st.p{color:#1e7a37}#psum .st.f{color:#c0392b}#psum .st.a{color:#a06a00}
+
+/* drawings: one landscape A4 sheet each */
+.drawing-layout{display:block!important;margin:0!important;padding:0!important}
+.drawing-layout .drawing-bottom{display:block!important;margin:0!important}
+.drawing-layout .panel{page:drawings;break-before:page;display:block!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;border:0!important;background:none!important;overflow:visible!important;break-inside:avoid;page-break-inside:avoid}
+.drawing-layout .panel:not(:has(svg:not(:empty))){display:none!important}
+.drawing-layout .panel svg{display:block!important;height:auto!important;max-height:none!important;max-width:100%!important;margin:0 auto!important;object-fit:fill!important}
+.drawing-layout #chm{width:281mm!important;aspect-ratio:1000/536}
+.drawing-layout #use,.drawing-layout #sch{width:281mm!important;aspect-ratio:1000/626}
+.drawing-layout #sec{width:180mm!important;aspect-ratio:640/626}
+.drawing-layout #plan{width:159mm!important;aspect-ratio:640/706}
+.drawing-layout svg>rect:first-child{fill:#fff}
+
+/* site footer, on the last drawing sheet */
+.el-footer{display:block!important;border-top:.3mm solid #999!important;padding:2mm 0 0!important;margin:1mm 0 0!important;text-align:center;color:#555!important;font-size:8pt!important;break-inside:avoid}
+body:has(#plan:not(:empty)) .el-footer{page:drawings}
+.el-footer b{color:#111!important;font-weight:700}
 }
 </style>
 </head>
@@ -228,14 +244,14 @@ td{border-color:#ccc!important}
 </section>
 <div class="drawing-layout">
   <div class="drawing-top panel">
-    <svg id="chm" viewBox="0 0 1000 470" role="img" aria-label="Chamber detail"></svg>
+    <svg id="chm" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 536" role="img" aria-label="Chamber detail"></svg>
     <div class="hint" style="color:#555;padding:0 6px 4px">Tap any drawing to enlarge.</div>
   </div>
-  <div class="panel"><svg id="use" viewBox="0 0 1000 560" role="img" aria-label="Use-case detail"></svg></div>
-  <div class="panel"><svg id="sch" viewBox="0 0 1000 560" role="img" aria-label="Earthing and bonding schematic"></svg></div>
+  <div class="panel"><svg id="use" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 626" role="img" aria-label="Use-case detail"></svg></div>
+  <div class="panel"><svg id="sch" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 626" role="img" aria-label="Earthing and bonding schematic"></svg></div>
   <div class="drawing-bottom">
-    <div class="panel" id="secp"><svg id="sec" viewBox="0 0 640 640" role="img" aria-label="Earth pit section"></svg></div>
-    <div class="panel"><svg id="plan" viewBox="0 0 640 640" role="img" aria-label="Earthing layout plan"></svg></div>
+    <div class="panel" id="secp"><svg id="sec" preserveAspectRatio="xMidYMid meet" viewBox="0 0 640 626" role="img" aria-label="Earth pit section"></svg></div>
+    <div class="panel"><svg id="plan" preserveAspectRatio="xMidYMid meet" viewBox="0 0 640 706" role="img" aria-label="Earthing layout plan"></svg></div>
   </div>
 </div>
 <div class="panel sum"><h2>Summary and quantities</h2><div id="tab"></div></div>
@@ -380,20 +396,15 @@ function calc(){
   ['Watering pipe',usePit?'40 mm (1½″) PVC or GI with funnel, per pit':'Not required'],['Test link',usePit?'One per pit, in chamber':'One in main chamber'],
   ['Chamber (clear / outer)',`${ch}×${ch}×500 mm / ${ch+230}×${ch+230} mm, 115 mm brick wall, 50 mm cover`]];$('tab').innerHTML=TR.map(r=>`<div class="kv"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');LAST={rows:[['Project',$('pn').value],['Prepared by',$('pb').value||'-'],['Drawing / revision',$('dn').value+' / Rev '+$('rv').value],['Recommended electrode',recTxt],...cmpRows.map(r=>['Compare: '+r.nm,`${r.txt}. ${r.R.toFixed(2)} Ω, ${r.ok?'target met':'target not met'}, ${r.m.toFixed(0)} m of metal`]),...msgs.map(x=>['Warning',x]),...cards.map(c=>[c[1],c[2]+'. '+c[3]]),...TR]};
  $('notes').innerHTML='Backfill resistivity in use: '+rb+' Ω·m. Conductors assume 1.5× uneven current sharing across rods.';
- const o={cfg,ls,appKey:$('app').value,pn:esc($('pn').value.slice(0,30)),pb:esc($('pb').value.slice(0,22)),dn:esc($('dn').value),rv:esc($('rv').value),pre:nd>0?'DC':'P',rho,R,n,s,L,bore,ch,usePit,dia,h,depth,mesh:M,mn:m.n,gi:`${gi[0]}×${gi[1]}`,lead:lead.toFixed(0)};
+ const o={cfg,ls,appKey:$('app').value,pn:esc($('pn').value.slice(0,80)),pb:esc($('pb').value.slice(0,60)),dn:esc($('dn').value),rv:esc($('rv').value),pre:nd>0?'DC':'P',rho,R,n,s,L,bore,ch,usePit,dia,h,depth,mesh:M,mn:m.n,gi:`${gi[0]}×${gi[1]}`,lead:lead.toFixed(0)};
  o.cuS=cu;o.nd=nd;{const bh=+$('bh').value||0,Dp=EFF.sepR&&bh>0?EFF.sepR*R+bh/(EFF.sepH*Math.max(nd,1)):0;o.info=A.kind==='lps'||$('app').value==='lps'?[`Down conductors used: ${nd}`,`Your study: ${nd0||'-'}   Standard min: ${ndS||'-'}`,'One earth pit per down conductor',Dp?`Separation D = ${EFF.sepR}R + H/(${EFF.sepH}n) = ${Dp.toFixed(2)} m`:'Separation distance: per IEC 62305-3 calculation']:[]}$('use').innerHTML=drawUse(o,A,$('std').value,tg);const SD=$('std').value;$('sch').innerHTML=drawSch(o,A,SD,tg);stdPanel(A,SD,tg);
  $('calcStatus').textContent='Calculation complete. Results correspond to the selected configuration and current inputs.';
- $('psum').innerHTML=`<h2>Design result</h2><table>
- <tr><td>Project</td><td>${esc($('pn').value)}${$('pb').value?' · prepared by '+esc($('pb').value):''}</td></tr>
- <tr><td>Facility / standard</td><td>${A.n} · ${STDS[SD]}</td></tr>
- <tr><td>Result</td><td><b>${ok?'PASS':'FAIL'}</b>: earth resistance ${R.toFixed(2)} Ω (${Rin>0?'your value':'calculated'}) against target ≤ ${tg} Ω</td></tr>
- <tr><td>Electrode</td><td>${dia} mm × ${L} m ${m.n.toLowerCase()}, ${n} ${m.pipe?'pipe':'rod'}${n>1?'s':''}${n>1&&!M?', '+s+' m apart':''}${M?', '+(cfg==='ring'?'ring':'grid')+' '+M.a+' × '+M.a+' m':''}${SS?', plus '+ls+' m strip':''}</td></tr>
- <tr><td>Pit</td><td>${usePit?'Test pit, bore Ø'+bore+' mm × '+depth+' m deep, chamber '+ch+' × '+ch+' mm':'Driven rod in inspection chamber '+ch+' × '+ch+' mm'}</td></tr>
- <tr><td>Earth conductor</td><td>2 × ${cu} mm² copper (or GI strip ${gi[0]}×${gi[1]} mm) from the main earth terminal to the pits</td></tr>
- <tr><td>GPR screening</td><td>${gpr<=Et?'Within tolerable touch limit':'Exceeds tolerable touch limit'}: ground potential rise ${(gpr/1000).toFixed(1)} kV versus tolerable touch ${Et.toFixed(0)} V. Screening only; GPR is not actual touch or step voltage.</td></tr>
- <tr><td>Touch voltage check</td><td>${touchStatus}: actual ${actualTouch.toFixed(0)} V versus tolerable ${Et.toFixed(0)} V${atvBlank?' (defaulted to tolerable limit because no actual value was entered)':''}</td></tr>
- <tr><td>Step voltage check</td><td>${stepStatus}: actual ${actualStep.toFixed(0)} V versus tolerable ${Es.toFixed(0)} V${asvBlank?' (defaulted to tolerable limit because no actual value was entered)':''}</td></tr>
- <tr><td>After installation</td><td>Measure the earth resistance and record it against the ${tg} Ω target before energising.</td></tr></table>`;$('sec').innerHTML=drawSec(o);$('chm').innerHTML=drawChm(o);$('plan').innerHTML=drawPlan(o);
+ {const tb=r=>'<table class="kv4">'+r.map(x=>`<tr><th>${x[0]}</th><td>${x[1]}</td><th>${x[2]}</th><td>${x[3]}</td></tr>`).join('')+'</table>',cl=x=>/^(PASS|WITHIN)/.test(x)?'p':(/^(FAIL|EXCEEDS)/.test(x)?'f':'a'),
+ chk=[['Earth resistance',`${R.toFixed(2)} Ω${Rin>0?' (entered)':''}`,`≤ ${tg} Ω`,ok?'PASS':'FAIL'],['Touch voltage',`${actualTouch.toFixed(0)} V`,`≤ ${Et.toFixed(0)} V`,touchStatus.replace(' AT LIMIT','')],['Step voltage',`${actualStep.toFixed(0)} V`,`≤ ${Es.toFixed(0)} V`,stepStatus.replace(' AT LIMIT','')],['GPR (screening)',`${(gpr/1000).toFixed(1)} kV`,`touch limit ${Et.toFixed(0)} V`,gpr<=Et?'WITHIN LIMIT':'EXCEEDS LIMIT']];
+ $('psum').innerHTML='<h2>Design summary</h2>'+tb([['Project',esc($('pn').value),'Facility',A.n],['Standard',STDS[SD],'Drawing / Rev',esc($('dn').value)+' / '+esc($('rv').value)],['Prepared by',esc($('pb').value)||'-','Date',new Date().toLocaleDateString('en-GB')]])
+ +'<h2>Result checks</h2><table class="chk"><tr><th>Check</th><th>Value</th><th>Limit</th><th>Status</th></tr>'+chk.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="st ${cl(r[3])}">${r[3]}</td></tr>`).join('')+'</table>'
+ +'<h2>Electrode &amp; layout</h2>'+tb([['Electrode',`${m.n}, Ø${dia} mm × ${L} m`,'Quantity',`${n} ${m.pipe?'pipe':'rod'}${n>1?'s':''}`],['Layout',M?`${cfg==='ring'?'Ring':'Grid'} ${M.a} × ${M.a} m`:SS?`Rod + strip, ${ls} m strip`:n>1?`Rods, ${s} m apart`:'Single rod','Pit',usePit?`Ø${bore} mm × ${depth} m deep`:'Driven rod, no pit'],['Earth conductor',`2 × ${cu} mm² Cu or GI ${gi[0]}×${gi[1]} mm`,'Chamber',`${ch} × ${ch} × 500 mm`],['Design soil',sm?`${rho.toFixed(0)} / ${r2.toFixed(0)} Ω·m (to ${h1} m)`:`${rho.toFixed(0)} Ω·m`,'Fault duty',`${Ig.toFixed(1)} kA, ${t} s`]])
+ +'<h2>Quantities</h2>'+tb([['Electrode section',`${Sreq.toFixed(0)} mm² min. (${(Irod/1000).toFixed(1)} kA)`,'Conductor (approx.)',`${lead.toFixed(0)} m`],['Backfill',usePit?`${vol.toFixed(2)} m³`:'None','Watering pipe',usePit?'40 mm, one per pit':'Not required'],['Test links',usePit?`${n}, one per pit`:'1, main chamber','GI strip',SS?`${ls} m`:'-']]);}$('sec').innerHTML=drawSec(o);$('chm').innerHTML=drawChm(o);$('plan').innerHTML=drawPlan(o);
 }
 let LAST={rows:[]};const DM='#0b5aa8',K='#1b1b1b';
 const esc=x=>String(x).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
@@ -410,21 +421,29 @@ const SY={rod:(x,y)=>Rc(x,y+3,18,6,'#c9803f',K,1),bf:(x,y)=>Rc(x,y,18,12,'url(#b
  pit:(x,y)=>Rc(x,y,18,12,'none',K,1.6)+`<circle cx="${x+9}" cy="${y+6}" r="4" fill="url(#bfp)" stroke="${K}"/><circle cx="${x+9}" cy="${y+6}" r="1.5" fill="#c9803f"/>`,meb:(x,y)=>Rc(x,y,18,12,'#fff',K,1.6)+T(x+9,y+9,'M','middle','',9)};
 function legend(x,y,w,it){let s=Rc(x,y,w,30+it.length*20,'#fff',K,1.4)+T(x+8,y+18,'LEGEND','start','',13);it.forEach(([n,sy,t],i)=>{const yy=y+30+i*20;s+=(n?bal(x+18,yy+6,n):'')+SY[sy](x+36,yy)+T(x+60,yy+10,t,'start','',12)});return s}
 let EFF={};const SCL={1:'DEPTH TO SCALE|WIDTH EXAGGERATED x3',2:'PROPORTIONAL|USE WRITTEN DIMENSIONS',3:'SPACING TO SCALE|SYMBOLS ENLARGED',4:'SCHEMATIC|NOT TO SCALE',5:'DIAGRAMMATIC|NOT TO SCALE'},SB=p=>dH(40,40+5*p,74,'5 m')+T(40,90,'plan scale bar','start','',10);
-function frame(W,H,title,o,sh){const bx=W-326,by=H-92;return `<rect width="${W}" height="${H}" fill="#f5f6f4"/>`+Rc(6,6,W-12,H-12,'none',K,2.2)+Rc(W-176,16,160,28,'none',K,1.8)+(()=>{const q=(SCL[sh]||'NOT TO SCALE').split('|');return q.length>1?T(W-96,28,q[0],'middle','',10)+T(W-96,40,q[1],'middle','',10):T(W-96,35,q[0],'middle','',13)})()+Rc(bx,by,320,86,'#fff',K,1.8)+Ln(bx,by+22,W-6,by+22)+Ln(bx,by+44,W-6,by+44)+Ln(bx,by+66,W-6,by+66)+Ln(bx+190,by+44,bx+190,by+66)+Ln(bx+245,by+44,bx+245,by+66)
- +T(bx+8,by+16,o.pn,'start','',14)+T(bx+8,by+37,title,'start','',12)+T(bx+8,by+60,`DWG ${o.dn}-0${sh}`,'start','',11)+T(bx+198,by+60,'REV '+o.rv,'start','',11)+T(bx+253,by+60,new Date().toLocaleDateString('en-GB'),'start','',10)+T(bx+8,by+80,'Prepared by: '+(o.pb||'-'),'start','',12)+T(bx+312,by+80,`ρ ${o.rho.toFixed(0)} Ω·m   R ${o.R.toFixed(2)} Ω`,'end','',11)}
+function frame(W,H,title,o,sh){const TB=66,HT=H+TB,cw=W-12,y0=H,X=f=>6+cw*f,q=(SCL[sh]||'NOT TO SCALE').split('|');
+ const tr=(t,n)=>{t=String(t);if(t.length<=n)return t;let r=t.slice(0,n-1);const i=r.lastIndexOf('&');if(i>r.lastIndexOf(';'))r=r.slice(0,i);return r+'…'};
+ const lab=(x,y,t)=>`<text x="${x+7}" y="${y+10}" font-size="7.5" style="fill:#666">${t}</text>`;
+ const cells=[[0,'PROJECT',tr(o.pn,Math.floor(cw*.55/7.4)-2),13,0],[.55,'DRAWING TITLE',title,12,0],[0,'DRAWING NO.',`${o.dn}-0${sh}`,12,1],[.26,'REV',o.rv,12,1],[.35,'DATE',new Date().toLocaleDateString('en-GB'),11,1],[.52,'PREPARED BY',tr(o.pb||'-',Math.floor(cw*.28/6.4)-2),11,1],[.80,'SOIL / RESISTANCE',`ρ ${o.rho.toFixed(0)} Ω·m   R ${o.R.toFixed(2)} Ω`,10.5,1]];
+ let s=`<rect width="${W}" height="${HT}" fill="#f5f6f4"/>`+Rc(6,6,W-12,H+TB-12,'none',K,2.2)+Rc(W-176,16,160,28,'none',K,1.8)+(q.length>1?T(W-96,28,q[0],'middle','',10)+T(W-96,40,q[1],'middle','',10):T(W-96,35,q[0],'middle','',13))
+  +Rc(6,y0,cw,TB-6,'#fff',K,1.8)+Ln(6,y0+30,6+cw,y0+30)+Ln(X(.55),y0,X(.55),y0+30);
+ [.26,.35,.52,.80].forEach(f=>s+=Ln(X(f),y0+30,X(f),y0+TB-6));
+ cells.forEach(c=>{const x=X(c[0]),y=y0+(c[4]?30:0);s+=lab(x,y,c[1])+T(x+7,y+24,c[2],'start','',c[3])});
+ return s}
+const wrapT=(t,n,m)=>{const out=[];let c='';String(t).split(' ').forEach(x=>{if((c+' '+x).trim().length>n){out.push(c);c=x}else c=(c+' '+x).trim()});if(c)out.push(c);if(out.length>m){out.length=m;out[m-1]=out[m-1].slice(0,n-1)+'…'}return out};
 function stdPanel(A,S,tg){const L=STDCL[S].concat(A.x||[],S==='bnbc'?A.xb||[]:[]);$('req').innerHTML=`<h2>${STDS[S]}: ${A.n}</h2><ul>${L.map(x=>`<li>${x}</li>`).join('')}</ul><p class="note"><b>Standard-defined values applied:</b> ${((LIB.std[S]||{}).rules||{}).src||'none for this standard; library defaults used'}</p><p class="note">Target ${tg} Ω comes from the editable template library. Confirm it against the current standard, your utility and the project specification.</p>`;LAST.rows.push(['Standard basis',STDS[S]],...L.map(x=>['Requirement',x]))}
 function drawSch(o,A,S,tg){
  const W=1000,H=560,RL=EFF,mb=Math.min(RL.mbMax,Math.max(RL.mbMin,Math.round(o.cuS*RL.mbRatio))),bl=A.bond.slice(0,6),lg=STDCL[S].concat(A.x||[]).slice(0,5);
  let s=frame(W,H,'EARTHING & BONDING SCHEMATIC',o,4)+T(30,40,A.n.toUpperCase()+'  |  '+STDS[S],'start','',14);
- s+=Rc(30,70,150,60,'#fff',K,1.6)+T(105,96,A.src,'middle','',12)+T(105,114,'neutral / PE origin','middle','',10)+grn(180,100,300,100)+Rc(300,70,120,60,'#fff',K,2)+T(360,96,'MET','middle','',15)+T(360,114,'main earth terminal','middle','',10);
- s+=grn(420,100,520,100)+T(470,92,mb+' mm² Cu','middle','d',11)+Ln(520,100,520,100+(bl.length-1)*32+15,GR,4)+T(520,86,'PE / bonding bus','middle','',10);
+ s+=Rc(30,70,150,60,'#fff',K,1.6)+wrapT(A.src,20,2).map((l,i,a)=>T(105,(a.length>1?91:97)+i*13,l,'middle','',11)).join('')+T(105,120,'neutral / PE origin','middle','',10)+grn(180,100,300,100)+Rc(300,70,120,60,'#fff',K,2)+T(360,96,'MET','middle','',15)+T(360,114,'main earth terminal','middle','',10);
+ s+=grn(420,100,520,100)+T(470,118,mb+' mm² Cu','middle','d',11)+Ln(520,100,520,100+(bl.length-1)*32+15,GR,4)+T(520,86,'PE / bonding bus','middle','',10);
  bl.forEach((b,i)=>{const yy=100+i*32;s+=grn(520,yy+15,590,yy+15)+Rc(590,yy,350,27,'#fff',K,1.2)+T(600,yy+18,b,'start','',11)});
  s+=Rc(30,310,620,215,'url(#sh)','#9a8a74',1)+Ln(30,310,650,310,K,2)+T(36,325,'GROUND LEVEL','start','',10);
  s+=T(36,343,'Duplicate earth leads connect the MET to the selected electrode arrangement below.','start','',10);
- s+=grn(340,130,340,337)+grn(380,130,380,337)+T(390,222,'Earth lead in duplicate','start','',11)+T(390,238,o.cuS+' mm² Cu (or GI strip '+o.gi+')','start','d',11);
+ s+=grn(340,130,340,337)+grn(380,130,380,337)+T(390,222,'Earth lead in duplicate','start','',11)+T(390,238,o.cuS+' mm² Cu','start','d',11)+T(390,254,'or GI strip '+o.gi,'start','d',11);
  s+=selectedGroundLayout(o,42,350,590,160);
- s+=Rc(665,310,325,195,'#fff',K,1.4)+T(672,328,'DESIGN BASIS: '+S.toUpperCase(),'start','',11);lg.forEach((x,i)=>{s+=T(672,347+i*17,esc(x.length>50?x.slice(0,49)+'…':x),'start','',10)});
- s+=T(672,489,'Verify bonds, joints, fault duty and testing on site.','start','',9);
+ s+=Rc(665,310,325,215,'#fff',K,1.4)+T(672,328,'DESIGN BASIS: '+S.toUpperCase(),'start','',11);let yy=346;lg.forEach(x=>{wrapT(x,58,3).forEach(l=>{if(yy<486){s+=T(672,yy,esc(l),'start','',9.5);yy+=11.5}});yy+=3});
+ s+=T(672,515,'Verify bonds, joints, fault duty and testing on site.','start','',9);
  return s;
 }
 const KIND0={res:'bld',com:'bld',hosp:'bld',dc:'bld',ind:'ind',sub:'sub',osub:'osub',lps:'lps',gen:'gen'};
@@ -488,16 +507,16 @@ function useLps(o){
  s+=Rc(x0,y0,w,h,'#e9e9e4',K,2)+T(x0+w/2,y0+h/2,'ROOF AIR-TERMINATION NETWORK','middle','',11);
  s+=Rc(x0-22,y0-22,w+44,h+44,'none',GR,3);
  const dcs=[[x0-22,y0-22],[x0+w+22,y0-22],[x0+w+22,y0+h+22],[x0-22,y0+h+22]];
- dcs.forEach((p,i)=>{s+=Ln(p[0],p[1],p[0],groundY,GR,2)+T(p[0]+(i===0||i===3?-8:8),groundY-8,'DC'+(i+1),i===0||i===3?'end':'start','',9)});
- s+=Ln(105,groundY,560,groundY,K,2)+T(108,groundY-7,'GROUND LEVEL','start','',10);
+ dcs.forEach((p,i)=>{s+=Ln(p[0],p[1],p[0],groundY,GR,2)+T(p[0]+(i===0||i===3?-8:8),groundY-8-(i>1?14:0),'DC'+(i+1),i===0||i===3?'end':'start','',9)});
+ s+=Ln(105,groundY,560,groundY,K,2)+T(108,groundY+14,'GROUND LEVEL','start','',10);
  s+=T(x0+w/2,y0-38,'Roof-level air-termination conductor (shown independently of the earth-electrode choice)','middle','d',10);
  s+=selectedGroundLayout(o,65,344,550,155);
  return s;
 }
 function useSub(o){
  let s=Rc(150,120,380,225,'none',K,2.4)+Rc(165,135,350,195,'none',GR,3)+T(160,112,'SUBSTATION: equipment bonded to the main earth terminal','start','',11)+BX(190,160,90,60,'HT panel')+BX(320,190,100,90,'TRANSFORMER','#c27a0033')+BX(440,160,70,150,'LT panel');
- s+=BX(275,350,110,25,'MET / EARTH BAR')+grn(320,215,320,350)+grn(235,220,235,350)+grn(475,235,475,350)+grn(370,280,370,350);
- s+=T(160,378,'Neutral, transformer tank, switchgear and lightning-arrester bonds must follow the approved system design.','start','',10);
+ s+=BX(275,350,110,25,'MET / EARTH BAR')+grn(320,215,320,350)+grn(235,220,235,350)+grn(475,250,475,350)+grn(370,280,370,350);
+ s+=wrapT('Neutral, transformer tank, switchgear and lightning-arrester bonds must follow the approved system design.',62,2).map((l,i)=>T(400,364+i*13,l,'start','',10)).join('');
  s+=selectedGroundLayout(o,48,390,595,115);
  return s;
 }
@@ -513,10 +532,10 @@ function useOsub(o){
    if(isStrip){const xx=rx,xe=rx+(shown-1)*dx,sy=ry+12;s+=Ln(xx,sy,xe+Math.max(20,Math.min(100,(o.ls||0))),sy,GR,3)+T(xe+Math.max(20,Math.min(100,(o.ls||0)))+4,sy+4,`GI strip ${o.ls||0} m`,'start','d',9);}
    if(o.n>shown)s+=T(x0+w-4,ry+28,`+ ${o.n-shown} additional rods (full count on layout plan)`,'end','d',10);
  }
- s+=`<rect x="${x0-22}" y="${y0-22}" width="${w+44}" height="${w+44}" fill="none" stroke="${K}" stroke-width="1.4" stroke-dasharray="8 4"/>`+T(x0-22,y0-28,'FENCE (bonding per study)','start','',10)+BX(x0+w*.1,y0+w*.15,50,36,'TX')+BX(x0+w*.55,y0+w*.2,40,30,'GANTRY')+BX(x0+w*.2,y0+w*.65,44,30,'CVT / LA')+BX(x0+w*.6,y0+w*.65,70,36,'CONTROL');
- if(isGrid){Array.from({length:o.n},(_,i)=>{let d=i*4*w/o.n,q;if(d<w)q=[x0+d,y0];else if((d-=w)<w)q=[x0+w,y0+d];else if((d-=w)<w)q=[x0+w-d,y0+w];else{d-=w;q=[x0,y0+w-d]}return q}).forEach((q,i)=>s+=PIT(q[0],q[1],'P'+(i+1)));return s+T(x0,y0+w+25,`Earth grid ${a}×${a} m, ${EFF.meshSize} m mesh; ${o.n} perimeter rods shown`,'start','d',11);}
- if(isRing){[[x0,y0],[x0+w,y0],[x0+w,y0+w],[x0,y0+w]].forEach((q,i)=>s+=PIT(q[0],q[1],'P'+(i+1)));return s+T(x0,y0+w+25,`Ring earth ${a}×${a} m with 4 corner rods of ${o.L} m`,'start','d',11);}
- return s+T(x0,y0+w+26,`${o.n} rods of ${o.L} m at approximately ${o.s} m spacing; schematic only, not a surveyed site layout`,'start','d',11);
+ s+=`<rect x="${x0-34}" y="${y0-34}" width="${w+68}" height="${w+68}" fill="none" stroke="${K}" stroke-width="1.4" stroke-dasharray="8 4"/>`+T(x0-34,y0-40,'FENCE (bonding per study)','start','',10)+BX(x0+w*.1,y0+w*.15,50,36,'TX')+BX(x0+w*.55,y0+w*.2,40,30,'GANTRY')+BX(x0+w*.2,y0+w*.65,44,30,'CVT / LA')+BX(x0+w*.6,y0+w*.65,70,36,'CONTROL');
+ if(isGrid){Array.from({length:o.n},(_,i)=>{let d=i*4*w/o.n,q;if(d<w)q=[x0+d,y0];else if((d-=w)<w)q=[x0+w,y0+d];else if((d-=w)<w)q=[x0+w-d,y0+w];else{d-=w;q=[x0,y0+w-d]}return q}).forEach((q,i)=>s+=PIT(q[0],q[1],'P'+(i+1)));return s+T(x0,y0+w+48,`Earth grid ${a}×${a} m, ${EFF.meshSize} m mesh; ${o.n} perimeter rods shown`,'start','d',11);}
+ if(isRing){[[x0,y0],[x0+w,y0],[x0+w,y0+w],[x0,y0+w]].forEach((q,i)=>s+=PIT(q[0],q[1],'P'+(i+1)));return s+T(x0,y0+w+48,`Ring earth ${a}×${a} m with 4 corner rods of ${o.L} m`,'start','d',11);}
+ return s+T(x0,y0+w+48,`${o.n} rods of ${o.L} m at approximately ${o.s} m spacing; schematic only, not a surveyed site layout`,'start','d',11);
 }
 function useBld(o,A){
  const appKey=$('app').value;
@@ -528,15 +547,13 @@ function useBld(o,A){
  }[appKey]||{floors:5,fh:42,yB:330,head:'BUILDING PE RISER AND EQUIPOTENTIAL BONDING',floor:A.bond.slice(0,5),risers:1,note:'Bond accessible extraneous conductive parts to the main earthing terminal.'};
  const x0=170,fw=200,yB=cfg.yB,fl=cfg.floors,fh=cfg.fh;let s='';
  s+=T(70,72,cfg.head,'start','d',12)+Ln(60,yB,640,yB,K,2)+T(66,yB+14,'GROUND LEVEL','start','',10);
- for(let i=0;i<fl;i++){
-  const yy=yB-(i+1)*fh;
-  s+=Rc(x0,yy,fw,fh,'#e9e9e4',K,1.2)+BX(x0+fw/2-20,yy+fh/2-8,40,16,appKey==='hosp'?(i===2?'MEDICAL':'PE'):appKey==='dc'?'RACK / PE':appKey==='res'?'DB / PE':'FLOOR PE','#fff');
-  const label=cfg.floor[i%cfg.floor.length];s+=T(x0+fw+10,yy+fh/2+4,label,'start','',9);
- }
- const riserX=appKey==='hosp'||appKey==='dc'?[x0+fw/2-8,x0+fw/2+8]:[x0+fw/2];
- riserX.forEach((rx,i)=>{s+=grn(rx,yB,rx,yB-fl*fh+8);if(i===0)s+=BX(rx-20,yB-30,40,20,appKey==='dc'?'BB':'MET');else s+=T(rx+8,yB-fl*fh+18,'parallel PE/bond path','start','',8)});
+const riserX=appKey==='hosp'||appKey==='dc'?[x0+fw/2-8,x0+fw/2+8]:[x0+fw/2];
+ for(let i=0;i<fl;i++){const yy=yB-(i+1)*fh;s+=Rc(x0,yy,fw,fh,'#e9e9e4',K,1.2)+T(x0+fw+10,yy+fh/2+4,cfg.floor[i%cfg.floor.length],'start','',9)}
+ riserX.forEach(rx=>s+=grn(rx,yB,rx,yB-fl*fh+8));
+ for(let i=1;i<fl;i++){const yy=yB-(i+1)*fh;s+=BX(x0+fw/2-27,yy+fh/2-8,54,16,appKey==='hosp'?(i===2?'MEDICAL':'PE'):appKey==='dc'?'RACK / PE':appKey==='res'?'DB / PE':'FLOOR PE','#fff')}
+ riserX.forEach((rx,i)=>{if(i===0)s+=BX(x0+fw/2-27,yB-30,54,20,appKey==='dc'?'BB':'MET');else s+=T(x0-8,yB-fl*fh+14,'parallel PE/bond path','end','',8)});
  if(appKey==='res'){
-  s+=grn(x0-5,yB+5,x0-38,yB+5)+T(x0-42,yB-5,'Service entry / water bond','end','',9);
+  s+=grn(x0-5,yB+5,x0-38,yB+5)+T(x0-42,yB-5,'Service / water bond','end','',9);
  }else if(appKey==='com'){
   s+=T(395,yB-fl*fh-10,'PE riser + floor bars','start','d',10);
  }else if(appKey==='hosp'){
@@ -551,7 +568,7 @@ function useBld(o,A){
 function useInd(o,A){
  const x0=170,y0=120,w=340,h=190;let s=Rc(x0,y0,w,h,'#e9e9e4',K,2)+T(x0+w/2,y0-12,'INDUSTRIAL PLANT / FACTORY','middle','d',12)+BX(x0+15,y0+15,60,30,'MCC');
  for(let i=0;i<3;i++){const x=x0+55+i*55,yy=y0+95;s+=Ln(x0+45,y0+45,x,yy-14,GR,1.5)+`<circle cx="${x}" cy="${yy}" r="14" fill="#fff" stroke="${K}"/>`+T(x,yy+4,'M','middle','',11)}
- s+=Ln(x0+220,y0+10,x0+220,y0+h-10,K,3)+Ln(x0+260,y0+10,x0+260,y0+h-10,K,3)+T(x0+240,y0+h-14,'CRANE RAILS','middle','',9)+`<circle cx="${x0+90}" cy="${y0+145}" r="24" fill="#fff" stroke="${K}"/>`+T(x0+90,y0+149,'TANK','middle','',10)+Ln(x0+114,y0+145,x0+220,y0+145,GR,1.5);
+ s+=Ln(x0+220,y0+10,x0+220,y0+h-10,K,3)+Ln(x0+260,y0+10,x0+260,y0+h-10,K,3)+T(x0+268,y0+h/2,'CRANE','start','',9)+T(x0+268,y0+h/2+12,'RAILS','start','',9)+`<circle cx="${x0+90}" cy="${y0+145}" r="24" fill="#fff" stroke="${K}"/>`+T(x0+90,y0+149,'TANK','middle','',10)+Ln(x0+114,y0+145,x0+220,y0+145,GR,1.5);
  s+=grn(100,y0+h/2,x0-26,y0+h/2)+BX(60,y0+h/2-14,40,28,'MET')+T(65,y0+h+20,'Bond motors, MCC, rails, tanks and services as required by the project.','start','',9);
  s+=selectedGroundLayout(o,55,355,585,150);
  return s;
@@ -565,21 +582,21 @@ function useGen(o,A){
 function drawUse(o,A,S,tg){const kd=A.kind||KIND0[$('app').value]||'bld',ln=['STD: '+STDS[S],`Pits/rods: ${o.n} × Ø${o.dia} × ${o.L} m`,`R ${o.R.toFixed(2)} Ω, target ≤ ${tg} Ω`,`Earth lead: 2 × ${o.cuS} mm² Cu`].concat(o.info||[]);
  let s=frame(1000,560,'USE-CASE DETAIL',o,5)+T(30,40,A.n.toUpperCase(),'start','',14);
  s+=({lps:useLps,sub:useSub,osub:useOsub,bld:useBld,ind:useInd,gen:useGen}[kd]||useBld)(o,A);
- s+=Rc(670,60,320,20+ln.length*18,'#fff',K,1.4)+T(678,76,'KEY DATA','start','',11);ln.forEach((x,i)=>s+=T(678,96+i*18,esc(x.length>52?x.slice(0,51)+'…':x),'start','',10));return s}
+ s+=Rc(670,60,320,30+ln.length*18,'#fff',K,1.4)+T(678,76,'KEY DATA','start','',11);ln.forEach((x,i)=>s+=T(678,96+i*18,esc(x.length>52?x.slice(0,51)+'…':x),'start','',10));return s}
 const LG=(o)=>[[1,'rod','Earth rod'],[2,'bf','Backfill column'],[3,'pipe','Watering pipe + funnel'],[4,'bk','Brick chamber wall'],[5,'cover','RCC / CI cover'],[6,'strip','Earth conductor'],[7,'tl','Test link'],[8,'clamp','Rod clamp']].filter(x=>o.usePit||![2,3].includes(x[0]));
-function drawSec(o){const W=640,H=640,gy=112,ppm=Math.min(44,330/o.depth),hx=3,cx=170,Y=m=>gy+m*ppm,bw=o.bore/1000*ppm*hx,ow=(o.ch+230)/1000*ppm*hx,cw=o.ch/1000*ppm*hx,rw=Math.max(5,o.dia/1000*ppm*hx),yb=Y(o.depth);
+function drawSec(o){const W=640,H=560,gy=112,ppm=Math.min(44,330/o.depth),hx=3,cx=170,Y=m=>gy+m*ppm,bw=o.bore/1000*ppm*hx,ow=(o.ch+230)/1000*ppm*hx,cw=o.ch/1000*ppm*hx,rw=Math.max(5,o.dia/1000*ppm*hx),yb=Y(o.depth);
  let s=frame(W,H,'SECTION A-A  Earth pit',o,1)+Rc(24,gy,300,yb-gy+44,'url(#sh)','none',0)+Ln(24,gy,324,gy,K,2.6);
  if(o.usePit)s+=Rc(cx-bw/2,Y(.5),bw,yb-Y(.5),'url(#bfp)',K,1.2);
  s+=Rc(cx-ow/2,gy,ow,.5*ppm,'url(#bk)',K,1.8)+Rc(cx-cw/2,gy,cw,.5*ppm,'#f5f6f4',K,1.2)+Rc(cx-ow/2-4,gy-7,ow+8,7,'#555',K,1.6)+Rc(cx-cw/4-5,gy-11,10,4,'#333','none',0)+Rc(cx+cw/4-5,gy-11,10,4,'#333','none',0);
  if(o.usePit)s+=Rc(cx+bw/2-9,gy+6,6,(o.h+.9)*ppm-6,'#9cc9e6',K,.9)+`<path d="M${cx+bw/2-15} ${gy+6}h18l-3 -10h-12z" fill="#9cc9e6" stroke="${K}" stroke-width=".9"/>`;
  s+=Rc(cx-rw/2,Y(o.h-.1),rw,(o.L+.1)*ppm-8,'#c9803f',K,1.3)+`<path d="M${cx-rw/2} ${yb-8}L${cx} ${yb+10}L${cx+rw/2} ${yb-8}z" fill="#c9803f" stroke="${K}" stroke-width="1.3"/>`+CL(cx,gy-16,yb+16)+grn(32,Y(o.h)+5,cx-rw/2-6,Y(o.h)+5)+Rc(cx-rw/2-6,Y(o.h)-1,rw+12,12,'#bbb',K,1.3)+`<circle cx="${cx}" cy="${Y(o.h)+5}" r="2" fill="${K}"/>`;
  const x1=cx+ow/2+38;
- s+=E(cx+ow/2+4,gy,x1+56,gy)+E(cx+ow/2+4,Y(o.h),x1+56,Y(o.h))+E(cx+bw/2+4,yb,x1+56,yb)+dV(x1,gy,Y(o.h),o.h*1000)+dV(x1,Y(o.h),yb,o.L*1000)+dV(x1+52,gy,yb,o.depth*1000)+dH(cx-ow/2,cx+ow/2,gy-26,o.ch+230)+T(cx,gy-46,'chamber outer, clear '+o.ch,'middle','d',12);
+ s+=E(cx+ow/2+4,gy,x1+56,gy)+E(cx+ow/2+4,Y(o.h),x1+56,Y(o.h))+E(cx+bw/2+4,yb,x1+56,yb)+dV(x1,gy,Y(o.h),o.h*1000)+dV(x1,Y(o.h),yb,o.L*1000)+dV(x1+52,gy,yb,o.depth*1000)+dH(cx-ow/2,cx+ow/2,gy-26,(o.ch+230)+' outer');
  if(o.usePit)s+=dH(cx-bw/2,cx+bw/2,yb+26,'Ø'+o.bore);
  s+=T(cx,yb+50,`Rod Ø${o.dia} × ${o.L*1000}`,'middle','d',13);
- const ly=Y(o.h+o.L*.7),by=Y(o.h);
+ const y2=Math.max(Y(o.h+o.L*.35),gy+112),ly=Math.min(Math.max(Y(o.h+o.L*.7),y2+24),yb-10),by=Y(o.h);
  s+=Ln(60,ly,cx-rw/2,ly)+bal(50,ly,1)+Ln(cx-ow/2-4,gy-3,60,gy-60)+bal(50,gy-60,5)+Ln(cx-ow/2,gy+.25*ppm,60,gy-18)+bal(50,gy-18,4)+Ln(80,by+5,60,by+30)+bal(50,by+34,6)+Ln(cx-rw/2-6,by+9,60,by+64)+bal(50,by+68,8);
- if(o.usePit)s+=Ln(cx-bw/2,Y(o.h+o.L*.35),60,Y(o.h+o.L*.35))+bal(50,Y(o.h+o.L*.35),2)+Ln(cx+bw/2-6,gy-8,cx+bw/2+24,gy-72)+bal(cx+bw/2+24,gy-82,3);
+ if(o.usePit)s+=Ln(cx-bw/2,y2,60,y2)+bal(50,y2,2)+Ln(cx+bw/2-6,gy-8,cx+bw/2+52,gy-60)+bal(cx+bw/2+52,gy-70,3);
  s+=legend(350,64,270,LG(o).filter(x=>x[0]!==7));
  const rows=[`Rod  Ø${o.dia} mm × ${o.L*1000} mm`,`Burial depth  ${o.h*1000} mm`,`Total depth  ${o.depth*1000} mm`,o.usePit?`Bore  Ø${o.bore} mm`:'Driven in natural soil',`Chamber  ${o.ch}×${o.ch}×500 mm`,`Resistance  ${o.R.toFixed(2)} Ω`];
  s+=Rc(350,64+30+(LG(o).length-1)*20+14,270,28+rows.length*22,'#fff',K,1.4)+T(358,64+30+(LG(o).length-1)*20+32,'KEY DIMENSIONS','start','',13);
@@ -591,24 +608,24 @@ function drawChm(o){const W=1000,H=470,k=.3,ow=(o.ch+230)*k,cw=o.ch*k,py=190,p1=
  s+=T(p2,50,'PLAN (cover removed)','middle','',14)+Rc(p2-ow/2,py-ow/2,ow,ow,'url(#bk)',K,2)+Rc(p2-cw/2,py-cw/2,cw,cw,'#f5f6f4',K,1.3)+grn(p2-ow/2-50,py,p2-rr-5,py)+Rc(p2-cw/2+6,py-8,34,16,'#ddd',K,1.2)+T(p2-cw/2+23,py+4,'TL','middle','',10)+`<circle cx="${p2}" cy="${py}" r="${rr+5}" fill="#bbb" stroke="${K}" stroke-width="1.3"/><circle cx="${p2}" cy="${py}" r="${rr}" fill="#c9803f" stroke="${K}"/><circle cx="${p2}" cy="${py}" r="1.6" fill="${K}"/>`;
  if(o.usePit)s+=`<circle cx="${p2+cw*.28}" cy="${py-cw*.28}" r="8" fill="#9cc9e6" stroke="${K}" stroke-width="1.2"/>`+Ln(p2+cw*.28+6,py-cw*.28-6,p2+cw*.28+30,py-cw*.28-30)+bal(p2+cw*.28+36,py-cw*.28-36,3);
  s+=Ln(p2+rr+5,py+rr+5,p2+30,py+34)+bal(p2+36,py+40,1)+Ln(p2-cw/2+23,py+8,p2-cw/2+23,py+34)+bal(p2-cw/2+23,py+44,7)+Ln(p2-ow/2-20,py,p2-ow/2-20,py-30)+bal(p2-ow/2-20,py-40,6)+Ln(p2-cw/2-4,py+cw/2-10,p2-cw/2-40,py+cw/2+30)+bal(p2-cw/2-44,py+cw/2+36,4)+CL(p2,py-ow/2-8,py+ow/2+8)+Ln(p2-ow/2-8,py,p2+ow/2+8,py,K,.7,'14 3 3 3');
- s+=dH(p2-ow/2,p2+ow/2,py-ow/2-26,o.ch+230)+dH(p2-ow/2,p2-cw/2,py-ow/2-8,115)+dH(p2-cw/2,p2+cw/2,py+ow/2+28,'clear '+o.ch)+dV(p2+ow/2+24,py-ow/2,py+ow/2,o.ch+230);
+ s+=dH(p2-ow/2,p2+ow/2,py-ow/2-38,o.ch+230)+dH(p2-ow/2,p2-cw/2,py-ow/2-8,115)+dH(p2-cw/2,p2+cw/2,py+ow/2+28,'clear '+o.ch)+dV(p2+ow/2+24,py-ow/2,py+ow/2,o.ch+230);
  const ch=500*k,cv=50*k,ey=110;
  s+=T(ex,50,'SECTION B-B','middle','',14)+Rc(ex-ow/2-50,ey,ow+100,ch+cv+110,'url(#sh)','none',0)+Rc(ex-ow/2,ey+cv,115*k,ch,'url(#bk)',K,1.6)+Rc(ex+cw/2,ey+cv,115*k,ch,'url(#bk)',K,1.6)+Rc(ex-ow/2,ey,ow,cv,'#555',K,1.6)+Ln(ex-ow/2-50,ey,ex+ow/2+50,ey,K,2.6);
  s+=Rc(ex-rr,ey+cv+ch-100*k,rr*2,100*k+100,'#c9803f',K,1.3)+`<path d="M${ex-rr} ${ey+cv+ch+100} L${ex} ${ey+cv+ch+118} L${ex+rr} ${ey+cv+ch+100}z" fill="#c9803f" stroke="${K}"/>`+Rc(ex-rr-5,ey+cv+ch-12,rr*2+10,10,'#bbb',K,1.3)+grn(ex-ow/2-50,ey+cv+ch+6,ex-rr-5,ey+cv+ch+6)+CL(ex,ey-10,ey+cv+ch+124);
  if(o.usePit)s+=Rc(ex+cw*.28-4,ey+cv+4,8,ch+50,'#9cc9e6',K,.9)+`<path d="M${ex+cw*.28-10} ${ey+cv+4}h20l-4 -12h-12z" fill="#9cc9e6" stroke="${K}" stroke-width=".9"/>`+bal(ex+cw*.28+40,ey+cv+40,3);
  s+=bal(ex-ow/2-30,ey+cv+ch+26,1)+Ln(ex-ow/2-20,ey+cv+ch+26,ex-rr-6,ey+cv+ch+26)+bal(ex-ow/2-30,ey+cv+ch/2,4)+Ln(ex-ow/2-20,ey+cv+ch/2,ex-ow/2+6,ey+cv+ch/2)+bal(ex-ow/2-30,ey+6,5)+Ln(ex-ow/2-20,ey+6,ex-ow/2+8,ey+6)+bal(ex+ow/2+36,ey+cv+ch-6,8)+Ln(ex+ow/2+26,ey+cv+ch-6,ex+rr+6,ey+cv+ch-6);
- s+=dH(ex-ow/2,ex+ow/2,ey-26,o.ch+230)+dH(ex-cw/2,ex+cw/2,ey+cv+ch/2,o.ch)+dH(ex-ow/2,ex-cw/2,ey+cv+ch+34,115)+dV(ex+ow/2+66,ey,ey+cv,50)+dV(ex+ow/2+66,ey+cv,ey+cv+ch,500)+E(ex+ow/2+2,ey,ex+ow/2+72,ey)+E(ex+ow/2+2,ey+cv+ch,ex+ow/2+72,ey+cv+ch);
- const it=LG(o);return s+T(ex+ow/2+84,ey+20,'All dimensions in mm','start','',12)+legend(20,350,235,it.slice(0,4))+legend(265,350,235,it.slice(4))}
+ s+=dH(ex-ow/2,ex+ow/2,ey-26,o.ch+230)+dH(ex-cw/2,ex+cw/2,ey+cv+ch/2,o.ch)+dH(ex-ow/2,ex-cw/2,ey+cv+ch+52,115)+dV(ex+ow/2+66,ey,ey+cv,50)+dV(ex+ow/2+66,ey+cv,ey+cv+ch,500)+E(ex+ow/2+2,ey,ex+ow/2+72,ey)+E(ex+ow/2+2,ey+cv+ch,ex+ow/2+72,ey+cv+ch);
+ const it=LG(o);return s+T(W-20,66,'All dimensions in mm','end','',11)+legend(20,350,235,it.slice(0,4))+legend(265,350,235,it.slice(4))}
 function drawPlan(o){const W=640,H=640,bx=60;let s=frame(W,H,o.mesh?(o.cfg==='ring'?'LAYOUT PLAN  Ring earth':'LAYOUT PLAN  Earth grid'):'LAYOUT PLAN  Earth electrodes',o,3);
- const leg=legend(20,548,280,[[0,'pit','Earth pit (chamber, bore, rod)'],[0,'strip','Earth conductor'],[0,'meb','Main earth bar (MEB)']]);
+ const leg=legend(20,536,280,[[0,'pit','Earth pit (chamber, bore, rod)'],[0,'strip','Earth conductor'],[0,'meb','Main earth bar (MEB)']]);
  if(o.mesh&&o.cfg==='ring'){
-  const a=o.mesh.a,p=Math.min(380/a,12),x0=130,y0=120,w=a*p,by=y0+w/2;
+  const a=o.mesh.a,p=Math.min(340/a,11),x0=130,y0=120,w=a*p,by=y0+w/2;
   s+=Ln(x0,y0,x0+w,y0,'#2e8b3d',4)+Ln(x0+w,y0,x0+w,y0+w,'#2e8b3d',4)+Ln(x0+w,y0+w,x0,y0+w,'#2e8b3d',4)+Ln(x0,y0+w,x0,y0,'#2e8b3d',4);
   [[x0,y0],[x0+w,y0],[x0+w,y0+w],[x0,y0+w]].forEach((q,i)=>s+=Rc(q[0]-9,q[1]-9,18,18,'#fff',K,1.8)+`<circle cx="${q[0]}" cy="${q[1]}" r="4" fill="url(#bfp)" stroke="${K}"/><circle cx="${q[0]}" cy="${q[1]}" r="1.6" fill="#c9803f"/>`+T(q[0],q[1]-14,'P'+(i+1),'middle','',12));
   s+=grn(bx+18,by,x0,by)+Rc(bx-16,by-16,32,32,'#fff',K,2)+T(bx,by+4,'MEB','middle','',12)+dH(x0,x0+w,y0-34,a+' m')+dV(x0+w+26,y0,y0+w,a+' m');
   return s+SB(p)+T(30,y0+w+64,`Ring earth ${a}×${a} m, 4 corner rods Ø${o.dia} mm × ${o.L} m; conductor ${o.lead} m`,'start','',13)+leg;
  }
- if(o.mesh){const a=o.mesh.a,st=o.mesh.step||EFF.meshSize,p=Math.min(380/a,12),x0=130,y0=120,w=a*p,by=y0+w/2;
+ if(o.mesh){const a=o.mesh.a,st=o.mesh.step||EFF.meshSize,p=Math.min(340/a,11),x0=130,y0=120,w=a*p,by=y0+w/2;
   for(let i=0;i<=a/st;i++){const d=i*st*p;s+=Ln(x0+d,y0,x0+d,y0+w,'#2e8b3d',2)+Ln(x0,y0+d,x0+w,y0+d,'#2e8b3d',2)}
   Array.from({length:o.n},(_,i)=>{let d=i*4*w/o.n,q;if(d<w)q=[x0+d,y0];else if((d-=w)<w)q=[x0+w,y0+d];else if((d-=w)<w)q=[x0+w-d,y0+w];else{d-=w;q=[x0,y0+w-d]}return q}).forEach((q,i)=>s+=Rc(q[0]-9,q[1]-9,18,18,'#fff',K,1.8)+`<circle cx="${q[0]}" cy="${q[1]}" r="4" fill="url(#bfp)" stroke="${K}"/><circle cx="${q[0]}" cy="${q[1]}" r="1.6" fill="#c9803f"/>`+T(q[0],q[1]-14,o.pre+(i+1),'middle','',12));
   s+=grn(bx+18,by,x0,by)+Rc(bx-16,by-16,32,32,'#fff',K,2)+T(bx,by+4,'MEB','middle','',12)+dH(x0,x0+w,y0-34,a+' m')+dV(x0+w+26,y0,y0+w,a+' m');
@@ -630,20 +647,6 @@ const ENG='This is a preliminary design tool. Confirm the target resistance, soi
 $('eng').innerHTML='<b>Engineering note.</b> '+ENG;
 const lb=$('lb');['use','sch','sec','plan','chm'].forEach(i=>{const v=$(i);v.style.cursor='zoom-in';v.addEventListener('click',()=>{const c=v.cloneNode(true);c.removeAttribute('style');$('lbc').innerHTML='';$('lbc').appendChild(c);lb.style.display='block'})});
 $('lbx').onclick=()=>lb.style.display='none';document.addEventListener('keydown',e=>{if(e.key==='Escape')lb.style.display='none'});
-function svgPng(id){return new Promise(res=>{const sv=$(id).cloneNode(true),vb=sv.viewBox.baseVal,k=3;
- sv.setAttribute('xmlns','http://www.w3.org/2000/svg');sv.setAttribute('width',vb.width*k);sv.setAttribute('height',vb.height*k);
- sv.insertAdjacentHTML('afterbegin','<style>text{fill:#1b1b1b;font-family:Arial,sans-serif}text.d{fill:#0b5aa8}</style>'+document.querySelector('defs').innerHTML);
- const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=vb.width*k;c.height=vb.height*k;c.getContext('2d').drawImage(im,0,0);res({d:c.toDataURL('image/png'),w:vb.width,h:vb.height})};
- im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(sv))})}
-async function pdf(){
- if(!window.jspdf){window.print();return}
- const doc=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}),Z=x=>String(x).replace(/Ω/g,'ohm').replace(/″/g,'"').replace(/≤/g,'<=').replace(/ρ/g,'rho').replace(/√/g,'sqrt').replace(/·/g,'.');
- doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('Earthing design report',14,16);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('ElectraLab | '+new Date().toLocaleDateString('en-GB'),14,22);
- let y=32;doc.setFontSize(10);
- LAST.rows.forEach(r=>{const v=doc.splitTextToSize(Z(r[1]),205);if(y+v.length*5>198){doc.addPage();y=16}doc.setFont('helvetica','bold');doc.text(Z(r[0]),14,y);doc.setFont('helvetica','normal');doc.text(v,72,y);y+=v.length*5+2});
-const nt=doc.splitTextToSize(ENG,269);if(y+nt.length*5+10>200){doc.addPage();y=16}doc.setFont('helvetica','bold');doc.text('Engineering note',14,y+5);doc.setFont('helvetica','normal');doc.text(nt,14,y+11);
- for(const id of['use','sch','sec','chm','plan']){const p=await svgPng(id),k=Math.min(277/p.w,190/p.h);doc.addPage();doc.addImage(p.d,'PNG',(297-p.w*k)/2,(210-p.h*k)/2,p.w*k,p.h*k)}
- doc.save('earthing-design.pdf')}
 const LIB0={rules:{mbMin:6,mbMax:25,mbRatio:.5,share:1.5,kCu:159,kSt:58,cuMin:16,cuMinCrit:35,rockRho:3000,csA:.09,csB:.29,k:.157,bodyR:1000,touchF:1.5,stepF:6,meshSize:5,burialDepth:.5,rodLengths:[3,4.5,6,9],stripRodLengths:[3,4.5,6],boreShort:250,boreLong:300,boreAbove:3,spacingFactor:2,spacingMax:6},std:{},tpl:JSON.parse(JSON.stringify(APPS))};
 Object.keys(STDS).forEach(k=>LIB0.std[k]={n:STDS[k],i:SI[k],cl:STDCL[k]});
 LIB0.std.bnbc.rules={src:'BNBC Part 8 Ch.2: 2.8.3.3-5 and Table 8.2.11 (earth conductor ≥ ½ phase and ≥14 SWG; earth lead ≥8 SWG; Cu rod ≥12.7 mm; GI pipe ≥50 mm)',matMin:{cu:12.7,gi:50},cuMin:12,cuMinCrit:12,mbMin:3.243,mbMax:1000,mbRatio:.5,dcFirstArea:100,dcPerArea:300,dcPerim:30,sepR:.3,sepH:15};
