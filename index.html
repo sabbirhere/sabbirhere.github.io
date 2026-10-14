@@ -2737,5 +2737,60 @@ document.addEventListener("DOMContentLoaded", () => {
 (function(){var h=document.getElementById('home');if(!h||!('IntersectionObserver' in window))return;
 new IntersectionObserver(function(e){h.classList.toggle('hero-off',!e[0].isIntersecting);},{rootMargin:'100px'}).observe(h);})();
 </script>
+
+<script>
+/* Keep the existing install flow, but provide an APK fallback even when browser install is unavailable. */
+(function () {
+  /* Resolve the APK beside the currently served page, including GitHub project-page paths. */
+  function getApkHref() { return new URL("./ElectraLab.apk", window.location.href).href; }
+  let fallbackSheet;
+
+  function addAndroidApkOption(sheet) {
+    if (!sheet || sheet.querySelector(".electralab-apk-option")) return;
+    const option = document.createElement("div");
+    option.className = "electralab-apk-option";
+    option.style.cssText = "clear:both;margin-top:12px;padding-top:12px;border-top:1px solid rgba(148,163,184,.28)";
+    option.innerHTML =
+      '<div style="font-weight:700;margin-bottom:5px">Android app — ElectraLab</div>' +
+      '<div style="font-size:13px;opacity:.82;margin-bottom:10px">Download the Android APK and install it on your device.</div>' +
+      '<a href="' + getApkHref() + '" type="application/vnd.android.package-archive" style="display:block;text-align:center;text-decoration:none;padding:10px 12px;border-radius:9px;background:#0bb9ed;color:#020617;font-weight:700">Download Android APK</a>';
+    sheet.appendChild(option);
+  }
+
+  function makeFallbackSheet() {
+    if (!fallbackSheet) {
+      fallbackSheet = document.createElement("div");
+      fallbackSheet.className = "install-sheet electralab-fallback-sheet";
+      fallbackSheet.innerHTML = '<div class="install-sheet-title">Install ElectraLab</div><div>Your browser may offer an option to add this website as an app. You can also download the Android version below.</div><button type="button" class="install-sheet-close">Close</button>';
+      fallbackSheet.querySelector(".install-sheet-close").addEventListener("click", function () { fallbackSheet.remove(); fallbackSheet = null; });
+      document.body.appendChild(fallbackSheet);
+    }
+    addAndroidApkOption(fallbackSheet);
+  }
+
+  function ensureOption() {
+    document.querySelectorAll(".install-sheet").forEach(addAndroidApkOption);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const installBtn = document.getElementById("installBtn");
+    /* Keep the existing button available even in browsers that do not expose PWA installation. */
+    if (installBtn) {
+      installBtn.hidden = false;
+      installBtn.addEventListener("click", function () {
+        window.setTimeout(function () {
+          ensureOption();
+          if (!document.querySelector(".install-sheet")) makeFallbackSheet();
+        }, 80);
+      });
+    }
+    ensureOption();
+  });
+
+  const observer = new MutationObserver(ensureOption);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
 <script src="pwa.js" defer></script>
 </body> </html>
