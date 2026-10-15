@@ -225,7 +225,7 @@ $('form').addEventListener('click',async ev=>{
   if(!panel||!input||!entry)return;
   const action=panel.querySelector('.ai-action').value,role=panel.querySelector('.ai-role').value.trim()||entry.role||'',status=panel.querySelector('.ai-status');
   if(!input.value.trim()){status.textContent='Add responsibilities first.';return}
-  b.disabled=true;status.textContent='Sending request to Cloudflare Worker…';
+  b.disabled=true;status.textContent='Sending request to Electra AI …';
   try{
    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);let response,raw,data;
    try{response=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json, text/plain'},body:JSON.stringify({task:'rewrite_job_responsibilities',action,role,company:entry.org||'',text:input.value,instructions:AI_ACTIONS[action]}),signal:controller.signal});raw=await response.text()}finally{clearTimeout(timeout)}
