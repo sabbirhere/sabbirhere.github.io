@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ElectraLab CV BUILDER</title>
+<title>ElectraLab AI CV BUILDER</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect x=%2710%27 y=%276%27 width=%2744%27 height=%2752%27 rx=%276%27 fill=%27%230369a1%27/%3E%3Cpath d=%27M22 20h20M22 29h20M22 38h14%27 stroke=%27white%27 stroke-width=%274%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
 <style>
 :root{color-scheme:light;--ink:#1f2937;--mut:#6b7280;--line:#d1d5db;--bg:#eef0f3;--pn:#fff;--pn2:#f9fafb;--inp:#fff;--ui:#0369a1;--onui:#fff;--ac:#1e3a8a}
@@ -90,7 +90,7 @@ details.en[open]>summary{margin-bottom:8px}
 @media(max-width:600px){.bar{grid-template-columns:1fr 1fr}.body{padding:10px 10px 60px}.in{padding:8px}.top{gap:8px;padding:6px 10px}.top .back{padding:6px 10px;font-size:13px}.ttl b{font-size:15px}.foot{font-size:11px;padding:6px 10px}input[type=text],input[type=date],input[type=number],input[type=email],input[type=url],select,textarea{font-size:16px}.tools{flex-wrap:wrap}.tools button{flex:1;min-height:38px}}
 @media(pointer:coarse){button,select,input[type=text],input[type=date],input[type=number],input[type=email],input[type=url]{min-height:40px}}
 </style><script>try{document.documentElement.dataset.theme=localStorage.getItem('electralab-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){}</script></head><body>
-<div class="top"><a class="back" href="Docs.html">← Back to DOCBOX</a><div class="ttl"><b>ElectraLab CV BUILDER</b><span class="tg">Free, clean and ATS-friendly, ready to print on A4</span></div><button id="theme" type="button" aria-label="Switch between light and dark theme">Dark mode</button></div>
+<div class="top"><a class="back" href="Docs.html">← Back to DOCBOX</a><div class="ttl"><b>ELECTRALAB ⚡ AI CV BUILDER</b><span class="tg">Free, clean and ATS-friendly, ready to print on A4</span></div><button id="theme" type="button" aria-label="Switch between light and dark theme">Dark mode</button></div>
 <div class="tabs"><button class="on" id="tE">Edit</button><button id="tP">Preview</button></div>
 <div class="app">
 <div class="panel">
@@ -108,7 +108,7 @@ details.en[open]>summary{margin-bottom:8px}
 </div>
 <div class="preview" id="pv"><div id="page"></div></div>
 </div>
-<footer class="foot">Free, safe and private: no sign-up, no tracking, no data stored on any server. Everything you type stays in your browser and never leaves your device.</footer>
+<footer class="foot">Your CV is edited in your browser. If you choose an AI writing action, the responsibilities and related job details are sent to the configured Cloudflare Worker.</footer>
 <script>
 const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LK=/([\w.+-]+@[\w-]+(?:\.[\w-]+)+)|((?:https?:\/\/|www\.)[^\s<]+|\b(?:[a-z0-9-]+\.)+(?:com|org|net|io|dev|me|co|app|edu|info|bd|uk|us|ca)\b(?:\/[^\s<]*)?)/gi;
@@ -176,36 +176,18 @@ $('form').addEventListener('input',ev=>{const t=ev.target,d=t.dataset;
  if(t.id=='showph'){D.o.ph=t.checked}else if(d.k){if(d.s=='p')D.p[d.k]=t.value;else{D.s[d.s][d.i][d.k]=t.value;const st=t.closest('details').querySelector('.st');st.textContent=lbl(D.s[d.s][d.i],d.s)}}else return;draw();save()});
 $('form').addEventListener('change',ev=>{if(ev.target.id!='photo')return;const f=ev.target.files[0];if(!f)return;
  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=400,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);D.p.photo=c.toDataURL('image/jpeg',.85);form();draw();save()};im.src=r.result};r.readAsDataURL(f)});
-// Set this once in the source code. The URL is never shown in the editor UI.
-const AI_WORKER_URL = 'https://electra-cv-ai.sabbirac.workers.dev';
+//I worked really fuckin hard to build this free for you mf.  
+const AI_WORKER_URL = 'https://electra-cv-ai.sabbirac-cv.workers.dev';
 const AI_ACTIONS = {
- improve: {label:'Improve writing', task:'improve_writing', instructions:'Rewrite these job responsibilities into polished, professional CV bullets. Improve clarity, flow, and impact while preserving all facts. Do not invent achievements, metrics, tools, or duties. Return only bullets, one per line.'},
- correct: {label:'Correct grammar', task:'correct_grammar', instructions:'Correct grammar, spelling, punctuation, and awkward phrasing only. Preserve the original meaning and level of detail. Do not add new facts. Return the corrected text in the same line-by-line format.'},
- concise: {label:'Make concise', task:'make_concise', instructions:'Make these job responsibility bullets concise and easy to scan. Remove repetition and filler while preserving important details and facts. Do not invent details. Return only bullets, one per line.'},
- verbs: {label:'Stronger action verbs', task:'stronger_action_verbs', instructions:'Rewrite each bullet to begin with an appropriate strong action verb where natural. Keep the claims truthful and do not exaggerate or invent results. Return only bullets, one per line.'},
- achievements: {label:'Highlight achievements', task:'highlight_achievements', instructions:'Improve the wording to make concrete contributions and outcomes clearer, using only facts already present. Do not invent numbers, metrics, outcomes, or responsibilities. If no outcome is stated, do not fabricate one. Return only bullets, one per line.'},
- suggestions: {label:'Suggestions', task:'writing_suggestions', instructions:'Review these job responsibility bullets and suggest specific improvements to make them clearer and more effective on a CV. Keep suggestions practical and based only on the text. Clearly separate suggested revised bullets from brief notes if useful.'},
- tailor: {label:'Tailor to job title', task:'tailor_to_role', instructions:'Refine these bullets to emphasize relevant skills for the stated job title, without adding experience, qualifications, tools, or achievements not supported by the source text. Return only revised bullets, one per line.'}
+ improve: 'Improve the wording professionally without inventing facts.',
+ correct: 'Correct grammar and spelling while preserving the original meaning.',
+ concise: 'Make the text shorter and clearer without removing important facts.',
+ tailor: 'Tailor the wording to the target job title without inventing experience or skills.'
 };
-function aiPanel(details){let panel=details.querySelector('.ai-result');if(!panel){panel=document.createElement('div');panel.className='ai-result';panel.style.cssText='grid-column:1/-1;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--pn2)';details.querySelector('.grid').appendChild(panel)}return panel}
-function electraNormLine(value){return String(value||'').trim().replace(/^(?:[•*\-–—]|\d+[.)])\s*/,'').replace(/\s+/g,' ').toLocaleLowerCase()}
-function electraSplitResponsibilities(value){
- const out=[];
- String(value||'').split(/\r?\n/).forEach((row,lineIndex)=>{
-  // Separate numbered/bulleted points pasted onto a shared line, then number each item consistently.
-  const parts=row.trim().split(/\s+(?=(?:\d+[.)]\s+|[•*]\s+))/);
-  parts.forEach(part=>{const raw=part.trim();const text=raw.replace(/^(?:[•*\-–—]|\d+[.)])\s*/,'').trim();if(text)out.push({raw,text,key:electraNormLine(text),lineIndex});});
- });
- return out;
-}
-function electraNumberResponsibilities(value){
- const items=electraSplitResponsibilities(value);
- return items.map((item,i)=>(i+1)+'. '+item.text).join('\n');
-}
-function electraAutoNumber(textarea){
- const before=textarea.value, start=textarea.selectionStart, end=textarea.selectionEnd;
- const numbered=electraNumberResponsibilities(before);
- if(numbered!==before){textarea.value=numbered;const delta=numbered.length-before.length;textarea.setSelectionRange(Math.min(numbered.length,start+delta),Math.min(numbered.length,end+delta));textarea.dispatchEvent(new Event('input',{bubbles:true}));}
+function aiPanel(details){
+ let panel=details.querySelector('.ai-result');
+ if(!panel){panel=document.createElement('div');panel.className='ai-result';panel.style.cssText='grid-column:1/-1;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--pn2)';details.querySelector('.grid').appendChild(panel)}
+ return panel;
 }
 function electraExtractText(data){
  if(typeof data==='string')return data;
@@ -216,88 +198,56 @@ function electraExtractText(data){
  if(Array.isArray(value))value=value.map(x=>typeof x==='string'?x:(x.text||x.content||'')).join('\n');
  return typeof value==='string'?value:'';
 }
-function electraRenderResults(panel,entry,actionKey,failed=false){
- const input=panel.closest('details')?.querySelector('textarea[data-k="desc"]');
- const currentKeys=new Set((input?.value||'').split(/\r?\n/).map(electraNormLine).filter(Boolean));
- const items=(entry._electraAIItems||[]).filter(x=>x.action===actionKey&&!x.inserted&&currentKeys.has(x.sourceKey));
- panel.innerHTML=(failed?'<p class="hint" role="alert">AI not available now.</p>':'')+'<b>Electra AI results</b><p class="hint">Each request contains one responsibility point. Insert replaces only its matching original point. Already inserted AI text is skipped.</p><div class="ai-line-results"></div><div class="ai-tools"><button type="button" class="ai-again">Check for new points</button><button type="button" class="ai-cancel">Close</button></div>';
- const box=panel.querySelector('.ai-line-results');
- items.forEach((item,n)=>{
-  const card=document.createElement('div');card.style.cssText='border:1px solid var(--line);border-radius:4px;padding:8px;margin-top:8px';
-  const from=document.createElement('p');from.className='hint';from.textContent='Original line: '+item.source;
-  const label=document.createElement('label');label.className='f';label.textContent='AI result';
-  const output=document.createElement('textarea');output.className='ai-suggestion';output.rows=3;output.spellcheck=true;output.value=item.result;
-  const insert=document.createElement('button');insert.type='button';insert.className='ai-insert';insert.textContent='Insert';insert.dataset.itemId=item.id;
-  const note=document.createElement('span');note.className='hint';note.style.marginLeft='8px';note.textContent='Not inserted';
-  label.appendChild(output);card.append(from,label,insert,note);box.appendChild(card);
- });
- if(!items.length&&!failed){const note=document.createElement('p');note.className='hint';note.textContent='No new responsibility lines to send. Add or edit a line, then run Electra AI Assistant again.';box.appendChild(note)}
-}
-$('form').addEventListener('click',async ev=>{const b=ev.target.closest('button');if(!b)return;
+$('form').addEventListener('click',async ev=>{
+ const b=ev.target.closest('button');if(!b)return;
  if(b.dataset.ai==='responsibilities'){
-  const details=b.closest('details'),panel=aiPanel(details),existing=panel.querySelector('.ai-menu');
-  if(existing){panel.remove();b.setAttribute('aria-expanded','false');return}
-  const input=details.querySelector('textarea[data-k="desc"]');if(input)electraAutoNumber(input);
-  const lines=electraSplitResponsibilities(input?.value||'');
-  panel.innerHTML='<b>Choose an AI action</b><div class="ai-menu">'+Object.entries(AI_ACTIONS).map(([key,a])=>`<button type="button" data-ai-action="${key}">${a.label}</button>`).join('')+'<button type="button" class="ai-cancel">Close</button></div><p class="hint">Each action asks you to choose one numbered line. The last/highest-numbered line is selected by default. Only that line is sent.</p>';
+  const details=b.closest('details'),panel=aiPanel(details),entry=(D.s.exp||[])[+(details.dataset.i||0)];
+  if(panel.dataset.open==='yes'){panel.remove();b.setAttribute('aria-expanded','false');return}
+  panel.dataset.open='yes';
+  panel.innerHTML=`<b>AI writing assistant</b>
+   <p class="hint">Send the responsibilities to your Cloudflare Worker, review the suggestion, then replace or append it. Check every claim before using it.</p>
+   <label class="f" style="margin-top:8px">Writing action
+    <select class="ai-action">${Object.entries(AI_ACTIONS).map(([key])=>`<option value="${key}">${key==='improve'?'Improve writing':key==='correct'?'Correct grammar':key==='concise'?'Make concise':'Tailor to job title'}</option>`).join('')}</select>
+   </label>
+   <label class="f" style="margin-top:8px">Target job title (optional)
+    <input class="ai-role" type="text" value="${e(entry?.role||'')}" placeholder="e.g. Electrical Engineer">
+   </label>
+   <div class="ai-tools"><button type="button" class="ai-send-simple pri">Send to AI</button><button type="button" class="ai-cancel">Close</button></div>
+   <label class="f" style="margin-top:8px">AI suggestion
+    <textarea class="ai-suggestion" rows="6" placeholder="Electra AI suggestion will appear here. You can edit it before applying."></textarea>
+   </label>
+   <div class="ai-tools"><button type="button" class="ai-replace">Replace responsibilities</button><button type="button" class="ai-append">Append suggestion</button></div>
+   <p class="hint ai-status" role="status">Worker endpoint: ${e(AI_WORKER_URL)}</p>`;
   b.setAttribute('aria-expanded','true');return;
  }
- if(b.dataset.aiAction&&!b.classList.contains('ai-send-selected')){
-  const actionKey=b.dataset.aiAction,action=AI_ACTIONS[actionKey],details=b.closest('details'),panel=aiPanel(details),input=details.querySelector('textarea[data-k="desc"]');
-  if(!action||!input)return;
-  electraAutoNumber(input);
-  const lines=electraSplitResponsibilities(input.value);
-  if(!lines.length){panel.innerHTML='<p class="hint">Add at least one responsibility line first.</p><button type="button" class="ai-cancel">Close</button>';return}
-  panel.innerHTML='<b>'+e(action.label)+'</b><label class="f" style="margin-top:8px">Which line should AI process?<select class="ai-line-select">'+lines.map((line,index)=>`<option value="${index}" ${index===lines.length-1?'selected':''}>${index+1}. ${e(line.text.length>100?line.text.slice(0,97)+'…':line.text)}</option>`).join('')+'</select></label><div class="ai-tools"><button type="button" class="ai-send-selected" data-ai-action="'+actionKey+'">Send selected line</button><button type="button" class="ai-cancel">Cancel</button></div><p class="hint">Only the selected line will be sent. By default, the last/highest-numbered line is selected.</p>';
-  return;
- }
- if(b.classList.contains('ai-send-selected')){
-  const actionKey=b.dataset.aiAction,action=AI_ACTIONS[actionKey],details=b.closest('details'),panel=aiPanel(details),input=details.querySelector('textarea[data-k="desc"]'),entry=(D.s.exp||[])[+(details.dataset.i||0)];
-  if(!action||!input||!entry)return;
-  const endpoint=(localStorage.getItem('cvb-ai-worker-url')||AI_WORKER_URL).trim();
-  if(!endpoint){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>';return}
-  const lines=electraSplitResponsibilities(input.value),selected=Number(panel.querySelector('.ai-line-select')?.value);
-  const line=lines[selected];if(!line){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>';return}
-  if(!Array.isArray(entry._electraAIItems))entry._electraAIItems=[];
-  if(!Array.isArray(entry._electraInsertedLines))entry._electraInsertedLines=[];
-  const existing=entry._electraAIItems.find(x=>x.action===actionKey&&x.sourceKey===line.key&&!x.inserted);
-  if(existing){electraRenderResults(panel,entry,actionKey,false);return}
-  const alreadyInserted=entry._electraInsertedLines.includes(electraNormLine(line.text));
-  if(alreadyInserted){panel.innerHTML='<p class="hint">This line has already been inserted by AI and will not be sent again.</p><button type="button" class="ai-cancel">Close</button>';return}
-  b.disabled=true;panel.innerHTML='<p class="hint" role="status">'+e(action.label)+'… sending line '+(selected+1)+'.</p><progress max="1" value="0" style="width:100%"></progress>';
+ if(b.classList.contains('ai-send-simple')){
+  const details=b.closest('details'),panel=details.querySelector('.ai-result'),input=details.querySelector('textarea[data-k="desc"]'),entry=(D.s.exp||[])[+(details.dataset.i||0)];
+  if(!panel||!input||!entry)return;
+  const action=panel.querySelector('.ai-action').value,role=panel.querySelector('.ai-role').value.trim()||entry.role||'',status=panel.querySelector('.ai-status');
+  if(!input.value.trim()){status.textContent='Add responsibilities first.';return}
+  b.disabled=true;status.textContent='Sending request to Cloudflare Worker…';
   try{
-   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);let response,raw,data,result;
-   try{response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json, text/plain'},body:JSON.stringify({task:'rewrite_job_responsibilities',action:actionKey,role:entry.role||'',company:entry.org||'',text:line.text,instructions:action.instructions,item_index:selected+1,total_items:lines.length}),signal:controller.signal});raw=await response.text()}finally{clearTimeout(timeout)}
+   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);let response,raw,data;
+   try{response=await fetch(AI_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json, text/plain'},body:JSON.stringify({task:'rewrite_job_responsibilities',action,role,company:entry.org||'',text:input.value,instructions:AI_ACTIONS[action]}),signal:controller.signal});raw=await response.text()}finally{clearTimeout(timeout)}
    try{data=raw?JSON.parse(raw):{}}catch(_){data=raw}
    if(!response.ok)throw new Error('HTTP '+response.status);
-   result=electraExtractText(data).trim().replace(/^```(?:\w+)?\s*/,'').replace(/\s*```$/,'').trim();
-   if(!result||/^\s*<(?:!doctype|html|head|body)\b/i.test(result))throw new Error('Empty response');
-   entry._electraAIItems.push({id:'el-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),action:actionKey,source:line.raw,sourceKey:line.key,result,inserted:false});save();electraRenderResults(panel,entry,actionKey,false);
-  }catch(err){panel.innerHTML='<p class="hint" role="alert">AI not available now.</p><button type="button" class="ai-cancel">Close</button>'}
+   const result=electraExtractText(data).trim().replace(/^```(?:\w+)?\s*/,'').replace(/\s*```$/,'').trim();
+   if(!result||/^\s*<(?:!doctype|html|head|body)\b/i.test(result))throw new Error('Empty or unexpected response');
+   panel.querySelector('.ai-suggestion').value=result;status.textContent='Suggestion received. Review it, then choose Replace or Append.';
+  }catch(err){status.textContent='Electra fell asleep, try again after some time'}
+  finally{b.disabled=false}
   return;
  }
- if(b.classList.contains('ai-again')){const details=b.closest('details'),trigger=details.querySelector('[data-ai="responsibilities"]');if(trigger){details.querySelector('.ai-result')?.remove();trigger.click()}return}
- if(b.classList.contains('ai-insert')){
-  const details=b.closest('details'),ta=details.querySelector('textarea[data-k="desc"]'),entry=(D.s.exp||[])[+(details.dataset.i||0)],card=b.closest('div'),suggestion=card&&card.querySelector('.ai-suggestion');
-  if(!ta||!entry||!suggestion)return;
-  const item=(entry._electraAIItems||[]).find(x=>x.id===b.dataset.itemId),resultText=suggestion.value.trim();if(!item||!resultText)return;
-  const current=ta.value.split(/\r?\n/),key=electraNormLine(item.sourceKey);
-  // Replace the exact matching point; the first match is used if duplicate points exist.
-  let target=current.findIndex(line=>electraNormLine(line)===key);
-  if(target>=0){current[target]=resultText.replace(/\s*\n+\s*/g,' ').trim();ta.value=current.join('\n');}
-  else {
-   // Numbered/bulleted points may have been pasted on a shared line. Split them before matching.
-   const parts=electraSplitResponsibilities(ta.value);const match=parts.findIndex(part=>part.key===key);
-   if(match<0){const note=card.querySelector('.hint');if(note)note.textContent='Original point changed or removed. Nothing was replaced; run Electra AI again for that point.';return}
-   parts[match].raw=resultText.replace(/\s*\n+\s*/g,' ').trim();ta.value=parts.map(part=>part.raw).join('\n');
-  }
-  item.inserted=true;item.result=resultText.replace(/\s*\n+\s*/g,' ').trim();
-  if(!Array.isArray(entry._electraInsertedLines))entry._electraInsertedLines=[];
-  entry._electraInsertedLines.push(electraNormLine(resultText));
-  ta.dispatchEvent(new Event('input',{bubbles:true}));b.disabled=true;b.textContent='Inserted';const note=card.querySelector('.hint');if(note)note.textContent='Inserted into responsibilities';return;
+ if(b.classList.contains('ai-replace')||b.classList.contains('ai-append')){
+  const details=b.closest('details'),panel=details.querySelector('.ai-result'),input=details.querySelector('textarea[data-k="desc"]'),suggestion=panel?.querySelector('.ai-suggestion')?.value.trim();
+  if(!input||!suggestion)return;
+  input.value=b.classList.contains('ai-replace')?suggestion:(input.value.trim()?input.value.trim()+'\n'+suggestion:suggestion);
+  input.dispatchEvent(new Event('input',{bubbles:true}));
+  const status=panel.querySelector('.ai-status');if(status)status.textContent=b.classList.contains('ai-replace')?'Responsibilities replaced. Review the result.':'Suggestion appended. Review the result.';
+  return;
  }
  if(b.classList.contains('ai-cancel')){const details=b.closest('details'),panel=details.querySelector('.ai-result');if(panel)panel.remove();const trigger=details.querySelector('[data-ai="responsibilities"]');if(trigger)trigger.setAttribute('aria-expanded','false');return}
-  if(!b.dataset.a)return;const d=b.dataset,i=+d.i,L=D.s[d.s]=D.s[d.s]||[];
+   if(!b.dataset.a)return;const d=b.dataset,i=+d.i,L=D.s[d.s]=D.s[d.s]||[];
  if(d.a=='add')L.push({_o:true});else if(d.a=='del')L.splice(i,1);else if(d.a=='rmph')delete D.p.photo;
  else{const n=d.a=='up'?i-1:i+1;if(n<0||n>=L.length)return;[L[i],L[n]]=[L[n],L[i]]}
  form();draw();save();if(d.a=='add'){const q=[...document.querySelectorAll(`details.en[data-s=${d.s}]`)].pop();q&&q.querySelector('input,textarea').focus()}});
@@ -354,7 +304,7 @@ $('form').addEventListener('change',ev=>{const t=ev.target,d=t.dataset;
  if(t.id=='fixon'){D.o.fix=t.checked;save();return}
  if(D.o.fix===false||!d.k||!/^(INPUT|TEXTAREA)$/.test(t.tagName))return;
  const v=fix(d.s,d.k,t.value,t.tagName=='TEXTAREA');if(v!==t.value){t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}});
-
+//Sabbir Ahamed Chowdhury- :)
 
 $('formatToggle').onclick=()=>{const bar=$('formatToggle').closest('.bar'),collapsed=bar.classList.toggle('collapsed');$('formatToggle').setAttribute('aria-expanded',String(!collapsed));$('formatToggle .arrow').textContent=collapsed?'▴':'▾'};
 const setTheme=t=>{document.documentElement.dataset.theme=t;try{localStorage.setItem('electralab-theme',t)}catch(_){}$('theme').textContent=t=='dark'?'Light mode':'Dark mode'};
