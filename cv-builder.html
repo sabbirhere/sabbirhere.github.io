@@ -108,7 +108,7 @@ details.en[open]>summary{margin-bottom:8px}
 </div>
 <div class="preview" id="pv"><div id="page"></div></div>
 </div>
-<footer class="foot">Your CV is edited in your browser. If you choose an AI writing action, the responsibilities and related job details are sent to the configured Cloudflare Worker.</footer>
+<footer class="foot">Your CV is edited in your browser. If you choose an AI writing action, the selected text and related job details are sent for processing.</footer>
 <script>
 const e=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LK=/([\w.+-]+@[\w-]+(?:\.[\w-]+)+)|((?:https?:\/\/|www\.)[^\s<]+|\b(?:[a-z0-9-]+\.)+(?:com|org|net|io|dev|me|co|app|edu|info|bd|uk|us|ca)\b(?:\/[^\s<]*)?)/gi;
@@ -217,7 +217,7 @@ $('form').addEventListener('click',async ev=>{
     <textarea class="ai-suggestion" rows="6" placeholder="Electra AI suggestion will appear here. You can edit it before applying."></textarea>
    </label>
    <div class="ai-tools"><button type="button" class="ai-replace">Replace responsibilities</button><button type="button" class="ai-append">Append suggestion</button></div>
-   <p class="hint ai-status" role="status">Worker endpoint: ${e(AI_WORKER_URL)}</p>`;
+   <p class="hint ai-status" role="status"></p>`;
   b.setAttribute('aria-expanded','true');return;
  }
  if(b.classList.contains('ai-send-simple')){
