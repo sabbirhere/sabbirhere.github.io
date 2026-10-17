@@ -24,9 +24,9 @@ jobs:
       - name: Install Minifier Tool
         run: npm install -g html-minifier-terser
 
-      - name: Minify all files automatically
+      - name: Minify all files in-place
         run: |
-          find . -name "*.html" -not -path "./node_modules/*" -not -path "./.git/*" | while read file; do
+          find . -type f -name "*.html" -not -path "./node_modules/*" -not -path "./.git/*" | while read -r file; do
             html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true "$file" -o "$file"
           done
 
