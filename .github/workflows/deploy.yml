@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build clean URL deployment copy
-        run: python3 scripts/build_clean_urls.py
+        run: python3 build_clean_urls.py
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
