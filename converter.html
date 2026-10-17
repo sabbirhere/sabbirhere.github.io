@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="en" class="night"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ElectraLab DocBox · Converter</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#090d16;--panel:#111827;--soft:#1f293d;--ink:#f0f6fc;--mut:#94a3b8;--line:#1e293b;--grad:linear-gradient(135deg,#00f2fe 0%,#4facfe 50%,#7f00ff 100%);--accent:#38bdf8;--glow:rgba(56,189,248,.35);--shadow:0 8px 32px rgba(0,0,0,.5)}
+html:not(.night){--bg:#f8fafd;--panel:#fff;--soft:#f0f4f9;--ink:#0f172a;--mut:#475569;--line:#e2e8f0;--grad:linear-gradient(135deg,#0284c7 0%,#2563eb 50%,#7c3aed 100%);--accent:#0284c7;--glow:rgba(2,132,199,.2);--shadow:0 4px 20px rgba(0,0,0,.06)}
+*{box-sizing:border-box}body,html{margin:0;min-height:100%;font-family:'Google Sans',Roboto,system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);transition:background-color .3s,color .3s}
+a{text-decoration:none;color:inherit}.app{max-width:960px;margin:0 auto;padding:32px 20px 40px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;margin-bottom:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.bw{display:flex;align-items:center;gap:14px;min-width:0}.mark{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--grad);color:#fff;font-weight:700;flex:0 0 auto;box-shadow:0 0 20px var(--glow)}
+.header h1{margin:0;font-size:22px}.header p{margin:3px 0 0;color:var(--mut);font-size:14px}
+.acts{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 20px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--accent);font:inherit;font-weight:500;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);box-shadow:0 0 12px var(--glow)}.btn:disabled{opacity:.5;cursor:default}
+.btn.pri{background:var(--grad);color:#fff;border:0;font-weight:700}
+.tg{width:42px;padding:0;border-radius:50%;font-size:18px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}.tabs .btn{min-height:38px;padding:0 12px;font-size:14px}.tabs .btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:20px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.card .d{color:var(--mut);font-size:14px;margin:0 0 16px}
+.drop{display:block;border:2px dashed var(--line);border-radius:16px;padding:28px;text-align:center;color:var(--mut);cursor:pointer;transition:.2s}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--accent)}.drop input{display:none}
+.list{margin:14px 0;display:grid;gap:8px}
+.row{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}
+.row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.row small{color:var(--mut)}
+.mini{border:0;background:none;color:var(--accent);cursor:pointer;font-size:16px;padding:2px 6px}
+.th{width:56px;height:72px;border-radius:6px;background:#fff;flex:0 0 auto;display:grid;place-items:center;font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;overflow:hidden}
+.pgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin:14px 0}.pg{background:var(--soft);border:2px solid var(--line);border-radius:10px;padding:6px;text-align:center;font-size:12px;color:var(--mut);cursor:pointer}.pg img{width:100%;border-radius:4px;background:#fff;display:block;margin-bottom:4px}.pg.sel{border-color:var(--accent);color:var(--accent);font-weight:700}
+.bn{width:100%;display:grid;gap:10px}.bn textarea{width:100%;font-size:16px;line-height:1.6;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px;font-family:'Noto Sans Bengali','Nirmala UI',Vrinda,system-ui,sans-serif;resize:vertical}
+.opts{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:14px 0;font-size:14px;color:var(--mut)}
+.opts input,.opts select{font:inherit;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.opts input[type=text]{width:170px}.opts input[type=number]{width:90px}
+#st{margin:12px 0 0;font-size:14px;color:var(--mut);min-height:20px}#st.err{color:#f87171}
+.res{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+.res a{display:flex;flex-direction:column;gap:6px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13px;color:var(--accent);word-break:break-all;text-align:center}
+.res img{max-width:100%;max-height:110px;border-radius:6px}.res a:hover{border-color:var(--accent)}
+.footer{margin-top:36px;padding:16px;color:var(--mut);font-size:15px;text-align:center;line-height:1.6}.footer b{font-weight:500;color:var(--ink)}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}.tabs .btn{gap:6px}.hd{display:flex;align-items:center;gap:12px;margin-bottom:6px}.hd h2{margin:0}.ib{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--soft);border:1px solid var(--line);color:var(--accent);flex:0 0 auto}.ib .ic{width:22px;height:22px}
+[hidden]{display:none!important}.opts label{display:flex;align-items:center;gap:8px}.opts>.bn{grid-column:1/-1}.mini{min-width:36px;min-height:36px}
+@media(min-width:760px){.bn{grid-template-columns:1fr 1fr}.bn>label,.bn>div{grid-column:1/-1}.res{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+@media(max-width:640px){.app{padding:12px 12px calc(24px + env(safe-area-inset-bottom))}.header{flex-direction:column;align-items:stretch;padding:14px;gap:12px;border-radius:16px}.header h1{font-size:20px}.header p{font-size:13px}.acts{width:100%}.acts .btn:first-child{flex:1}
+.tabs{flex-wrap:nowrap;overflow-x:auto;margin:0 -12px 14px;padding:2px 12px 6px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs .btn{flex:0 0 auto;min-height:42px}
+.card{padding:16px;border-radius:16px}.drop{padding:22px 12px}.th{width:48px;height:62px}.row small{display:none}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px}.opts label{flex-direction:column;align-items:stretch;gap:4px}.opts label:has(input[type=checkbox]){flex-direction:row;align-items:center}.opts input[type=text],.opts input[type=number],.opts select{width:100%;font-size:16px}
+#go,#all{width:100%;margin-top:8px}.pgs{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}.res{grid-template-columns:repeat(2,1fr)}.footer{font-size:13px}}
+</style></head><body><main class="app">
+<header class="header"><div class="bw"><div class="mark">EL</div><div><h1>File Converter</h1><p>Merge, split, convert. Files stay in your browser.</p></div></div>
+<div class="acts"><a class="btn" href="Docs.html">← Back to DocBox</a><button class="btn tg" id="tt" type="button" aria-label="Toggle theme"><span id="ti">☽</span></button></div></header>
+<div class="tabs" id="tabs"></div>
+<section class="card"><div class="hd"><span class="ib" id="tic"></span><h2 id="tn"></h2></div><p class="d" id="td"></p>
+<label class="drop" id="dz"><input type="file" id="fi"><span id="dt">Drop files here or click to choose</span></label>
+<div class="list" id="ls"></div><div class="pgs" id="pgs"></div><div class="opts" id="op"></div>
+<button class="btn pri" id="go" type="button">Run</button> <button class="btn" id="all" type="button" hidden>Download all</button>
+<div id="st" role="status"></div><div class="res" id="rs"></div></section>
+<div class="footer"><div><b>ElectraLab DocBox by Sabbir Ahamed</b></div><div>Free, lightweight and private. Nothing is uploaded; all processing happens on your device.</div></div>
+</main>
+<script>
+/* theme (same key as DocBox) */
+(()=>{const h=document.documentElement,i=document.getElementById('ti');const s=m=>{const n=m==='night';h.classList.toggle('night',n);i.textContent=n?'☽':'☀';localStorage.setItem('electralab-docbox-theme',m)};s(localStorage.getItem('electralab-docbox-theme')||'night');document.getElementById('tt').onclick=()=>s(h.classList.contains('night')?'day':'night')})();
+
+const $=s=>document.querySelector(s),CD='https://cdnjs.cloudflare.com/ajax/libs/',L={};
+const lib=u=>L[u]||(L[u]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=()=>no(new Error('Could not load a library. Check your connection.'));document.head.appendChild(s)}));
+const pl=()=>lib(CD+'pdf-lib/1.17.1/pdf-lib.min.js'),mm=()=>lib(CD+'mammoth/1.6.0/mammoth.browser.min.js'),xl=()=>lib(CD+'xlsx/0.18.5/xlsx.full.min.js');
+const pj=async()=>{await lib(CD+'pdf.js/3.11.174/pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc=CD+'pdf.js/3.11.174/pdf.worker.min.js'};
+const ext=f=>f.name.split('.').pop().toLowerCase(),base=f=>f.name.replace(/\.[^.]+$/,''),buf=f=>f.arrayBuffer();
+const blob=(c,t)=>new Promise(r=>c.toBlob(r,t,.9));
+const rng=(s,n)=>{const o=new Set();s.split(',').forEach(p=>{const m=p.trim().match(/^(\d+)(?:-(\d+))?$/);if(!m)return;const a=+m[1],b=+(m[2]||m[1]);for(let i=Math.max(a,1);i<=Math.min(b,n);i++)o.add(i-1)});return o};
+
+let files=[],cur='merge',outs=[];
+const st=(m,e)=>{const s=$('#st');s.textContent=m||'';s.className=e?'err':''};
+function out(name,b){outs.push({name,b});const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;
+ if(b.type.startsWith('image/')){const i=document.createElement('img');i.src=u;a.appendChild(i)}
+ else if(b.type==='application/pdf'){const t=document.createElement('div');t.className='th';t.style.cssText='width:96px;height:128px';t.textContent='PDF';a.appendChild(t);pdfThumbs(b,(n,u)=>{const i=new Image();i.src=u;i.style.cssText='width:100%;height:100%;object-fit:contain';t.textContent='';t.appendChild(i);return false}).catch(()=>{})}
+ a.appendChild(Object.assign(document.createElement('span'),{textContent:'⬇ '+name}));$('#rs').appendChild(a);$('#all').hidden=outs.length<2}
+
+/* PDF building helpers */
+async function bnPages(doc,text){
+ await document.fonts.load('16px "Noto Sans Bengali"','অ');
+ const W=595,H=842,M=50,S=11,LH=19,k=3,c=document.createElement('canvas'),x=c.getContext('2d');c.width=W*k;c.height=H*k;let y,used=false;
+ const fresh=()=>{x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.font=`${S*k}px "Noto Sans Bengali","Nirmala UI",Vrinda,sans-serif`;x.textBaseline='top';y=M};
+ const flush=async()=>{const im=await doc.embedJpg(await(await blob(c,'image/jpeg')).arrayBuffer());doc.addPage([W,H]).drawImage(im,{x:0,y:0,width:W,height:H})};
+ fresh();
+ for(const raw of text.replace(/\t/g,'    ').split(/\r?\n/)){const ls=[];let ln='';
+  for(const w of raw.split(' ')){const t=ln?ln+' '+w:w;if(x.measureText(t).width>(W-2*M)*k&&ln){ls.push(ln);ln=w}else ln=t}
+  ls.push(ln);
+  for(const l of ls){if(y+LH>H-M){await flush();fresh()}x.fillText(l,M*k,y*k);y+=LH;used=true}}
+ if(used)await flush()}
+async function textPages(doc,text){
+ if(/[\u0980-\u09FF]/.test(text))return bnPages(doc,text);
+ const {StandardFonts,rgb}=PDFLib,font=await doc.embedFont(StandardFonts.Helvetica),W=595,H=842,M=50,S=11,LH=15,mx=W-2*M;
+ text=text.replace(/\t/g,'    ').replace(/[^\x0A\x0D\x20-\x7E\xA0-\xFF]/g,'?');
+ let pg=doc.addPage([W,H]),y=H-M;
+ for(const raw of text.split(/\r?\n/)){const ls=[];let ln='';
+  for(const w of raw.split(' ')){const t=ln?ln+' '+w:w;if(font.widthOfTextAtSize(t,S)>mx&&ln){ls.push(ln);ln=w}else ln=t}
+  ls.push(ln);
+  for(const l of ls){if(y<M){pg=doc.addPage([W,H]);y=H-M}pg.drawText(l,{x:M,y,size:S,font,color:rgb(0,0,0)});y-=LH}}
+}
+async function imgPage(doc,f){
+ const e=ext(f);let im;
+ if(e==='png')im=await doc.embedPng(await buf(f));else if(e==='jpg'||e==='jpeg')im=await doc.embedJpg(await buf(f));
+ else{const b=await bmp(f),c=document.createElement('canvas');c.width=b.width;c.height=b.height;c.getContext('2d').drawImage(b,0,0);im=await doc.embedPng(await(await blob(c,'image/png')).arrayBuffer())}
+ const W=595,H=842,M=24,s=Math.min((W-2*M)/im.width,(H-2*M)/im.height,1),w=im.width*s,h=im.height*s;
+ doc.addPage([W,H]).drawImage(im,{x:(W-w)/2,y:(H-h)/2,width:w,height:h});
+}
+const bmp=async f=>{try{return await createImageBitmap(f)}catch(e){const i=new Image();i.src=URL.createObjectURL(f);try{await i.decode()}catch(x){throw new Error(f.name+' could not be read as an image.')}return i}};
+const pdfBlob=async d=>new Blob([await d.save()],{type:'application/pdf'});
+
+/* thumbnails */
+const IMG=['png','jpg','jpeg','webp','gif','bmp'],TC=new WeakMap();
+async function pdfThumbs(f,cb){await pj();const pdf=await pdfjsLib.getDocument({data:await buf(f)}).promise;
+ for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:.3}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise;if(cb(i,c.toDataURL('image/jpeg',.7))===false)break}}
+function fthumb(f,el){const e=ext(f);el.textContent=e;
+ const put=u=>{const i=new Image();i.src=u;i.style.cssText='width:100%;height:100%;object-fit:contain';el.textContent='';el.appendChild(i)};
+ if(TC.has(f))return put(TC.get(f));
+ if(IMG.includes(e)){const u=URL.createObjectURL(f);TC.set(f,u);put(u)}
+ else if(e==='pdf')pdfThumbs(f,(n,u)=>{TC.set(f,u);put(u);return false}).catch(()=>{})}
+function selSync(){const s=[...document.querySelectorAll('.pg.sel')].map(d=>+d.dataset.i),r=[];
+ for(let i=0;i<s.length;){let j=i;while(s[j+1]===s[j]+1)j++;r.push(j>i?s[i]+'-'+s[j]:''+s[i]);i=j+1}$('#rg').value=r.join(',')}
+function grid(){const g=$('#pgs');g.innerHTML='';if(cur!=='pages'||!files[0])return;const f=files[0];
+ pdfThumbs(f,(i,u)=>{if(files[0]!==f)return false;const d=document.createElement('div');d.className='pg';d.dataset.i=i;d.innerHTML='<img alt=""><div>'+i+'</div>';d.firstChild.src=u;d.onclick=()=>{d.classList.toggle('sel');selSync()};g.appendChild(d)}).catch(()=>st('Could not render page thumbnails.',1))}
+
+/* Bangla: Bijoy (ANSI) -> Unicode, and Avro-style phonetic typing */
+const BJ={A:'অ',B:'ই',C:'ঈ',D:'উ',E:'ঊ',F:'ঋ',G:'এ',H:'ঐ',I:'ও',J:'ঔ',K:'ক',L:'খ',M:'গ',N:'ঘ',O:'ঙ',P:'চ',Q:'ছ',R:'জ',S:'ঝ',T:'ঞ',U:'ট',V:'ঠ',W:'ড',X:'ঢ',Y:'ণ',Z:'ত',_:'থ','`':'দ',a:'ধ',b:'ন',c:'প',d:'ফ',e:'ব',f:'ভ',g:'ম',h:'য',i:'র',j:'ল',k:'শ',l:'ষ',m:'স',n:'হ',o:'ড়',p:'ঢ়',q:'য়',r:'ৎ',s:'ং',t:'ঃ',u:'ঁ',v:'া',w:'ি',x:'ী',y:'ু',z:'ূ','„':'ৃ','†':'ে','‡':'ে','‰':'ৈ','ˆ':'ৈ','Š':'ৗ','&':'্','¨':'্য','ª':'্র','«':'্র','^':'্ব','’':'্থ','¯':'স্','©':'\uE000','|':'।','Ò':'“','Ó':'”','Ô':'‘','Õ':'’','ÿ':'ক্ষ'};
+function bijoy(s){const C='[\\u0995-\\u09B9\\u09DC-\\u09DF\\u09CE]',CL=`${C}(?:\\u09CD${C})*`;
+ s=s.replace(/Av/g,'আ').replace(/[\s\S]/g,c=>BJ[c]??c).replace(/[0-9]/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+ return s.replace(new RegExp(`(${CL})\\uE000`,'g'),'র্$1').replace(new RegExp(`([\\u09BF\\u09C7\\u09C8])(${CL})`,'g'),'$2$1').replace(/\u09C7\u09BE/g,'ো').replace(/\u09C7\u09D7/g,'ৌ')}
+const AC={kkh:'ক্ষ',gg:'জ্ঞ',kh:'খ',gh:'ঘ',NG:'ঙ',ch:'ছ',jh:'ঝ',Th:'ঠ',Dh:'ঢ',th:'থ',dh:'ধ',ph:'ফ',bh:'ভ',sh:'শ',Sh:'ষ',Rh:'ঢ়',k:'ক',g:'গ',c:'চ',j:'জ',T:'ট',D:'ড',N:'ণ',t:'ত',d:'দ',n:'ন',p:'প',f:'ফ',b:'ব',v:'ভ',m:'ম',z:'য',r:'র',l:'ল',S:'শ',s:'স',h:'হ',R:'ড়',y:'য়',q:'ক',x:'ক্স'};
+const AV={rri:['ঋ','ৃ'],oi:['ঐ','ৈ'],OI:['ঐ','ৈ'],ou:['ঔ','ৌ'],OU:['ঔ','ৌ'],ee:['ঈ','ী'],oo:['ঊ','ূ'],a:['আ','া'],i:['ই','ি'],I:['ঈ','ী'],u:['উ','ু'],U:['ঊ','ূ'],e:['এ','ে'],O:['ও','ো'],o:['অ','']};
+const AO={'^':'ঁ','.':'।','$':'৳'},AK=[...Object.keys(AC),...Object.keys(AV),'ng'].sort((a,b)=>b.length-a.length);
+function avro(s,j=true){let o='',pc=false,i=0;
+ while(i<s.length){if(s.startsWith(',,',i)){o+='্';i+=2;pc=false;continue}const k=AK.find(k=>s.startsWith(k,i));
+  if(!k){const c=s[i++];if(c!=='`')o+=/\d/.test(c)?'০১২৩৪৫৬৭৮৯'[c]:(AO[c]??c);pc=false;continue}
+  i+=k.length;
+  if(k==='ng'){o+='ং';pc=false}
+  else if(AV[k]){o+=AV[k][pc?1:0];pc=false}
+  else{o+=k==='y'&&pc&&j?'্য':(pc&&j?'্':'')+AC[k];pc=true}}
+ return o}
+function bnInit(){const run=()=>{const v=$('#bi').value;$('#bo').value=$('#bm').value==='bj'?bijoy(v):avro(v,$('#bj').checked)};
+ $('#bi').oninput=run;$('#bm').onchange=run;$('#bj').onchange=run;
+ $('#bc').onclick=()=>{$('#bo').select();navigator.clipboard?navigator.clipboard.writeText($('#bo').value).then(()=>st('Copied.')):(document.execCommand('copy'),st('Copied.'))};
+ $('#bt').onclick=()=>{reset();if($('#bo').value)out('bangla.txt',new Blob([$('#bo').value],{type:'text/plain'}))};
+ $('#bp').onclick=async()=>{reset();const t=$('#bo').value;if(!t.trim())return;try{st('Building PDF…');await pl();const d=await PDFLib.PDFDocument.create();await textPages(d,t);out('bangla.pdf',await pdfBlob(d));st('Done. Click the file to download.')}catch(e){st(e.message,1)}}}
+
+const IC={merge:'<path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/>',pages:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',p2i:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',p2t:'<path d="M4 6h16M4 12h16M4 18h10"/>',img:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',bn:'<text x="12" y="18" text-anchor="middle" font-size="18" fill="currentColor" stroke="none" font-family="Noto Sans Bengali,Nirmala UI,sans-serif">অ</text>',xls:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/>'};
+const svg=k=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+
+/* tools */
+async function merge(){await pl();const doc=await PDFLib.PDFDocument.create();
+ for(const f of files){st('Adding '+f.name+'…');const e=ext(f);
+  if(e==='pdf'){const s=await PDFLib.PDFDocument.load(await buf(f),{ignoreEncryption:true});(await doc.copyPages(s,s.getPageIndices())).forEach(p=>doc.addPage(p))}
+  else if(['png','jpg','jpeg','webp','gif','bmp','svg'].includes(e))await imgPage(doc,f);
+  else if(e==='docx'){await mm();await textPages(doc,(await mammoth.extractRawText({arrayBuffer:await buf(f)})).value)}
+  else if(['xlsx','xls','ods'].includes(e)){await xl();const wb=XLSX.read(await buf(f));await textPages(doc,wb.SheetNames.map(n=>n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n'))}
+  else if(['txt','md','log','csv','tsv'].includes(e))await textPages(doc,await f.text());
+  else throw new Error(f.name+': .'+e+' files are not supported (DOC, PPTX, ODT, RTF and HEIC need a server-side converter).')}
+ out(files.length>1?'merged.pdf':base(files[0])+'.pdf',await pdfBlob(doc))}
+async function pages(){await pl();const src=await PDFLib.PDFDocument.load(await buf(files[0]),{ignoreEncryption:true}),n=src.getPageCount(),
+ sel=rng($('#rg').value,n),act=$('#ac').value;if(!sel.size)throw new Error('Enter a valid page range, e.g. 1-3,5 (document has '+n+' pages).');
+ const doc=await PDFLib.PDFDocument.create(),idx=src.getPageIndices().filter(i=>act==='extract'?sel.has(i):act==='delete'?!sel.has(i):true);
+ if(!idx.length)throw new Error('No pages left.');
+ (await doc.copyPages(src,idx)).forEach((p,k)=>{if(act==='rotate'&&sel.has(idx[k]))p.setRotation(PDFLib.degrees((p.getRotation().angle+ +$('#dg').value)%360));doc.addPage(p)});
+ out(base(files[0])+'-'+act+'.pdf',await pdfBlob(doc))}
+async function p2i(){await pj();const fm=$('#fm').value,sc=+$('#sc').value,pdf=await pdfjsLib.getDocument({data:await buf(files[0])}).promise;
+ for(let i=1;i<=pdf.numPages;i++){st(`Rendering page ${i}/${pdf.numPages}…`);const pg=await pdf.getPage(i),vp=pg.getViewport({scale:sc}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise;
+  out(`${base(files[0])}-${i}.${fm==='png'?'png':'jpg'}`,await blob(c,fm==='png'?'image/png':'image/jpeg'))}}
+async function p2t(){await pj();const pdf=await pdfjsLib.getDocument({data:await buf(files[0])}).promise;let t='';
+ for(let i=1;i<=pdf.numPages;i++){const c=await(await pdf.getPage(i)).getTextContent();t+=`--- Page ${i} ---\n`+c.items.map(s=>s.str+(s.hasEOL?'\n':' ')).join('')+'\n\n'}
+ out(base(files[0])+'.txt',new Blob([t],{type:'text/plain'}))}
+async function imgs(){const fm=$('#fm').value,W=+$('#iw').value||0,H=+$('#ih').value||0,K=$('#kr').checked,q=+$('#q').value/100;
+ for(const f of files){st('Processing '+f.name+'…');const b=await bmp(f);let cw=b.width,ch=b.height;if(W||H){if(W&&H&&!K){cw=W;ch=H}else{const s=W&&H?Math.min(W/b.width,H/b.height):W?W/b.width:H/b.height;cw=Math.round(b.width*s);ch=Math.round(b.height*s)}}
+  const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');
+  if(fm!=='image/png'){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(b,0,0,c.width,c.height);
+  out(base(f)+'.'+{'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[fm],await new Promise(r=>c.toBlob(r,fm,q)))}}
+async function sheets(){await xl();for(const f of files){const e=ext(f);
+ if(e==='csv'){const wb=XLSX.read(await f.text(),{type:'string'});out(base(f)+'.xlsx',new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/octet-stream'}))}
+ else{const wb=XLSX.read(await buf(f));out(base(f)+'.csv',new Blob([XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]])],{type:'text/csv'}))}}}
+
+const T={
+ merge:{n:'Merge / To PDF',d:'Convert or combine files into one PDF, in the order listed. Works with one file or many. Supports PDF, images (PNG, JPG, WebP, GIF, BMP, SVG), TXT, MD, LOG, CSV, TSV, DOCX, XLSX, XLS and ODS. DOCX and spreadsheets are added as text.',a:'.pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp,.svg,.txt,.md,.log,.csv,.tsv,.docx,.xlsx,.xls,.ods',m:1,o:'',f:merge},
+ pages:{n:'Split / Cut',d:'Extract, delete or rotate pages of a PDF.',a:'.pdf',o:'<label>Pages <input type="text" id="rg" placeholder="1-3,5"></label><label>Action <select id="ac"><option value="extract">Extract these pages</option><option value="delete">Delete these pages</option><option value="rotate">Rotate these pages</option></select></label><label>Rotate <select id="dg"><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label>',f:pages},
+ p2i:{n:'PDF → Images',d:'Turn each PDF page into an image.',a:'.pdf',o:'<label>Format <select id="fm"><option value="png">PNG</option><option value="jpg">JPG</option></select></label><label>Quality <select id="sc"><option value="1.5">Standard</option><option value="2.5">High</option><option value="1">Small</option></select></label>',f:p2i},
+ p2t:{n:'PDF → Text',d:'Extract selectable text from a PDF. Scanned PDFs have no text to extract.',a:'.pdf',o:'',f:p2t},
+ img:{n:'Image Tools',d:'Convert, resize and compress images (PNG, JPG, WebP).',a:'.png,.jpg,.jpeg,.webp,.gif,.bmp',m:1,o:'<label>Convert to <select id="fm"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></label><label>Width px <input type="number" id="iw" placeholder="auto" min="1"></label><label>Height px <input type="number" id="ih" placeholder="auto" min="1"></label><label><input type="checkbox" id="kr" checked> Keep aspect ratio</label><label>Quality % <input type="number" id="q" value="85" min="10" max="100"></label>',f:imgs},
+ bn:{n:'Bangla',d:'Convert old Bijoy (ANSI) text to Unicode, or type Bangla phonetically, Avro style. Then copy it, or save as TXT or PDF.',x:1,a:'',f:null,o:`<div class="bn"><label>Mode <select id="bm"><option value="bj">Bijoy (legacy) → Unicode</option><option value="av">Avro phonetic → Bangla</option></select></label><label><input type="checkbox" id="bj" checked> Auto-join consonants (Avro style, Avro mode only)</label><textarea id="bi" rows="6" placeholder="Paste or type here"></textarea><textarea id="bo" rows="6" readonly placeholder="Result"></textarea><div><button class="btn" id="bc" type="button">Copy</button> <button class="btn" id="bt" type="button">Save TXT</button> <button class="btn pri" id="bp" type="button">Save PDF</button></div></div>`},
+ xls:{n:'CSV ↔ XLSX',d:'CSV becomes XLSX; XLSX becomes CSV (first sheet).',a:'.csv,.xlsx,.xls',m:1,o:'',f:sheets}
+};
+function show(k){cur=k;files=[];const t=T[k];$('#tn').textContent=t.n;$('#tic').innerHTML=svg(k);$('#td').textContent=t.d;$('#fi').accept=t.a;$('#fi').multiple=!!t.m;$('#fi').value='';$('#op').innerHTML=t.o;['#dz','#ls','#go'].forEach(s=>$(s).style.display=t.x?'none':'');if(t.x)bnInit();
+ document.querySelectorAll('#tabs .btn').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+ if(k==='pages'){const sync=()=>$('#dg').parentNode.style.display=$('#ac').value==='rotate'?'':'none';$('#ac').onchange=sync;sync();$('#rg').oninput=()=>{const p=document.querySelectorAll('.pg'),s=rng($('#rg').value,p.length);p.forEach(d=>d.classList.toggle('sel',s.has(+d.dataset.i-1)))}}
+ reset();list()}
+function reset(){outs=[];$('#rs').innerHTML='';$('#all').hidden=true;st('')}
+function list(){const l=$('#ls');l.innerHTML='';files.forEach((f,i)=>{const r=document.createElement('div');r.className='row';
+ r.innerHTML='<div class="th"></div><span></span><small></small>'+(T[cur].m&&files.length>1?'<button class="mini" data-a="u" aria-label="Move up">↑</button><button class="mini" data-a="d" aria-label="Move down">↓</button>':'')+'<button class="mini" data-a="x" aria-label="Remove">✕</button>';
+ fthumb(f,r.children[0]);r.children[1].textContent=f.name;r.children[2].textContent=(f.size/1024<1024?Math.round(f.size/1024)+' KB':(f.size/1048576).toFixed(1)+' MB');
+ r.onclick=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='x')files.splice(i,1);else{const j=a==='u'?i-1:i+1;if(files[j])[files[i],files[j]]=[files[j],files[i]]}list()};l.appendChild(r)});
+ $('#go').disabled=!files.length;if(cur==='pages')grid();$('#dt').textContent=files.length&&!T[cur].m?'Choose a different file':(matchMedia('(hover:none)').matches?'Tap to choose files':'Drop files here or click to choose')}
+function add(fl){fl=[...fl];if(!fl.length)return;files=T[cur].m?files.concat(fl):[fl[0]];reset();list()}
+$('#fi').onchange=e=>{add(e.target.files);e.target.value=''};
+const dz=$('#dz');['dragover','dragenter'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove('over')}));dz.addEventListener('drop',e=>add(e.dataTransfer.files));
+$('#go').onclick=async()=>{reset();$('#go').disabled=true;try{st('Working…');await T[cur].f();st('Done. Click a file to download.')}catch(e){console.error(e);st(e.message||'Something went wrong.',1)}$('#go').disabled=!files.length};
+$('#all').onclick=()=>outs.forEach((o,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(o.b);a.download=o.name;a.click()},i*400));
+Object.entries(T).forEach(([k,t])=>{const b=document.createElement('button');b.className='btn';b.type='button';b.dataset.k=k;b.innerHTML=svg(k);b.appendChild(document.createTextNode(t.n));b.onclick=()=>show(k);$('#tabs').appendChild(b)});
+show('merge');
+</script></body></html>
