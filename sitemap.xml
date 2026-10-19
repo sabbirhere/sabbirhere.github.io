@@ -1,2 +1,84 @@
-<?xml version='1.0' encoding='utf-8'?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"><url><loc>https://sabbirhere.github.io/</loc><image:image><image:loc>https://sabbirhere.github.io/homepage.png</image:loc><image:caption>ElectraLab homepage</image:caption></image:image><image:image><image:loc>https://sabbirhere.github.io/electra-ai.png</image:loc><image:caption>Electra AI assistant</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/Advanced/</loc></url><url><loc>https://sabbirhere.github.io/AirCompressor/</loc></url><url><loc>https://sabbirhere.github.io/CBP_Sabbir/</loc></url><url><loc>https://sabbirhere.github.io/Config615/</loc></url><url><loc>https://sabbirhere.github.io/Docs/</loc></url><url><loc>https://sabbirhere.github.io/Earthing_Pro_SAC/</loc><image:image><image:loc>https://sabbirhere.github.io/earthing-designer.png</image:loc><image:caption>Earthing Designer</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/Excel/</loc></url><url><loc>https://sabbirhere.github.io/FireHydrant/</loc></url><url><loc>https://sabbirhere.github.io/LPSdbS/</loc></url><url><loc>https://sabbirhere.github.io/PLC_Foundation/</loc></url><url><loc>https://sabbirhere.github.io/PLC_TRAINER/</loc><image:image><image:loc>https://sabbirhere.github.io/plc-trainer.png</image:loc><image:caption>PLC Trainer</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/PSPC/</loc><image:image><image:loc>https://sabbirhere.github.io/protection-coordination.png</image:loc><image:caption>Protection Coordination</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/Panel_Design_SAC/</loc><image:image><image:loc>https://sabbirhere.github.io/panel-designer.png</image:loc><image:caption>Panel Designer</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/REF615/</loc></url><url><loc>https://sabbirhere.github.io/SLD_Builder/</loc><image:image><image:loc>https://sabbirhere.github.io/sld-builder.png</image:loc><image:caption>SLD Builder</image:caption></image:image></url><url><loc>https://sabbirhere.github.io/TFTA/</loc></url><url><loc>https://sabbirhere.github.io/TPR/</loc></url><url><loc>https://sabbirhere.github.io/boq-maker/</loc></url><url><loc>https://sabbirhere.github.io/contact_boss/</loc></url><url><loc>https://sabbirhere.github.io/converter/</loc></url><url><loc>https://sabbirhere.github.io/cover-letter-builder/</loc></url><url><loc>https://sabbirhere.github.io/cv-builder/</loc></url><url><loc>https://sabbirhere.github.io/inspection-checklist/</loc></url><url><loc>https://sabbirhere.github.io/maintenance-log/</loc></url><url><loc>https://sabbirhere.github.io/quotation-maker/</loc></url><url><loc>https://sabbirhere.github.io/solar_pro/</loc></url><url><loc>https://sabbirhere.github.io/test-report-maker/</loc></url></urlset>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    
+    <!-- Homepage with Images -->
+    <url>
+        <loc>https://sabbirhere.github.io/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/homepage.png</image:loc>
+            <image:caption>ElectraLab homepage</image:caption>
+        </image:image>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/electra-ai.png</image:loc>
+            <image:caption>Electra AI assistant</image:caption>
+        </image:image>
+    </url>
+
+    <!-- Sub-pages with Clean URLs (Trailing Slashes) -->
+    <url><loc>https://sabbirhere.github.io/Advanced/</loc></url>
+    <url><loc>https://sabbirhere.github.io/AirCompressor/</loc></url>
+    <url><loc>https://sabbirhere.github.io/CBP_Sabbir/</loc></url>
+    <url><loc>https://sabbirhere.github.io/Config615/</loc></url>
+    <url><loc>https://sabbirhere.github.io/Docs/</loc></url>
+    
+    <url>
+        <loc>https://sabbirhere.github.io/Earthing_Pro_SAC/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/earthing-designer.png</image:loc>
+            <image:caption>Earthing Designer</image:caption>
+        </image:image>
+    </url>
+    
+    <url><loc>https://sabbirhere.github.io/Excel/</loc></url>
+    <url><loc>https://sabbirhere.github.io/FireHydrant/</loc></url>
+    <url><loc>https://sabbirhere.github.io/LPSdbS/</loc></url>
+    <url><loc>https://sabbirhere.github.io/PLC_Foundation/</loc></url>
+    
+    <url>
+        <loc>https://sabbirhere.github.io/PLC_TRAINER/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/plc-trainer.png</image:loc>
+            <image:caption>PLC Trainer</image:caption>
+        </image:image>
+    </url>
+    
+    <url>
+        <loc>https://sabbirhere.github.io/PSPC/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/protection-coordination.png</image:loc>
+            <image:caption>Protection Coordination</image:caption>
+        </image:image>
+    </url>
+    
+    <url>
+        <loc>https://sabbirhere.github.io/Panel_Design_SAC/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/panel-designer.png</image:loc>
+            <image:caption>Panel Designer</image:caption>
+        </image:image>
+    </url>
+    
+    <url><loc>https://sabbirhere.github.io/REF615/</loc></url>
+    
+    <url>
+        <loc>https://sabbirhere.github.io/SLD_Builder/</loc>
+        <image:image>
+            <image:loc>https://sabbirhere.github.io/sld-builder.png</image:loc>
+            <image:caption>SLD Builder</image:caption>
+        </image:image>
+    </url>
+    
+    <url><loc>https://sabbirhere.github.io/TFTA/</loc></url>
+    <url><loc>https://sabbirhere.github.io/TPR/</loc></url>
+    <url><loc>https://sabbirhere.github.io/boq-maker/</loc></url>
+    <url><loc>https://sabbirhere.github.io/contact_boss/</loc></url>
+    <url><loc>https://sabbirhere.github.io/converter/</loc></url>
+    <url><loc>https://sabbirhere.github.io/cover-letter-builder/</loc></url>
+    <url><loc>https://sabbirhere.github.io/cv-builder/</loc></url>
+    <url><loc>https://sabbirhere.github.io/inspection-checklist/</loc></url>
+    <url><loc>https://sabbirhere.github.io/maintenance-log/</loc></url>
+    <url><loc>https://sabbirhere.github.io/quotation-maker/</loc></url>
+    <url><loc>https://sabbirhere.github.io/solar_pro/</loc></url>
+    <url><loc>https://sabbirhere.github.io/test-report-maker/</loc></url>
+</urlset>
