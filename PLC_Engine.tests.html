@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test Your PLC Ladder</title>
+<style>
+:root{color-scheme:light dark;--bg:#f3f6f8;--card:#fff;--ink:#172b3a;--muted:#526576;--line:#ced8e0;--blue:#1457b8;--green:#187443;--red:#b42318;--amber:#8a5a00}
+@media(prefers-color-scheme:dark){:root{--bg:#121a22;--card:#1c2833;--ink:#e8eff5;--muted:#a6b3bf;--line:#3b4a57;--blue:#8ab4ff;--green:#66d19a;--red:#ff9189;--amber:#ffd078}}
+*{box-sizing:border-box}
+body{margin:0 auto;max-width:1100px;padding:20px 16px 48px;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{font-size:clamp(26px,4vw,36px);margin:0}
+h2{font-size:21px;margin:0 0 8px}
+p{margin:8px 0 14px}
+header{margin-bottom:18px}
+.intro{color:var(--muted);max-width:800px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+button,.button,select,input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 12px}
+button,.button{cursor:pointer}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:650}
+button:disabled{opacity:.55;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.status{padding:12px 14px;border-radius:8px;background:var(--bg);border-left:4px solid var(--muted)}
+.status.good{border-color:var(--green)}.status.bad{border-color:var(--red)}.status.warn{border-color:var(--amber)}
+.muted{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.control{border:1px solid var(--line);border-radius:8px;padding:11px}
+.control label{display:block;font-weight:650;margin-bottom:5px}
+.control select{width:100%}
+.table-wrap{overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:8px}
+th{font-size:14px;color:var(--muted)}
+.result-list{display:grid;gap:8px;list-style:none;margin:12px 0 0;padding:0}
+.result-list li{padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.result-list .pass{border-left:4px solid var(--green)}
+.result-list .fail{border-left:4px solid var(--red)}
+.result-list .info{border-left:4px solid var(--blue)}
+.scenario{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.scenario p{margin:2px 0}
+.scenario button{padding:5px 9px}
+.number{max-width:160px}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:650}
+.nav-actions{margin-top:12px}
+.nav-actions .button{min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+#programFile{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+#programFile:focus-visible+label{outline:3px solid var(--blue)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:760px){body{padding:28px 24px 56px}.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+@media(max-width:759px){body{padding:14px 10px 32px}section{padding:14px}.scenario{display:block}.scenario button{margin-top:8px}.actions>*{flex:1 1 100%;justify-content:center}.actions input[type=file]{flex:0 0 auto}.control{min-width:0}button,.button,select,input{min-height:44px}#scenarioName{width:100%}.number{min-height:44px;width:100%}}
+@media(max-width:380px){body{font-size:15px;padding:10px 8px 24px}section{padding:11px;margin:10px 0}h2{font-size:19px}.grid{grid-template-columns:minmax(0,1fr);gap:8px}.status{padding:10px}}
+</style>
+</head>
+<body>
+<header>
+<h1>Test your ladder program</h1>
+<p class="intro">Send your ladder here from Part 1, then see what it actually does. You do not need to export, open, or edit a data file.</p>
+<nav class="actions nav-actions" aria-label="PLC pages">
+<a class="button" href="PLC_TRAINER.html">Back to Part 1: Ladder</a>
+<a id="wiringLink" class="button" href="Wiring.html">Go to Part 2: Wiring</a>
+</nav>
+</header>
+
+<section aria-labelledby="connectionHeading">
+<h2 id="connectionHeading">Your ladder program</h2>
+<p id="programStatus" class="status" role="status" aria-live="polite">Waiting for a ladder program.</p>
+<div class="actions">
+<input id="programFile" type="file" accept=".json,application/json">
+<label class="button" for="programFile">Open a saved program file</label>
+</div>
+<p id="programInfo" class="muted">Easiest: open Part 1 and press <b>Test my ladder</b>. The current drawing will be sent here automatically. The saved-file option is only needed when you have a program file instead.</p>
+</section>
+
+<section aria-labelledby="sweepHeading">
+<h2 id="sweepHeading">Automatic input check</h2>
+<p>ElectraLab tries every ON/OFF combination of the inputs used by your ladder and shows which outputs turn on. This quick check is a behavior preview—not a guess at what your machine is supposed to do. Use the test builder below for timer delays or repeated counter pulses.</p>
+<div class="actions"><button id="runSweep" class="primary" type="button" disabled>Check all input combinations</button></div>
+<p id="sweepSummary" class="status" role="status" aria-live="polite">Load a ladder to begin.</p>
+<ul id="sweepResults" class="result-list"></ul>
+</section>
+
+<section aria-labelledby="manualHeading">
+<h2 id="manualHeading">Check a specific situation</h2>
+<p>Choose what the inputs should be, then say what you expect the outputs to do. A passing result means the ladder matched the expectation you entered.</p>
+<form id="scenarioForm">
+<div class="grid">
+<div class="control"><label for="scenarioName">Test name</label><input id="scenarioName" value="My test" maxlength="60" style="width:100%"></div>
+<div class="control"><label for="scenarioMode">Input action</label><select id="scenarioMode" style="width:100%"><option value="hold">Hold the switches steady</option><option value="pulse">Pulse the ON switches</option></select></div>
+<div class="control"><label for="holdTime">Hold switches for</label><select id="holdTime" style="width:100%"><option value="20">One quick check</option><option value="1000">1 second (for short timers)</option><option value="5000">5 seconds (for longer timers)</option></select></div>
+<div class="control"><label for="pulseCount">Number of pulses</label><select id="pulseCount" style="width:100%" disabled><option>1</option><option>2</option><option>3</option><option>5</option><option>10</option></select></div>
+</div>
+<h3>Set the input switches</h3><div id="inputControls" class="grid"><p class="muted">Load a ladder to see its inputs.</p></div>
+<h3>Choose what should happen</h3><div id="expectedControls" class="grid"><p class="muted">Load a ladder to see its outputs.</p></div>
+<div class="actions" style="margin-top:14px"><button id="addScenario" type="submit" disabled>Add this test</button><button id="runScenarios" type="button" disabled>Run my tests</button></div>
+</form>
+<p id="scenarioSummary" class="status" role="status" aria-live="polite">No tests added yet.</p>
+<ul id="scenarioList" class="result-list"></ul>
+<ul id="scenarioResults" class="result-list"></ul>
+</section>
+
+<section aria-labelledby="notesHeading">
+<h2 id="notesHeading">What the results mean</h2>
+<p><b>Automatic input check</b> shows the ladder’s behavior for each input combination. It cannot tell whether that behavior matches your design until you set expectations in a specific test.</p>
+<p><b>Simulator health</b> checks the underlying PLC engine, not your ladder program. These checks do not certify a real machine, a vendor PLC, or a safety circuit.</p>
+<p id="engineSummary" class="status" role="status" aria-live="polite">Checking simulator…</p>
+<details><summary>Simulator health check details</summary><ul id="engineResults" class="result-list"></ul></details>
+<details><summary>Potential ladder issues</summary><ul id="diagnosticResults" class="result-list"></ul></details>
+</section>
+
+<script src="PLC_Engine.js"></script>
+<script>
+"use strict";
+const $=selector=>document.querySelector(selector);
+const cases=[];
+const test=(name,fn)=>cases.push({name,fn});
+const R=(c,o)=>({c,o}),N=a=>({t:"NO",a}),C=(t,a,pt)=>({t,a,pt});
+function execute(program,actions){let last;const engine=PLCEngine.create(message=>{last=JSON.parse(JSON.stringify(message))});engine({cmd:"load",p:program.rungs,tags:program.tags});for(const action of actions)engine(action);return last}
+test("An empty rung keeps its output off",()=>!execute({rungs:[R([],[C("OTE","Q0")])]},[{cmd:"step",dt:20}]).b.Q0);
+test("Series contacts need every input on",()=>{const p={rungs:[R([N("I0"),N("I1")],[C("OTE","Q0")])]};const one=execute(p,[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]);const both=execute(p,[{cmd:"in",a:"I0",v:true},{cmd:"in",a:"I1",v:true},{cmd:"step",dt:20}]);return !one.b.Q0&&both.b.Q0});
+test("Parallel paths work like either/or",()=>{const p={rungs:[R([{par:[[N("I0"),N("I1")],[N("I2")]]}],[C("OTE","Q0")])]};const both=execute(p,[{cmd:"in",a:"I0",v:true},{cmd:"in",a:"I1",v:true},{cmd:"step",dt:20}]);const onePath=execute(p,[{cmd:"in",a:"I2",v:true},{cmd:"step",dt:20}]);return both.b.Q0&&onePath.b.Q0});
+test("A normally closed contact opens when its input turns on",()=>{const p={rungs:[R([{t:"NC",a:"I0"}],[C("OTE","Q0")])]};const off=execute(p,[{cmd:"step",dt:20}]);const on=execute(p,[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]);return off.b.Q0&&!on.b.Q0});
+test("A seal-in branch holds after the start switch is released",()=>!!execute({rungs:[R([{par:[[N("I0")],[N("Q0")]]},{t:"NC",a:"I1"}],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:false},{cmd:"step",dt:20}]).b.Q0);
+test("An on-delay timer finishes after its preset",()=>!!execute({rungs:[R([N("I0")],[C("TON","T0",40)]),R([N("T0")],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"step",dt:20}]).b.Q0);
+test("A retentive timer keeps time when its input turns off",()=>execute({rungs:[R([N("I0")],[C("TONR","T0",60)])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:40},{cmd:"in",a:"I0",v:false},{cmd:"step",dt:20}]).t.T0.acc===40);
+test("An off-delay timer stays on briefly after its input turns off",()=>{const s=execute({rungs:[R([N("I0")],[C("TOF","T0",40)]),R([N("T0")],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:false},{cmd:"step",dt:20}]);return !!s.b.Q0});
+test("A pulse timer turns off after its preset",()=>!execute({rungs:[R([{t:"P",a:"I0"}],[C("TP","T0",40)]),R([N("T0")],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"step",dt:30}]).b.Q0);
+test("A counter counts a rising input edge once",()=>execute({rungs:[R([{t:"P",a:"I0"}],[C("CTU","C0",2)])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:false},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]).t.C0.cnt===2);
+test("A down counter stops at zero",()=>!!execute({rungs:[R([{t:"P",a:"I0"}],[C("CTD","C0",2)]),R([N("C0")],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:false},{cmd:"step",dt:20},{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]).b.Q0);
+test("A move instruction copies a number or register",()=>{const a=execute({rungs:[R([N("I0")],[{t:"MOV",a:"D0",src:"#12"}])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]);const b=execute({rungs:[R([N("I0")],[{t:"MOV",a:"D0",src:"D1"}])]},[{cmd:"reg",a:"D1",v:7},{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]);return a.d.D0===12&&b.d.D0===7});
+test("A nonzero register can turn on a ladder contact",()=>!!execute({rungs:[R([N("I0")],[{t:"MOV",a:"D0",src:"#1"}]),R([N("D0")],[C("OTE","Q0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]).b.Q0);
+test("An add instruction updates the register on each active scan",()=>execute({rungs:[R([N("I0")],[{t:"ADD",a:"D0",src:"#2"}])]},[{cmd:"reg",a:"D0",v:0},{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"step",dt:20}]).d.D0===4);
+test("A reset instruction clears a counter",()=>execute({rungs:[R([{t:"P",a:"I0"}],[C("CTU","C0",3)]),R([N("I1")],[C("RES","C0")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20},{cmd:"in",a:"I1",v:true},{cmd:"step",dt:20}]).t.C0.cnt===0);
+test("The scan report shows which rungs and outputs were active",()=>{const s=execute({rungs:[R([N("I0")],[C("OTE","Q0")]),R([],[C("OTE","Q1")])]},[{cmd:"in",a:"I0",v:true},{cmd:"step",dt:20}]);return s.trace.length===2&&s.trace[0].power&&s.trace[0].outputs[0].value===true&&!s.trace[1].power});
+test("Reset clears forced inputs and edge history",()=>{let last;const engine=PLCEngine.create(m=>{last=m});engine({cmd:"load",p:[R([{t:"P",a:"I0"}],[C("OTE","Q0")])]});engine({cmd:"in",a:"I0",v:true});engine({cmd:"step",dt:20});engine({cmd:"reset"});engine({cmd:"step",dt:20});return !last.b.Q0});
+test("A shared contact can be used more than once",()=>{const contact=N("I0");return !!PLCEngine.validate({rungs:[R([contact,contact],[C("OTE","Q0")])]})});
+test("An invalid PLC address is rejected with a clear error",()=>{try{PLCEngine.validate({rungs:[R([N("I99")],[C("OTE","Q0")])]});return false}catch(e){return /address|contact/i.test(e.message)}});
+test("A missing ladder program is rejected",()=>{try{PLCEngine.validate(null);return false}catch(e){return true}});
+const engineFailures=[];
+for(const item of cases){let passed=false,error="";try{passed=!!item.fn()}catch(e){error=e.message||String(e)}if(!passed)engineFailures.push({name:item.name,error})}
+const engineList=$("#engineResults");
+for(const item of cases){let passed=true;try{passed=!!item.fn()}catch(e){passed=false}const li=document.createElement("li");li.className=passed?"pass":"fail";li.textContent=(passed?"Works: ":"Needs attention: ")+item.name;engineList.append(li)}
+$("#engineSummary").className="status "+(engineFailures.length?"bad":"good");
+$("#engineSummary").textContent=engineFailures.length?`Simulator health: ${cases.length-engineFailures.length} of ${cases.length} checks passed. ${engineFailures.map(x=>x.name+(x.error?" ("+x.error+")":"")).join("; ")}`:`Simulator health: all ${cases.length} checks passed. These checks are for the simulator engine, not your ladder's design.`;
+
+let program=null;
+const scenarios=[];
+function setPageLinks(){if(!program)return;const payload={profile:program.profile,rungs:program.rungs,tags:program.tags||{}};const bytes=new TextEncoder().encode(JSON.stringify(payload));let binary="";for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));const encoded=btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");$("#wiringLink").href=`Wiring.html#program=${encoded}`;const editorPayload={prof:program.profile,P:{rungs:program.rungs,tags:program.tags||{}}};$("#wiringLink").previousElementSibling.href=`PLC_TRAINER.html#p=${btoa(unescape(encodeURIComponent(JSON.stringify(editorPayload))))}`}
+function addrNum(address){return Number(address.slice(1))}
+function sortAddresses(a,b){return a[0].localeCompare(b[0])||addrNum(a)-addrNum(b)}
+function visitContacts(list,visit){for(const node of list||[]){if(node.par)for(const branch of node.par)visitContacts(branch,visit);else visit(node)}}
+function inputsUsed(p){const found=new Set;for(const rung of p.rungs)visitContacts(rung.c,node=>{if(node.a&&node.a[0]==="I")found.add(node.a)});return [...found].sort((a,b)=>addrNum(a)-addrNum(b))}
+function outputsUsed(p){const found=new Set;for(const rung of p.rungs)for(const output of rung.o||[])found.add(output.a);return [...found].sort(sortAddresses)}
+function label(address){const tagged=program&&program.tags&&program.tags[address];if(tagged)return `${tagged} (${address})`;const n=addrNum(address);const kind={I:"Input",Q:"Output",M:"Memory bit",T:"Timer",C:"Counter",D:"Number register"}[address[0]]||"Point";return `${kind} ${n+1} (${address})`}
+function stateValue(snapshot,address){if(address[0]==="D")return snapshot.d[address]||0;if(address[0]==="C")return snapshot.t[address]?.cnt||0;return !!snapshot.b[address]}
+function displayState(address,value){if(address[0]==="D"||address[0]==="C")return String(value);return value?"ON":"OFF"}
+function friendlyError(error){const message=error&&error.message||String(error);if(/cannot write/i.test(message))return "An instruction is connected to the wrong kind of address.";if(/preset/i.test(message))return "A timer or counter needs a preset number greater than zero.";if(/address|contact instruction/i.test(message))return "A contact or output has an address the simulator does not recognize.";if(/tag/i.test(message))return "One of the saved point names is invalid.";if(/rung/i.test(message))return "One of the ladder rungs is incomplete or damaged.";if(/too many|over-nested|circular/i.test(message))return "The ladder is too large or has a damaged branch.";return "The saved ladder could not be read. Open it in Part 1 and send it again."}
+function loadProgram(candidate,source){try{PLCEngine.validate(candidate);if(!candidate.rungs.length)throw Error("The ladder has no rungs yet. Add a rung in Part 1 and send it again.");program={profile:candidate.profile||"iec",rungs:candidate.rungs,tags:candidate.tags||{}};setPageLinks();const inputs=inputsUsed(program),outputs=outputsUsed(program);$("#programStatus").className="status good";$("#programStatus").textContent=`Ladder received from ${source}. ${program.rungs.length} ${program.rungs.length===1?"rung":"rungs"}, ${inputs.length} ${inputs.length===1?"input":"inputs"}, and ${outputs.length} ${outputs.length===1?"output":"outputs"}.`;$("#programInfo").textContent="Your drawing is loaded here. The automatic check starts below; add specific expected results if you want pass/fail tests.";$("#runSweep").disabled=false;buildControls();showDiagnostics();runAutomaticSweep()}catch(error){program=null;$("#programStatus").className="status bad";$("#programStatus").textContent=`Could not use this ladder: ${friendlyError(error)}`;$("#sweepSummary").className="status bad";$("#sweepSummary").textContent="The current ladder could not be tested.";$("#sweepResults").replaceChildren();$("#inputControls").textContent="Load a valid ladder to see its inputs.";$("#expectedControls").textContent="Load a valid ladder to see its outputs.";$("#diagnosticResults").replaceChildren();$("#runSweep").disabled=true;$("#addScenario").disabled=true;$("#runScenarios").disabled=true;$("#scenarioList").replaceChildren();$("#scenarioResults").replaceChildren();$("#scenarioSummary").className="status";$("#scenarioSummary").textContent="No tests added yet.";scenarios.length=0}}
+function buildControls(){const ins=inputsUsed(program),outs=outputsUsed(program),inputRoot=$("#inputControls"),expectRoot=$("#expectedControls");inputRoot.replaceChildren();expectRoot.replaceChildren();$("#scenarioResults").replaceChildren();$("#scenarioSummary").textContent="No tests added yet.";$("#scenarioSummary").className="status";scenarios.length=0;renderScenarios();if(!ins.length)inputRoot.textContent="This ladder does not use any input switches.";for(const address of ins){const item=document.createElement("div");item.className="control";const labelEl=document.createElement("label");labelEl.textContent=label(address);const select=document.createElement("select");select.dataset.address=address;select.innerHTML='<option value="false">OFF</option><option value="true">ON</option>';item.append(labelEl,select);inputRoot.append(item)}if(!outs.length)expectRoot.textContent="This ladder has no output instructions yet.";for(const address of outs){const item=document.createElement("div");item.className="control";const labelEl=document.createElement("label");labelEl.textContent=label(address);const select=document.createElement("select");select.dataset.expect=address;if(address[0]==="D"||address[0]==="C"){select.innerHTML='<option value="">Do not check this value</option><option value="number">Check the number</option>';const number=document.createElement("input");number.type="number";number.step="any";number.value="0";number.disabled=true;number.className="number";number.setAttribute("aria-label",`Expected number for ${label(address)}`);select.addEventListener("change",()=>number.disabled=select.value!=="number");item.append(labelEl,select,number)}else{select.innerHTML='<option value="">Do not check this output</option><option value="true">Should be ON</option><option value="false">Should be OFF</option>';item.append(labelEl,select)}expectRoot.append(item)}$("#addScenario").disabled=!outs.length;$("#runSweep").disabled=false}
+function diagnostics(){const findings=[];const writers=new Map,reads=new Set;for(let i=0;i<program.rungs.length;i++){const rung=program.rungs[i];if(!rung.c.length)findings.push(`Rung ${i+1} has no input contacts. In this simulator, an empty rung stays off.`);if(!rung.o.length)findings.push(`Rung ${i+1} has no output instruction.`);visitContacts(rung.c,node=>{if("MTCD".includes(node.a[0]))reads.add(node.a)});for(const output of rung.o){const list=writers.get(output.a)||[];list.push({rung:i+1,type:output.t});writers.set(output.a,list)}}for(const [address,list] of writers)if(list.length>1)findings.push(`${label(address)} is controlled in ${list.length} places (rungs ${list.map(x=>x.rung).join(", ")}). One rung may overwrite another.`);for(const address of reads)if(!writers.has(address))findings.push(`${label(address)} is used as a condition but is never set by this ladder.`);return findings}
+function showDiagnostics(){const root=$("#diagnosticResults"),items=diagnostics();root.replaceChildren();if(!items.length){const li=document.createElement("li");li.className="pass";li.textContent="No obvious structural issues found. This does not prove the ladder matches your design.";root.append(li);return}for(const text of items){const li=document.createElement("li");li.className="fail";li.textContent=text;root.append(li)}}
+function run(programValue,inputs,duration,pulses=0){let last;const engine=PLCEngine.create(message=>{last=message});engine({cmd:"load",p:programValue.rungs,tags:programValue.tags});if(pulses){const active=Object.keys(inputs).filter(address=>inputs[address]);for(let n=0;n<pulses;n++){for(const [address,value] of Object.entries(inputs))engine({cmd:"in",a:address,v:value});engine({cmd:"step",dt:20});for(const address of active)engine({cmd:"in",a:address,v:false});engine({cmd:"step",dt:20});}return last}for(const [address,value] of Object.entries(inputs))engine({cmd:"in",a:address,v:value});const scans=Math.max(1,Math.ceil(duration/20));for(let n=0;n<scans;n++)engine({cmd:"step",dt:20});return last}
+function inputDescription(inputs){const entries=Object.entries(inputs);return entries.length?entries.map(([address,value])=>`${label(address)} ${value?"ON":"OFF"}`).join(", "):"with no input switches"}
+function runAutomaticSweep(){if(!program)return;const ins=inputsUsed(program),outs=outputsUsed(program),summary=$("#sweepSummary"),results=$("#sweepResults");results.replaceChildren();if(ins.length>10){summary.className="status warn";summary.textContent=`This ladder uses ${ins.length} inputs. Testing every combination would take too long for this quick check. Use “Check a specific situation” below to try the cases that matter.`;return}if(!outs.length){summary.className="status warn";summary.textContent="This ladder has no outputs to observe yet. Add an output instruction in Part 1, then send the ladder again.";return}const count=2**ins.length;summary.className="status";summary.textContent=`Checking ${count} input ${count===1?"combination":"combinations"}…`;$("#runSweep").disabled=true;setTimeout(async()=>{try{for(let mask=0;mask<count;mask++){const forced={};for(let bit=0;bit<ins.length;bit++)forced[ins[bit]]=!!(mask&(1<<bit));const snapshot=run(program,forced,20);const states=outs.map(address=>`${label(address)} ${displayState(address,stateValue(snapshot,address))}`).join("; ");const li=document.createElement("li");li.className="info";li.textContent=`When ${inputDescription(forced)}, ${states}.`;results.append(li);if(mask%32===31)await new Promise(resolve=>requestAnimationFrame(resolve))}summary.className="status good";summary.textContent=`Finished: checked all ${count} input ${count===1?"combination":"combinations"}. These are the ladder's observed results, not a pass/fail against design requirements.`}catch(error){summary.className="status bad";summary.textContent=`The automatic check stopped: ${friendlyError(error)}`}finally{$("#runSweep").disabled=false}},0)}
+function renderScenarios(){const root=$("#scenarioList");root.replaceChildren();for(let index=0;index<scenarios.length;index++){const scenario=scenarios[index],li=document.createElement("li"),row=document.createElement("div"),body=document.createElement("div"),remove=document.createElement("button");li.className="info";row.className="scenario";const title=document.createElement("b");title.textContent=scenario.name;const condition=document.createElement("p");const inputAction=scenario.pulses?`with ${scenario.pulses} pulse(s) on the selected ON inputs`:`holding the switches for ${scenario.duration===20?"one quick check":scenario.duration/1000+" second(s)"}`;condition.textContent=`When ${inputDescription(scenario.inputs)} ${inputAction}, expect ${scenario.expectations.map(item=>`${label(item.address)} ${item.mode==="number"?`to be ${item.value}`:item.mode==="true"?"to be ON":"to be OFF"}`).join(" and ")}.`;body.append(title,condition);remove.type="button";remove.textContent="Remove";remove.setAttribute("aria-label",`Remove test ${scenario.name}`);remove.addEventListener("click",()=>{scenarios.splice(index,1);renderScenarios()});row.append(body,remove);li.append(row);root.append(li)}$("#runScenarios").disabled=!scenarios.length}
+$("#scenarioMode").addEventListener("change",()=>{const pulse=$("#scenarioMode").value==="pulse";$("#pulseCount").disabled=!pulse;$("#holdTime").disabled=pulse});
+$("#scenarioForm").addEventListener("submit",event=>{event.preventDefault();if(!program)return;const inputs={};for(const select of $("#inputControls").querySelectorAll("select"))inputs[select.dataset.address]=select.value==="true";const expectations=[];for(const control of $("#expectedControls").querySelectorAll(".control")){const select=control.querySelector("select"),address=select.dataset.expect;if(!select.value)continue;if(select.value==="number"){const number=control.querySelector("input");const value=Number(number.value);if(!Number.isFinite(value)){alert(`Enter a valid expected number for ${label(address)}.`);return}expectations.push({address,mode:"number",value})}else expectations.push({address,mode:select.value})}if(!expectations.length){$("#scenarioSummary").className="status warn";$("#scenarioSummary").textContent="Choose at least one output result to check before adding this test.";return}const name=$("#scenarioName").value.trim()||`Test ${scenarios.length+1}`,pulses=$("#scenarioMode").value==="pulse"?Number($("#pulseCount").value):0;scenarios.push({name,inputs,duration:Number($("#holdTime").value),pulses,expectations});$("#scenarioSummary").className="status";$("#scenarioSummary").textContent=`${scenarios.length} ${scenarios.length===1?"test":"tests"} ready to run.`;$("#scenarioResults").replaceChildren();renderScenarios()});
+$("#runScenarios").addEventListener("click",()=>{const root=$("#scenarioResults"),summary=$("#scenarioSummary");root.replaceChildren();if(!program||!scenarios.length)return;let matched=0,passedResults=0,total=0;for(const scenario of scenarios){let snapshot;try{snapshot=run(program,scenario.inputs,scenario.duration,scenario.pulses)}catch(error){const li=document.createElement("li");li.className="fail";li.textContent=`${scenario.name}: could not run. ${friendlyError(error)}`;root.append(li);continue}const mismatches=[];for(const item of scenario.expectations){const actual=stateValue(snapshot,item.address);const expected=item.mode==="number"?item.value:item.mode==="true";total++;if(actual===expected)passedResults++;else mismatches.push({address:item.address,actual,expected})}const passed=mismatches.length===0;if(passed)matched++;const li=document.createElement("li");li.className=passed?"pass":"fail";if(passed){li.textContent=`PASS — ${scenario.name}: the ladder produced the expected result. ${scenario.expectations.map(item=>`${label(item.address)} ${item.mode==="number"?`was ${stateValue(snapshot,item.address)}`:stateValue(snapshot,item.address)?"turned ON":"stayed OFF"}`).join("; ")}.`}else{li.textContent=`CHECK — ${scenario.name}: ${mismatches.map(item=>`${label(item.address)} was expected ${item.expected===true?"ON":item.expected===false?"OFF":item.expected}, but was ${displayState(item.address,item.actual)}`).join("; ")}.`}root.append(li)}summary.className="status "+(matched===scenarios.length?"good":"warn");summary.textContent=`${matched} of ${scenarios.length} tests matched. ${passedResults} of ${total} expected results matched. A mismatch tells you what happened; compare it with your intended machine behavior.`});
+$("#runSweep").addEventListener("click",runAutomaticSweep);
+$("#programFile").addEventListener("change",async event=>{const file=event.target.files&&event.target.files[0];if(!file)return;try{const candidate=JSON.parse(await file.text());loadProgram(candidate,"the saved program file")}catch(error){$("#programStatus").className="status bad";$("#programStatus").textContent="That file could not be read as a saved PLC ladder. In Part 1, choose Export, save the program file, then try opening it here again."}finally{event.target.value=""}});
+function receiveTransfer(){const encoded=new URLSearchParams(location.hash.slice(1)).get("program");if(!encoded)return;try{const base64=encoded.replace(/-/g,"+").replace(/_/g,"/");const binary=atob(base64+"=".repeat((4-base64.length%4)%4));const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));loadProgram(JSON.parse(new TextDecoder().decode(bytes)),"Part 1")}catch(error){$("#programStatus").className="status bad";$("#programStatus").textContent="The ladder transfer was incomplete. Go back to Part 1 and press “Test my ladder” again."}}
+receiveTransfer();
+</script>
+</body>
+</html>
