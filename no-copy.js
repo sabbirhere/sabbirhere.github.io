@@ -2,8 +2,6 @@
 (() => {
   'use strict';
 
-  // Allow text selection inside form controls and explicitly
-  // permitted text areas.
   const allowed = [
     'input',
     'textarea',
@@ -12,12 +10,15 @@
     '.selectable-text'
   ].join(',');
 
-  // Prevent selection of ordinary page text.
+  const isAllowed = target =>
+    target instanceof Element && !!target.closest(allowed);
+
   const style = document.createElement('style');
   style.textContent = `
-    body, body * {
+    html, body, body * {
       -webkit-user-select: none !important;
       user-select: none !important;
+      -webkit-touch-callout: none;
     }
 
     input, textarea, select,
@@ -25,28 +26,27 @@
     .selectable-text {
       -webkit-user-select: text !important;
       user-select: text !important;
+      -webkit-touch-callout: default;
     }
   `;
-  (document.head || document.documentElement).appendChild(style);
+  document.head.appendChild(style);
 
-  // Prevent copying or cutting ordinary page text.
-  document.addEventListener('copy', event => {
-    if (!event.target.closest(allowed)) {
+  for (const type of ['copy', 'cut', 'selectstart']) {
+    document.addEventListener(type, event => {
+      if (!isAllowed(event.target)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+  }
+
+  document.addEventListener('keydown', event => {
+    if (isAllowed(event.target)) return;
+
+    if ((event.ctrlKey || event.metaKey) &&
+        ['c', 'x', 'a'].includes(event.key.toLowerCase())) {
       event.preventDefault();
+      event.stopImmediatePropagation();
     }
   }, true);
-
-  document.addEventListener('cut', event => {
-    if (!event.target.closest(allowed)) {
-      event.preventDefault();
-    }
-  }, true);
-
-  // Prevent selecting ordinary page text with the mouse.
-  document.addEventListener('selectstart', event => {
-    if (!event.target.closest(allowed)) {
-      event.preventDefault();
-    }
-  }, true);
-
 })();
