@@ -10,43 +10,46 @@
     '.selectable-text'
   ].join(',');
 
-  const isAllowed = target =>
-    target instanceof Element && !!target.closest(allowed);
+  const isAllowed = el =>
+    el instanceof Element && !!el.closest(allowed);
 
   const style = document.createElement('style');
   style.textContent = `
-    html, body, body * {
+    html, body, body *:not(input):not(textarea):not(select):not([contenteditable="true"]):not(.selectable-text) {
       -webkit-user-select: none !important;
       user-select: none !important;
-      -webkit-touch-callout: none;
-    }
-
-    input, textarea, select,
-    [contenteditable="true"],
-    .selectable-text {
-      -webkit-user-select: text !important;
-      user-select: text !important;
-      -webkit-touch-callout: default;
     }
   `;
   document.head.appendChild(style);
 
-  for (const type of ['copy', 'cut', 'selectstart']) {
+  function clearPageSelection() {
+    const selection = window.getSelection();
+    const active = document.activeElement;
+
+    if (selection && selection.rangeCount && !isAllowed(active)) {
+      selection.removeAllRanges();
+    }
+  }
+
+  ['copy', 'cut', 'selectstart'].forEach(type => {
     document.addEventListener(type, event => {
       if (!isAllowed(event.target)) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
     }, true);
-  }
+  });
 
   document.addEventListener('keydown', event => {
     if (isAllowed(event.target)) return;
 
     if ((event.ctrlKey || event.metaKey) &&
-        ['c', 'x', 'a'].includes(event.key.toLowerCase())) {
+        ['a', 'c', 'x'].includes(event.key.toLowerCase())) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      clearPageSelection();
     }
   }, true);
+
+  document.addEventListener('selectionchange', clearPageSelection);
 })();
