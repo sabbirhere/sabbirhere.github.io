@@ -255,4 +255,5 @@ if(transfer){$("#hio").parentElement.open=true;try{const base64=transfer.replace
 else if(new URLSearchParams(location.search).get("load")==="part1"){const panel=$("#hio").parentElement;panel.open=true;importPart1()}
 function encodeProgramTransfer(value){const bytes=new TextEncoder().encode(JSON.stringify(value));let binary="";for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 $("#testLink").addEventListener("click",event=>{event.preventDefault();if(!S.prog||!Array.isArray(S.prog.rungs)||!S.prog.rungs.length){alert("Load a ladder from Part 1 into the PLC before opening the test page.");return}const payload={profile:prof,rungs:S.prog.rungs,tags:S.prog.tags||{}};const encoded=encodeProgramTransfer(payload);if(encoded.length>1500000){alert("This ladder is too large for a direct handoff. Use the Part 1 Export button, then open the saved program file on the test page.");return}const destination=new URL(event.currentTarget.href,location.href);destination.hash="program="+encoded;location.href=destination.href});
-</script></body></html>
+</script><script src="/no-copy.js" defer></script>
+</body></html>

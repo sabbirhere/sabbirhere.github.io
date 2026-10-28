@@ -200,4 +200,5 @@ $('#go').onclick=async()=>{reset();$('#go').disabled=true;try{st('Working…');a
 $('#all').onclick=()=>outs.forEach((o,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(o.b);a.download=o.name;a.click()},i*400));
 Object.entries(T).forEach(([k,t])=>{const b=document.createElement('button');b.className='btn';b.type='button';b.dataset.k=k;b.innerHTML=svg(k);b.appendChild(document.createTextNode(t.n));b.onclick=()=>show(k);$('#tabs').appendChild(b)});
 show('merge');
-</script></body></html>
+</script><script src="/no-copy.js" defer></script>
+</body></html>

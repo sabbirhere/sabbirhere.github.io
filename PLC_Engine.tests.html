@@ -172,5 +172,6 @@ $("#programFile").addEventListener("change",async event=>{const file=event.targe
 function receiveTransfer(){const encoded=new URLSearchParams(location.hash.slice(1)).get("program");if(!encoded)return;try{const base64=encoded.replace(/-/g,"+").replace(/_/g,"/");const binary=atob(base64+"=".repeat((4-base64.length%4)%4));const bytes=Uint8Array.from(binary,char=>char.charCodeAt(0));loadProgram(JSON.parse(new TextDecoder().decode(bytes)),"Part 1")}catch(error){$("#programStatus").className="status bad";$("#programStatus").textContent="The ladder transfer was incomplete. Go back to Part 1 and press “Test my ladder” again."}}
 receiveTransfer();
 </script>
+<script src="/no-copy.js" defer></script>
 </body>
 </html>
