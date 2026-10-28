@@ -1,0 +1,62 @@
+
+name: Enable Text Copy Protection
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  protect-pages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add protection script to HTML pages
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          tag = '<script src="/no-copy.js" defer></script>'
+          count = 0
+
+          for page in Path(".").rglob("*.html"):
+              if ".git" in page.parts:
+                  continue
+
+              content = page.read_text(encoding="utf-8")
+
+              if "no-copy.js" in content:
+                  continue
+
+              lower = content.lower()
+              pos = lower.rfind("</body>")
+
+              if pos == -1:
+                  pos = lower.rfind("</head>")
+
+              if pos == -1:
+                  content += "\n" + tag + "\n"
+              else:
+                  content = content[:pos] + tag + "\n" + content[pos:]
+
+              page.write_text(content, encoding="utf-8")
+              count += 1
+
+          print(f"Updated {count} HTML pages.")
+          PY
+
+      - name: Commit changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -- '*.html'
+            git commit -m "Enable text copy protection on all pages"
+            git push
+          else
+            echo "No changes needed."
+          fi
